@@ -1,8 +1,8 @@
 import { describe } from 'node:test';
-import { findIriPropertiesWithObject } from '../lib/alignment';
+import { findIriPropertiesWithObject } from '../lib/query';
 
 
-describe('aligment', () => {
+describe('query', () => {
 
     describe('findIriPropertiesWithObject', ()=>{
         it('should return the property with an IRI given a query with one triple', ()=>{
