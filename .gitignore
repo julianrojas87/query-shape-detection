@@ -23,3 +23,5 @@ config
 componentsjs-error-state.json
 social_network_auxiliary.ttl
 parameters-*.csv
+experiment.mjs
+example

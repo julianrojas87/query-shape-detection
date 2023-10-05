@@ -16,3 +16,22 @@ export interface PropertyObjectExtendedWithConstraint extends PropertyObjectExte
     /// The related filter expression segments in relation to the object
     filter_contraint: string[]
 }
+
+export interface SimpleShape {
+    name: string,
+    predicates: string[],
+}
+
+export interface Shape extends SimpleShape {
+    constraint: Map<string, ObjectConstraint>
+}
+
+export interface Shape {
+    constraints: Constraints[]
+}
+export interface Constraints {
+    predicate: string,
+    object: ObjectConstraint
+}
+
+export type ObjectConstraint = string | undefined;
