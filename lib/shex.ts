@@ -8,18 +8,23 @@ const visitor = shexVisitor();
 
 /**
  * 
- * @param quads 
+ * @param input_schema 
  * @param shape_iri 
  * @returns 
  */
-export function getAllShapes(quads: string, shape_iri: string): Map<string, ShEx.ShapeDecl> | Error | undefined {
+export function getAllShapes(input_schema: string|ShEx.Schema, shape_iri: string): Map<string, ShEx.ShapeDecl> | Error | undefined {
     const parser = shexParser.construct(shape_iri);
     let schema: ShEx.Schema;
-    try {
-        schema =parser.parse(quads);
-    } catch (error:any) {
-        return <Error> error
+    if (typeof input_schema  === 'string'){
+        try {
+            schema = parser.parse(input_schema);
+        } catch (error:any) {
+            return <Error> error
+        }
+    }else{
+        schema = input_schema;
     }
+    
 
     const shapes: ShEx.ShapeDecl[] | undefined = schema.shapes;
     if (shapes === undefined || shapes.length === 0) {
