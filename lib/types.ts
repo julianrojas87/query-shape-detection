@@ -17,16 +17,16 @@ export interface PropertyObjectExtendedWithConstraint extends PropertyObjectExte
     filter_contraint: string[]
 }
 
-export interface SimpleShape {
+export interface SimpleShapeConstraint {
     name: string,
     predicates: string[],
 }
 
-export interface Shape extends SimpleShape {
+export interface ShapeConstraint extends SimpleShapeConstraint {
     constraint: Map<string, ObjectConstraint>
 }
 
-export interface Shape {
+export interface ShapeConstraint {
     constraints: Constraints[]
 }
 export interface Constraints {
