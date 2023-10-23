@@ -1,4 +1,4 @@
-import { SimpleShapeConstraint } from './types';
+import { SimpleShape } from './types';
 import * as ShEx from 'shexj';
 
 const shexParser = require('@shexjs/parser');
@@ -40,8 +40,8 @@ export function getAllShapes(input_schema: string|ShEx.Schema, shape_iri: string
     return shape_map;
 }
 
-export function createSimpleShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<string, SimpleShapeConstraint> {
-    const simple_shapes: Map<string, SimpleShapeConstraint> = new Map();
+export function createShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<string, SimpleShape> {
+    const simple_shapes: Map<string, SimpleShape> = new Map();
     for (const [key, shape] of shapes.entries()) {
         const shape_predicates: string[] = [];
         visitor.visitTripleConstraint = (tripleConstraint: ShEx.TripleConstraint): void => {
