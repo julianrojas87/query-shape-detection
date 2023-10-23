@@ -40,7 +40,7 @@ export function getAllShapes(input_schema: string|ShEx.Schema, shape_iri: string
     return shape_map;
 }
 
-export function createSimpleShape(shapes: Map<string, ShEx.ShapeDecl>): Map<string, SimpleShapeConstraint> {
+export function createSimpleShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<string, SimpleShapeConstraint> {
     const simple_shapes: Map<string, SimpleShapeConstraint> = new Map();
     for (const [key, shape] of shapes.entries()) {
         const shape_predicates: string[] = [];
