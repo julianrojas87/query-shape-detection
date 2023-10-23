@@ -50,4 +50,9 @@ describe('query', () => {
         });
     });
 
+    it('should return an error given a malformed query',()=>{
+        const query = 'what a valid query';
+        expect(()=>{findIriPropertiesWithObject(query);}).toThrow()
+    });
+
 });
