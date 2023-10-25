@@ -1,5 +1,5 @@
 import { describe } from 'node:test';
-import { getAllShapes, createShapes } from '../lib/shex';
+import { getAllShapes, createSimpleShapes } from '../lib/shex';
 import * as ShEx from 'shexj';
 import { SimpleShape } from '../lib/types';
 
@@ -139,7 +139,7 @@ describe('shex', () => {
 
     it('should return no shape given an empty map of shape declaration', () => {
       const shapes_declarations = new Map();
-      expect(createShapes(shapes_declarations).size).toBe(0);
+      expect(createSimpleShapes(shapes_declarations).size).toBe(0);
     });
 
     it('should return a valid simple shape given shape declaration', () => {
@@ -147,7 +147,7 @@ describe('shex', () => {
       const id = "id";
       const shape_declaration = createDummySimpleShapeDecl("id", predicates);
       const shape_declaration_map = new Map([[id, shape_declaration]]);
-      const resp = createShapes(shape_declaration_map);
+      const resp = createSimpleShapes(shape_declaration_map);
 
       expect(resp.size).toBe(1);
       const shape = resp.get(id) as SimpleShape;
@@ -160,7 +160,7 @@ describe('shex', () => {
       const id = "id";
       const shape_declaration = createDummySimpleShapeDecl("id", []);
       const shape_declaration_map = new Map([[id, shape_declaration]]);
-      const resp = createShapes(shape_declaration_map);
+      const resp = createSimpleShapes(shape_declaration_map);
 
       expect(resp.size).toBe(1);
       const shape = resp.get(id) as SimpleShape;
@@ -178,7 +178,7 @@ describe('shex', () => {
         shape_declaration_map.set(i, shape_declaration);
         i++;
       }
-      const resp = createShapes(shape_declaration_map);
+      const resp = createSimpleShapes(shape_declaration_map);
 
       expect(resp.size).toBe(predicates_matrix.length);
       i = 0;

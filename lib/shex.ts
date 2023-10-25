@@ -40,16 +40,16 @@ export function getAllShapes(input_schema: string|ShEx.Schema, shape_iri: string
     return shape_map;
 }
 
-export function createShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<string, SimpleShape> {
+export function createSimpleShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<string, SimpleShape> {
     const simple_shapes: Map<string, SimpleShape> = new Map();
     for (const [key, shape] of shapes.entries()) {
         const shape_predicates: string[] = [];
-        visitor.visitTripleConstraint = (tripleConstraint: ShEx.TripleConstraint): void => {
+        visitor.visitTripleConstraint = (tripleConstraint: ShEx.TripleConstraint, ...args: any[]): void => {
             shape_predicates.push(tripleConstraint.predicate);
         };
         visitor.visitShapeDecl(shape);
 
-        simple_shapes.set(key, { name: key, predicates: shape_predicates });
+        simple_shapes.set(key, { name: key, predicates: shape_predicates, predicates_not:[]});
     }
     return simple_shapes;
 }

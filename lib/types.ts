@@ -50,7 +50,7 @@ export interface SimpleShape {
     predicates_not: string[]
 }
 
-export interface Shape extends SimpleShape {
+export interface ShapeWithConstraint extends SimpleShape {
     constraint: Map<string, ObjectConstraint>
 }
 
