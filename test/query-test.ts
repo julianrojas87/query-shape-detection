@@ -4,8 +4,8 @@ import { createSimplePropertyObjectFromQuery } from '../lib/query';
 
 describe('query', () => {
 
-    describe('createSimplePropertyObjectFromQuery', ()=>{
-        it('should return the property with an IRI given a query with one triple', ()=>{
+    describe('createSimplePropertyObjectFromQuery', () => {
+        it('should return the property with an IRI given a query with one triple', () => {
             const query = "SELECT * WHERE { ?x <http://exemple.ca> ?z }";
             const resp = createSimplePropertyObjectFromQuery(query);
             expect(resp.length).toBe(1);
@@ -14,13 +14,13 @@ describe('query', () => {
             expect(resp[0].object.value).toBe("z");
         });
 
-        it('should return no property given a query with one triple', ()=>{
+        it('should return no property given a query with one triple', () => {
             const query = "SELECT * WHERE { ?x ?o ?z }";
             const resp = createSimplePropertyObjectFromQuery(query);
             expect(resp.length).toBe(0);
         });
 
-        it('should the properties with a query with multiple triples', ()=>{
+        it('should the properties with a query with multiple triples', () => {
             const query = `SELECT * WHERE { 
                 ?x ?o ?z .
                 ?x <http://exemple.ca> ?z .
@@ -31,7 +31,7 @@ describe('query', () => {
             }`;
             const resp = createSimplePropertyObjectFromQuery(query);
             expect(resp.length).toBe(4);
-            
+
             expect(resp[0].property_iri).toBe("http://exemple.ca");
             expect(resp[0].object.termType).toBe("Variable");
             expect(resp[0].object.value).toBe("z");
@@ -48,11 +48,10 @@ describe('query', () => {
             expect(resp[3].object.termType).toBe("Literal");
             expect(resp[3].object.value).toBe("def");
         });
-    });
 
-    it('should return an error given a malformed query',()=>{
-        const query = 'what a valid query';
-        expect(()=>{createSimplePropertyObjectFromQuery(query);}).toThrow()
+        it('should return an error given a malformed query', () => {
+            const query = 'what a valid query';
+            expect(() => { createSimplePropertyObjectFromQuery(query); }).toThrow()
+        });
     });
-
 });

@@ -47,7 +47,9 @@ export interface PropertyObjectExtendedWithConstraint extends PropertyObjectExte
 export interface SimpleShape {
     name: string,
     predicates: string[],
-    predicates_not: string[]
+    // will be necesary because we will not match align on negated properties and
+    // maybe for some link ordering the negation will be useful
+    // predicates_not: string[]
 }
 
 export interface ShapeWithConstraint extends SimpleShape {

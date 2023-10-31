@@ -49,7 +49,7 @@ export function createSimpleShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<str
         };
         visitor.visitShapeDecl(shape);
 
-        simple_shapes.set(key, { name: key, predicates: shape_predicates, predicates_not:[]});
+        simple_shapes.set(key, { name: key, predicates: shape_predicates});
     }
     return simple_shapes;
 }
