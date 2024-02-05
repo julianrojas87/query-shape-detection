@@ -1,6 +1,6 @@
 {
   "name": "query-shape-detection",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "files": [
@@ -36,7 +36,8 @@
     "build:ts": "tsc",
     "validate": "npm ls",
     "prepare": "npm run build",
-    "version": "manual-git-changelog onversion"
+    "version": "manual-git-changelog onversion",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "@rdfjs/types": "^1.1.0",
