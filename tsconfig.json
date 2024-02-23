@@ -3,10 +3,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "lib": [
-      "es2021",
+      "ES2023",
       "dom"
     ],
-    "target": "es6",
+    "target": "ES2022",
     "noImplicitAny": true,
     "removeComments": false,
     "preserveConstEnums": true,
