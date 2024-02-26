@@ -6,7 +6,7 @@ export interface IPropertyObject {
     /// The object related to the property
     object: Term,
 
-    isAlignedWithShape(shape: ISimpleShape): boolean
+    isAlignedWithShape(shape: ISimpleShape): boolean,
 }
 
 export class PropertyObject implements IPropertyObject {
@@ -27,22 +27,21 @@ export class PropertyObject implements IPropertyObject {
 
         return false;
     }
-
-    public static hasOneAlign(queryProperties: IPropertyObject[], shape: ISimpleShape): boolean|undefined {
-        if (queryProperties.length===0){
-            return undefined;
-        }
-    
-        for(const property of queryProperties){
-            const isAlign = property.isAlignedWithShape(shape);
-            if (isAlign){
-                return true;
-            }
-        }
-        return false;
-    }
 }
  
+export function hasOneAlign(queryProperties: IPropertyObject[], shape: ISimpleShape): boolean | undefined {
+    if (queryProperties.length === 0) {
+        return undefined;
+    }
+
+    for (const property of queryProperties) {
+        const isAlign = property.isAlignedWithShape(shape);
+        if (isAlign) {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 /**
@@ -71,4 +70,4 @@ export interface ShapeWithConstraint extends ISimpleShape {
     constraint: Map<string, ObjectConstraint>
 }
 
-export type ObjectConstraint = string | ISimpleShape| undefined;
+export type ObjectConstraint = string | ISimpleShape | undefined;

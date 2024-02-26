@@ -1,4 +1,4 @@
-import { ISimpleShape } from './types';
+import { ISimpleShape } from './aligment';
 import * as ShEx from 'shexj';
 import * as RDF from '@rdfjs/types';
 import { SHEX_PREDICATE, SHEX_EXPRESSION } from './constant';

@@ -1,5 +1,5 @@
 import { Algebra, translate, Factory as AlgebraFactory, Util } from 'sparqlalgebrajs';
-import { IPropertyObject, PropertyObject } from './types';
+import { IPropertyObject, PropertyObject } from './aligment';
 import { Term } from "@rdfjs/types"
 
 export function createSimplePropertyObjectFromQuery(query: string): IPropertyObject[] {

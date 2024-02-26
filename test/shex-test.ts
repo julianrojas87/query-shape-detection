@@ -1,7 +1,7 @@
 import { describe } from 'node:test';
 import { getAllShapes, createSimpleShapes } from '../lib/shex';
 import * as ShEx from 'shexj';
-import { ISimpleShape } from '../lib/types';
+import { ISimpleShape } from '../lib/aligment';
 
 describe('shex', () => {
   describe('getAllShapes', () => {
