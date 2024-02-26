@@ -1,4 +1,4 @@
-import type * as RDF from 'rdf-js';
+import type * as RDF from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
 
 const DF = new DataFactory<RDF.BaseQuad>();

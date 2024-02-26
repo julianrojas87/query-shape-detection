@@ -28,7 +28,22 @@ export class SimplePropertyObject implements PropertyObject {
         return false;
     }
 
+    public static hasOneAlign(queryProperties: PropertyObject[], shape: SimpleShape): boolean|undefined {
+        if (queryProperties.length===0){
+            return undefined;
+        }
+    
+        for(const property of queryProperties){
+            const isAlign = property.isAlignedWithShape(shape);
+            if (isAlign){
+                return true;
+            }
+        }
+        return false;
+    }
 }
+ 
+
 
 /**
  * We are going to extend it with other classes to consider nested properties

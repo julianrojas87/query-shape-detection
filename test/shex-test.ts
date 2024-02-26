@@ -41,8 +41,6 @@ describe('shex', () => {
       const map_shape: Map<string, ShEx.ShapeDecl> = resp as Map<string, ShEx.ShapeDecl>;
       expect(map_shape.size).toBe(2);
       for (const [key, shape] of map_shape.entries()) {
-        console.log(key);
-        console.log(schemaIds);
         expect(schemaIds.has(key)).toBe(true);
         expect(shape).toBeInstanceOf(Object);
         expect(shape).not.toBeNull()
@@ -115,8 +113,6 @@ describe('shex', () => {
       const map_shape: Map<string, ShEx.ShapeDecl> = resp as Map<string, ShEx.ShapeDecl>;
       expect(map_shape.size).toBe(2);
       for (const [key, shape] of map_shape.entries()) {
-        console.log(key);
-        console.log(schemaIds);
         expect(schemaIds.has(key)).toBe(true);
         expect(shape).toBeInstanceOf(Object);
         expect(shape).not.toBeNull()
