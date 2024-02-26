@@ -1,6 +1,6 @@
 import { Term } from "@rdfjs/types"
 
-export interface PropertyObject {
+export interface IPropertyObject {
     /// The iri of a property
     property_iri: string,
     /// The object related to the property
@@ -9,7 +9,7 @@ export interface PropertyObject {
     isAlignedWithShape(shape: ISimpleShape): boolean
 }
 
-export class IPropertyObject implements PropertyObject {
+export class PropertyObject implements IPropertyObject {
     public readonly property_iri: string;
     public readonly object: Term;
 
@@ -28,7 +28,7 @@ export class IPropertyObject implements PropertyObject {
         return false;
     }
 
-    public static hasOneAlign(queryProperties: PropertyObject[], shape: ISimpleShape): boolean|undefined {
+    public static hasOneAlign(queryProperties: IPropertyObject[], shape: ISimpleShape): boolean|undefined {
         if (queryProperties.length===0){
             return undefined;
         }
