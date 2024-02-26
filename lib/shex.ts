@@ -1,4 +1,4 @@
-import { SimpleShape } from './types';
+import { ISimpleShape } from './types';
 import * as ShEx from 'shexj';
 import * as RDF from '@rdfjs/types';
 import { SHEX_PREDICATE, SHEX_EXPRESSION } from './constant';
@@ -41,7 +41,7 @@ export function getAllShapes(input_schema: string | ShEx.Schema, shape_iri: stri
 
     return shape_map;
 }
-export function hackCreateSimpleShapesFromQuadStream(streamingQuads: RDF.Stream<RDF.Quad>): Promise<SimpleShape> {
+export function hackCreateSimpleShapesFromQuadStream(streamingQuads: RDF.Stream<RDF.Quad>): Promise<ISimpleShape> {
     const predicates: string[] = [];
     let name: string | undefined;
     let multipleShapes = false;
@@ -82,10 +82,10 @@ export function hackCreateSimpleShapesFromQuadStream(streamingQuads: RDF.Stream<
 /**
  * create a map of simple shapes
  * @param {Map<string, ShEx.ShapeDecl>} shapes - ShEx shapes
- * @returns {Map<string, SimpleShape>} map of simple shapes
+ * @returns {Map<string, ISimpleShape>} map of simple shapes
  */
-export function createSimpleShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<string, SimpleShape> {
-    const simple_shapes: Map<string, SimpleShape> = new Map();
+export function createSimpleShapes(shapes: Map<string, ShEx.ShapeDecl>): Map<string, ISimpleShape> {
+    const simple_shapes: Map<string, ISimpleShape> = new Map();
     for (const [key, shape] of shapes.entries()) {
         const shape_predicates: string[] = [];
         visitor.visitTripleConstraint = (tripleConstraint: ShEx.TripleConstraint, ...args: any[]): void => {

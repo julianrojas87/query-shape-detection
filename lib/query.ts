@@ -1,5 +1,5 @@
 import { Algebra, translate, Factory as AlgebraFactory, Util } from 'sparqlalgebrajs';
-import { PropertyObject, SimplePropertyObject } from './types';
+import { PropertyObject, IPropertyObject } from './types';
 import { Term } from "@rdfjs/types"
 
 export function createSimplePropertyObjectFromQuery(query: string): PropertyObject[] {
@@ -11,7 +11,7 @@ export function createSimplePropertyObjectFromQuery(query: string): PropertyObje
         const object = quad.object as Term;
         if (predicate.termType === "NamedNode") {
             const propertyIri = quad.predicate.value;
-            resp.push(new SimplePropertyObject(
+            resp.push(new IPropertyObject(
                 propertyIri,
                 object
             ));

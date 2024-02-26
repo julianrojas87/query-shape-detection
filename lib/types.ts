@@ -6,10 +6,10 @@ export interface PropertyObject {
     /// The object related to the property
     object: Term,
 
-    isAlignedWithShape(shape: SimpleShape): boolean
+    isAlignedWithShape(shape: ISimpleShape): boolean
 }
 
-export class SimplePropertyObject implements PropertyObject {
+export class IPropertyObject implements PropertyObject {
     public readonly property_iri: string;
     public readonly object: Term;
 
@@ -18,7 +18,7 @@ export class SimplePropertyObject implements PropertyObject {
         this.object = object;
     }
 
-    public isAlignedWithShape(shape: SimpleShape): boolean {
+    public isAlignedWithShape(shape: ISimpleShape): boolean {
         for (const predicat of shape.predicates) {
             if (predicat === this.property_iri) {
                 return true;
@@ -28,7 +28,7 @@ export class SimplePropertyObject implements PropertyObject {
         return false;
     }
 
-    public static hasOneAlign(queryProperties: PropertyObject[], shape: SimpleShape): boolean|undefined {
+    public static hasOneAlign(queryProperties: PropertyObject[], shape: ISimpleShape): boolean|undefined {
         if (queryProperties.length===0){
             return undefined;
         }
@@ -59,7 +59,7 @@ export interface PropertyObjectExtendedWithConstraint extends PropertyObjectExte
 }
 */
 
-export interface SimpleShape {
+export interface ISimpleShape {
     name: string,
     predicates: string[],
     // will be necesary because we will not match align on negated properties and
@@ -67,8 +67,8 @@ export interface SimpleShape {
     // predicates_not: string[]
 }
 
-export interface ShapeWithConstraint extends SimpleShape {
+export interface ShapeWithConstraint extends ISimpleShape {
     constraint: Map<string, ObjectConstraint>
 }
 
-export type ObjectConstraint = string | SimpleShape| undefined;
+export type ObjectConstraint = string | ISimpleShape| undefined;

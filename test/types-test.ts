@@ -1,4 +1,4 @@
-import { SimplePropertyObject, SimpleShape } from '../lib/types';
+import { IPropertyObject, ISimpleShape } from '../lib/types';
 import { Term } from "@rdfjs/types";
 import { DataFactory } from 'rdf-data-factory';
 import type * as RDF from '@rdfjs/types';
@@ -12,8 +12,8 @@ describe('SimplePropertyObject', () => {
         it('should be align with a SimpleShape with the right predicate', () => {
             const predicate = 'foo';
             const object: Term = AN_OBJECT;
-            const property_object = new SimplePropertyObject(predicate, object);
-            const shape: SimpleShape = {
+            const property_object = new IPropertyObject(predicate, object);
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [predicate]
             };
@@ -23,8 +23,8 @@ describe('SimplePropertyObject', () => {
         it('should not be align with a SimpleShape with the wrong predicate', () => {
             const predicate = 'foo';
             const object: Term = AN_OBJECT;
-            const property_object = new SimplePropertyObject(predicate, object);
-            const shape: SimpleShape = {
+            const property_object = new IPropertyObject(predicate, object);
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: ["wrong predicate"]
             };
@@ -34,8 +34,8 @@ describe('SimplePropertyObject', () => {
         it('should not be align with a SimpleShape with no predicate', () => {
             const predicate = 'foo';
             const object: Term = AN_OBJECT;
-            const property_object = new SimplePropertyObject(predicate, object);
-            const shape: SimpleShape = {
+            const property_object = new IPropertyObject(predicate, object);
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: []
             };
@@ -45,8 +45,8 @@ describe('SimplePropertyObject', () => {
         it('should not be align with a SimpleShape with multiple wrong predicate', () => {
             const predicate = 'foo';
             const object: Term = AN_OBJECT;
-            const property_object = new SimplePropertyObject(predicate, object);
-            const shape: SimpleShape = {
+            const property_object = new IPropertyObject(predicate, object);
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: ['1', '2', '3', '4']
             };
@@ -56,8 +56,8 @@ describe('SimplePropertyObject', () => {
         it('should be align with a SimpleShape with multiple right predicates', () => {
             const predicate = 'foo';
             const object: Term = AN_OBJECT;
-            const property_object = new SimplePropertyObject(predicate, object);
-            const shape: SimpleShape = {
+            const property_object = new IPropertyObject(predicate, object);
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [predicate, predicate, predicate]
             };
@@ -67,8 +67,8 @@ describe('SimplePropertyObject', () => {
         it('should be align with a SimpleShape with the right predicates and wrong predicate starting with the right predicate', () => {
             const predicate = 'foo';
             const object: Term = AN_OBJECT;
-            const property_object = new SimplePropertyObject(predicate, object);
-            const shape: SimpleShape = {
+            const property_object = new IPropertyObject(predicate, object);
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [predicate, '1', '2']
             };
@@ -78,8 +78,8 @@ describe('SimplePropertyObject', () => {
         it('should be align with a SimpleShape with the right predicates and wrong predicate starting with the wrong predicate', () => {
             const predicate = 'foo';
             const object: Term = AN_OBJECT;
-            const property_object = new SimplePropertyObject(predicate, object);
-            const shape: SimpleShape = {
+            const property_object = new IPropertyObject(predicate, object);
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: ['1', predicate, '2']
             };
@@ -90,59 +90,59 @@ describe('SimplePropertyObject', () => {
     describe('hasOneAlign', () => {
         it('should return undefined given an empty queryProperties array', () => {
             const predicate = 'foo';
-            const queryProperties: SimplePropertyObject[] = [];
-            const shape: SimpleShape = {
+            const queryProperties: IPropertyObject[] = [];
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [predicate, '1', '2']
             };
-            expect(SimplePropertyObject.hasOneAlign(queryProperties, shape))
+            expect(IPropertyObject.hasOneAlign(queryProperties, shape))
                 .toBeUndefined();
         });
 
         it('should return true given an array of properties with on align property', () => {
             const predicate = 'foo';
-            const queryProperties: SimplePropertyObject[] = [new SimplePropertyObject(predicate, AN_OBJECT)];
-            const shape: SimpleShape = {
+            const queryProperties: IPropertyObject[] = [new IPropertyObject(predicate, AN_OBJECT)];
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [predicate, '1', '2']
             };
-            expect(SimplePropertyObject.hasOneAlign(queryProperties, shape))
+            expect(IPropertyObject.hasOneAlign(queryProperties, shape))
                 .toBe(true);
         });
 
         it('should return true given an array of properties with all the properties aligned', () => {
             const predicates = ['foo', 'bar', 'boo'];
-            const queryProperties: SimplePropertyObject[] =
-                predicates.map((predicate) => new SimplePropertyObject(predicate, AN_OBJECT))
-            const shape: SimpleShape = {
+            const queryProperties: IPropertyObject[] =
+                predicates.map((predicate) => new IPropertyObject(predicate, AN_OBJECT))
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [...predicates, '1', '2']
             };
-            expect(SimplePropertyObject.hasOneAlign(queryProperties, shape))
+            expect(IPropertyObject.hasOneAlign(queryProperties, shape))
                 .toBe(true);
         });
 
         it('should return true given an array of properties with some properties aligned', () => {
             const predicates = ['foo', 'bar', 'boo'];
-            const queryProperties: SimplePropertyObject[] =
-                [...predicates, 'a', 'b', 'c'].map((predicate) => new SimplePropertyObject(predicate, AN_OBJECT))
-            const shape: SimpleShape = {
+            const queryProperties: IPropertyObject[] =
+                [...predicates, 'a', 'b', 'c'].map((predicate) => new IPropertyObject(predicate, AN_OBJECT))
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [...predicates, '1', '2']
             };
-            expect(SimplePropertyObject.hasOneAlign(queryProperties, shape))
+            expect(IPropertyObject.hasOneAlign(queryProperties, shape))
                 .toBe(true);
         });
 
         it('should return false given an array of properties with no properties aligned', () => {
             const predicates = ['foo', 'bar', 'boo'];
-            const queryProperties: SimplePropertyObject[] =
-                ['a', 'b', 'c'].map((predicate) => new SimplePropertyObject(predicate, AN_OBJECT))
-            const shape: SimpleShape = {
+            const queryProperties: IPropertyObject[] =
+                ['a', 'b', 'c'].map((predicate) => new IPropertyObject(predicate, AN_OBJECT))
+            const shape: ISimpleShape = {
                 name: "foo",
                 predicates: [...predicates, '1', '2']
             };
-            expect(SimplePropertyObject.hasOneAlign(queryProperties, shape))
+            expect(IPropertyObject.hasOneAlign(queryProperties, shape))
                 .toBe(false);
         });
     });
