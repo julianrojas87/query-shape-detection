@@ -1,7 +1,7 @@
 import { describe } from 'node:test';
 import { getAllShapes, createSimpleShapes } from '../lib/shex';
 import * as ShEx from 'shexj';
-import { SimpleShape } from '../lib/types';
+import { ISimpleShape } from '../lib/types';
 
 describe('shex', () => {
   describe('getAllShapes', () => {
@@ -146,7 +146,7 @@ describe('shex', () => {
       const resp = createSimpleShapes(shape_declaration_map);
 
       expect(resp.size).toBe(1);
-      const shape = resp.get(id) as SimpleShape;
+      const shape = resp.get(id) as ISimpleShape;
       expect(shape).toBeDefined();
       expect(shape.name).toBe(id);
       expect(new Set(shape.predicates)).toStrictEqual(new Set(predicates))
@@ -159,7 +159,7 @@ describe('shex', () => {
       const resp = createSimpleShapes(shape_declaration_map);
 
       expect(resp.size).toBe(1);
-      const shape = resp.get(id) as SimpleShape;
+      const shape = resp.get(id) as ISimpleShape;
       expect(shape).toBeDefined();
       expect(shape.name).toBe(id);
       expect(shape.predicates.length).toBe(0);
