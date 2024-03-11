@@ -1,12 +1,13 @@
 import { ISimpleShape } from './aligment';
 import * as ShEx from 'shexj';
 import * as RDF from '@rdfjs/types';
-import { SHEX_PREDICATE, SHEX_EXPRESSION } from './constant';
+import { SHEX_PREDICATE, SHEX_EXPRESSION, IRI_FIRST_RDF_LIST, SHEX_EXPRESSIONS } from './constant';
 
 const shexParser = require('@shexjs/parser');
 const shexVisitor = require('@shexjs/visitor').Visitor;
 
 const visitor = shexVisitor();
+
 
 /**
  * get all the shapes from a schema
@@ -41,13 +42,19 @@ export function getAllShapes(input_schema: string | ShEx.Schema, shape_iri: stri
 
     return shape_map;
 }
-export function hackCreateSimpleShapesFromQuadStream(streamingQuads: RDF.Stream<RDF.Quad>): Promise<ISimpleShape> {
+export function hackCreateSimpleShapesFromQuadStream(streamingQuads: RDF.Stream<RDF.Quad>, shapeIri: string): Promise<ISimpleShape> {
     const predicates: string[] = [];
+    const mapIdPredicate: Map<string, string> = new Map();
+    const mapIdPrevNextList: Map<string, string> = new Map();
+    const mapIdLogicLinkIdExpressions: Map<string, string> = new Map();
+    const mapShapeExpressionId: Map<string, string> = new Map();
+
     let name: string | undefined;
     let multipleShapes = false;
     return new Promise((resolve, reject) => {
         streamingQuads.on('data', (quad: RDF.Quad) => {
             if (quad.predicate.equals(SHEX_PREDICATE)) {
+                mapIdPredicate.set(quad.subject.value, quad.object.value);
                 predicates.push(quad.object.value);
             }
             if (quad.predicate.equals(SHEX_EXPRESSION)) {
@@ -55,6 +62,15 @@ export function hackCreateSimpleShapesFromQuadStream(streamingQuads: RDF.Stream<
                     multipleShapes = true;
                 }
                 name = quad.subject.value;
+            }
+            if (quad.predicate.equals(IRI_FIRST_RDF_LIST)) {
+                mapIdPrevNextList.set(quad.object.value, quad.subject.value)
+            }
+            if (quad.predicate.equals(SHEX_EXPRESSIONS)) {
+                mapIdLogicLinkIdExpressions.set(quad.subject.value, quad.object.value);
+            }
+            if (quad.predicate.equals(SHEX_EXPRESSION)) {
+                mapShapeExpressionId.set(quad.subject.value, quad.object.value);
             }
         });
 
@@ -77,6 +93,20 @@ export function hackCreateSimpleShapesFromQuadStream(streamingQuads: RDF.Stream<
             )
         });
     });
+}
+
+function generateShape(
+    mapIdPredicate: Map<string, string>,
+    mapIdPrevNextList: Map<string, string>,
+    mapIdLogicLinkIdExpressions: Map<string, string>,
+    mapShapeExpressionId: Map<string, string>,
+    shapeIri: string
+    ){
+    const expression = mapShapeExpressionId.get(shapeIri);
+    if (expression===undefined){
+        return undefined;
+    }
+    
 }
 
 /**
