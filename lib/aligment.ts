@@ -6,7 +6,7 @@ export interface IPropertyObject {
     /// The object related to the property
     object: Term,
 
-    isAlignedWithShape(shape: ISimpleShape): boolean,
+    isAlignedWithShape(shape: IShape): boolean,
 }
 
 export class PropertyObject implements IPropertyObject {
@@ -18,8 +18,13 @@ export class PropertyObject implements IPropertyObject {
         this.object = object;
     }
 
-    public isAlignedWithShape(shape: ISimpleShape): boolean {
-        for (const predicat of shape.predicates) {
+    public isAlignedWithShape(shape: IShape): boolean {
+        for (const predicat of shape.rejectedPredicate()) {
+            if (predicat === this.property_iri) {
+                return false;
+            }
+        }
+        for (const predicat of shape.expectedPredicate()) {
             if (predicat === this.property_iri) {
                 return true;
             }
@@ -28,8 +33,8 @@ export class PropertyObject implements IPropertyObject {
         return false;
     }
 }
- 
-export function hasOneAlign(queryProperties: IPropertyObject[], shape: ISimpleShape): boolean | undefined {
+
+export function hasOneAlign(queryProperties: IPropertyObject[], shape: IShape): boolean | undefined {
     if (queryProperties.length === 0) {
         return undefined;
     }
@@ -43,31 +48,27 @@ export function hasOneAlign(queryProperties: IPropertyObject[], shape: ISimpleSh
     return false;
 }
 
-
-/**
- * We are going to extend it with other classes to consider nested properties
- * and filter constraint and the like
-export interface PropertyObjectExtended extends PropertyObject {
-    /// Triples in the query defining the object
-    object_neighbors: Term[],
-}
-
-export interface PropertyObjectExtendedWithConstraint extends PropertyObjectExtended {
-    /// The related filter expression segments in relation to the object
-    filter_contraint: string[]
-}
-*/
-
-export interface ISimpleShape {
+export interface IShape {
     name: string,
-    predicates: string[],
-    // will be necesary because we will not match align on negated properties and
-    // maybe for some link ordering the negation will be useful
-    // predicates_not: string[]
+    expectedPredicate(): string[],
+    rejectedPredicate(): string[]
 }
 
-export interface ShapeWithConstraint extends ISimpleShape {
-    constraint: Map<string, ObjectConstraint>
-}
 
-export type ObjectConstraint = string | ISimpleShape | undefined;
+export class ShapeWithPositivePredicate implements IShape {
+    public readonly name: string;
+    private readonly predicates: string[];
+
+    constructor(name: string, predicates: string[]) {
+        this.name = name
+        this.predicates = predicates;
+    }
+
+    public expectedPredicate(): string[] {
+        return this.predicates;
+    }
+
+    public rejectedPredicate(): string[] {
+        return [];
+    }
+}

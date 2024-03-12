@@ -1,4 +1,4 @@
-import { Algebra, translate, Factory as AlgebraFactory, Util } from 'sparqlalgebrajs';
+import { Algebra, translate, Util } from 'sparqlalgebrajs';
 import { IPropertyObject, PropertyObject } from './aligment';
 import { Term } from "@rdfjs/types"
 
