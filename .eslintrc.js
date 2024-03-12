@@ -23,6 +23,8 @@ module.exports = {
       'import/unambiguous': 'off',
       'import/extensions': 'off',
       'import/first': 'off',
+      '@typescript-eslint/lines-between-class-members': 'off',
+      'mocha/max-top-level-suites': 'off'
     },
     overrides: [
       {

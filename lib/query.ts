@@ -1,31 +1,32 @@
+import type { Term } from '@rdfjs/types';
 import { Algebra, translate, Util } from 'sparqlalgebrajs';
-import { IPropertyObject, PropertyObject } from './aligment';
-import { Term } from "@rdfjs/types"
+import type { IPropertyObject } from './aligment';
+import { PropertyObject } from './aligment';
 
 export function createSimplePropertyObjectFromQuery(query: string): IPropertyObject[] {
-    const resp: IPropertyObject[] = [];
-    const algebraQuery = translate(query);
+  const resp: IPropertyObject[] = [];
+  const algebraQuery = translate(query);
 
-    const addProperty = (quad: any): boolean => {
-        const predicate = quad.predicate as Term;
-        const object = quad.object as Term;
-        if (predicate.termType === "NamedNode") {
-            const propertyIri = quad.predicate.value;
-            resp.push(new PropertyObject(
-                propertyIri,
-                object
-            ));
-        }
+  const addProperty = (quad: any): boolean => {
+    const predicate = <Term> quad.predicate;
+    const object = <Term> quad.object;
+    if (predicate.termType === 'NamedNode') {
+      const propertyIri = quad.predicate.value;
+      resp.push(new PropertyObject(
+        propertyIri,
+        object,
+      ));
+    }
 
-        return true;
-    };
+    return true;
+  };
 
-    Util.recurseOperation(
-        algebraQuery,
-        {
-            [Algebra.types.PATH]: addProperty,
-            [Algebra.types.PATTERN]: addProperty,
-        }
-    );
-    return resp;
+  Util.recurseOperation(
+    algebraQuery,
+    {
+      [Algebra.types.PATH]: addProperty,
+      [Algebra.types.PATTERN]: addProperty,
+    },
+  );
+  return resp;
 }
