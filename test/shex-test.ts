@@ -41,6 +41,9 @@ describe('shapeFromQuads', () => {
     readFileSync('./test/shape/shex_shape_closed_multiple_properties.ttl').toString(),
   );
   const twoShapes = n3Parser.parse(readFileSync('./test/shape/shex_two_shapes.ttl').toString());
+  const shapeWithShapeExpression = n3Parser.parse(
+    readFileSync('./test/shape/shex_with_shape_expression.ttl').toString(),
+  );
 
   const shapeNoPredicate = n3Parser.parse(readFileSync('./test/shape/shex_invalid_shape_no_predicate.ttl').toString());
   const shapeIncompleteRdfList = n3Parser.parse(
@@ -65,7 +68,7 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should return a closed Shape with multiple properties  given some quads', async() => {
+    it('should return a closed Shape with multiple properties given some quads', async() => {
       const shape = await shapeFromQuads(closedShapeWithMultipleProperties, shapeIri);
       const expectedPredicates: string[] = [
         'http://foaf.example/#me',
@@ -101,6 +104,33 @@ describe('shapeFromQuads', () => {
     it('should return an error given quads representing a shape with an incomplete RDF list', async() => {
       expect(await shapeFromQuads(shapeIncompleteRdfList, shapeIri)).toBeInstanceOf(Error);
     });
+
+    it(`should return a closed Shape with multiple properties  
+    given some quads representing a shape with a shape expression`, async() => {
+      const shape = await shapeFromQuads(shapeWithShapeExpression, shapeIri);
+      const prefix = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary';
+      const expectedPredicates: string[] = [
+        'http://www.w3.org/ns/pim/space#storage',
+        `${prefix}/id`,
+        `${prefix}/firstName`,
+        `${prefix}/lastName`,
+        `${prefix}/gender`,
+        `${prefix}/birthday`,
+        `${prefix}/locationIP`,
+        `${prefix}/browserUsed`,
+        `${prefix}/creationDate`,
+        `${prefix}/isLocatedIn`,
+        `${prefix}/speaks`,
+        `${prefix}/email`,
+        `${prefix}/hasInterest`,
+        `${prefix}/studyAt`,
+      ];
+      expect(shape).not.toBeInstanceOf(Error);
+      expect((<IShape>shape).closed).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
+      expect((<IShape>shape).expectedPredicate().sort()).toStrictEqual(expectedPredicates.sort());
+      expect((<IShape>shape).name).toBe(shapeIri);
+    });
   });
 
   describe('quad stream', () => {
@@ -114,6 +144,8 @@ describe('shapeFromQuads', () => {
     let closedShapeWithMultipleProperties: any;
     // eslint-disable-next-line @typescript-eslint/no-shadow
     let twoShapes: any;
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    let shapeWithShapeExpression: any;
 
     // eslint-disable-next-line @typescript-eslint/no-shadow
     let shapeNoPredicate: any;
@@ -151,6 +183,7 @@ describe('shapeFromQuads', () => {
 
       shapeNoPredicate = populateStream('./test/shape/shex_invalid_shape_no_predicate.ttl');
       shapeIncompleteRdfList = populateStream('./test/shape/shex_invalid_shape_incomplete_rdf_list.ttl');
+      shapeWithShapeExpression = populateStream('./test/shape/shex_with_shape_expression.ttl');
     });
 
     it('should return an error given an empty stream', async() => {
@@ -205,6 +238,33 @@ describe('shapeFromQuads', () => {
 
     it('should return an error given quads representing a shape with an incomplete RDF list', async() => {
       expect(await shapeFromQuads(shapeIncompleteRdfList, shapeIri)).toBeInstanceOf(Error);
+    });
+
+    it(`should return a closed Shape with multiple properties  
+    given some quads representing a shape with a shape expression`, async() => {
+      const shape = await shapeFromQuads(shapeWithShapeExpression, shapeIri);
+      const prefix = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary';
+      const expectedPredicates: string[] = [
+        'http://www.w3.org/ns/pim/space#storage',
+        `${prefix}/id`,
+        `${prefix}/firstName`,
+        `${prefix}/lastName`,
+        `${prefix}/gender`,
+        `${prefix}/birthday`,
+        `${prefix}/locationIP`,
+        `${prefix}/browserUsed`,
+        `${prefix}/creationDate`,
+        `${prefix}/isLocatedIn`,
+        `${prefix}/speaks`,
+        `${prefix}/email`,
+        `${prefix}/hasInterest`,
+        `${prefix}/studyAt`,
+      ];
+      expect(shape).not.toBeInstanceOf(Error);
+      expect((<IShape>shape).closed).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
+      expect((<IShape>shape).expectedPredicate().sort()).toStrictEqual(expectedPredicates.sort());
+      expect((<IShape>shape).name).toBe(shapeIri);
     });
 
     it('should return an error given the stream return an error', async() => {

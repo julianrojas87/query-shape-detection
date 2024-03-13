@@ -9,6 +9,7 @@ import {
   IRI_REST_RDF_LIST,
   SHEX_CLOSED_SHAPE,
   RDF_TRUE,
+  SHEX_SHAPE_EXPRESSION,
 } from './constant';
 
 export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | Error> {
@@ -27,6 +28,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
   const mapShapeExpressionId: Map<string, string> = new Map();
   const mapPrevNextList: Map<string, string> = new Map();
   const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
+  const mapIriShapeExpression: Map<string, string> = new Map();
 
   return new Promise(resolve => {
     quadSteam.on('data', (quad: RDF.Quad) => {
@@ -38,6 +40,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
         mapShapeExpressionId,
         mapPrevNextList,
         mapShapeExpressionClosedShape,
+        mapIriShapeExpression,
       );
     });
 
@@ -52,6 +55,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
         mapShapeExpressionId,
         mapPrevNextList,
         mapShapeExpressionClosedShape,
+        mapIriShapeExpression,
         shapeIri,
       );
       if (shape === undefined) {
@@ -70,6 +74,7 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error
   const mapShapeExpressionId: Map<string, string> = new Map();
   const mapPrevNextList: Map<string, string> = new Map();
   const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
+  const mapIriShapeExpression: Map<string, string> = new Map();
 
   for (const quad of quads) {
     parseShapeQuads(
@@ -80,6 +85,7 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error
       mapShapeExpressionId,
       mapPrevNextList,
       mapShapeExpressionClosedShape,
+      mapIriShapeExpression,
     );
   }
 
@@ -90,6 +96,7 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error
     mapShapeExpressionId,
     mapPrevNextList,
     mapShapeExpressionClosedShape,
+    mapIriShapeExpression,
     shapeIri,
   );
   if (shape === undefined) {
@@ -105,11 +112,17 @@ function concatShapeInfo(
   mapShapeExpressionId: Map<string, string>,
   mapPrevNextList: Map<string, string>,
   mapShapeExpressionClosedShape: Map<string, boolean>,
+  mapIriShapeExpression: Map<string, string>,
   shapeIri: string,
 ): IShape | undefined {
   const predicates: string[] = [];
-  const expression = mapShapeExpressionId.get(shapeIri);
-
+  const shapeExpr = mapIriShapeExpression.get(shapeIri);
+  let expression;
+  if (shapeExpr === undefined) {
+    expression = mapShapeExpressionId.get(shapeIri);
+  } else {
+    expression = mapShapeExpressionId.get(shapeExpr);
+  }
   if (expression === undefined) {
     return undefined;
   }
@@ -141,7 +154,12 @@ function concatShapeInfo(
     current = mapPrevCurrentList.get(next);
     next = mapPrevNextList.get(next);
   }
-  const isClosed = mapShapeExpressionClosedShape.get(shapeIri);
+  let isClosed;
+  if (shapeExpr === undefined) {
+    isClosed = mapShapeExpressionClosedShape.get(shapeIri);
+  } else {
+    isClosed = mapShapeExpressionClosedShape.get(shapeExpr);
+  }
   return new ShapeWithPositivePredicate(shapeIri, predicates, isClosed);
 }
 
@@ -153,6 +171,7 @@ function parseShapeQuads(
   mapShapeExpressionId: Map<string, string>,
   mapPrevNextList: Map<string, string>,
   mapShapeExpressionClosedShape: Map<string, boolean>,
+  mapIriShapeExpression: Map<string, string>,
 ): void {
   if (quad.predicate.equals(SHEX_PREDICATE)) {
     mapIdPredicate.set(quad.subject.value, quad.object.value);
@@ -171,5 +190,8 @@ function parseShapeQuads(
   }
   if (quad.predicate.equals(SHEX_CLOSED_SHAPE)) {
     mapShapeExpressionClosedShape.set(quad.subject.value, quad.object.equals(RDF_TRUE));
+  }
+  if (quad.predicate.equals(SHEX_SHAPE_EXPRESSION)) {
+    mapIriShapeExpression.set(quad.subject.value, quad.object.value);
   }
 }
