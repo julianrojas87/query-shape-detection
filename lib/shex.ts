@@ -7,48 +7,29 @@ import {
   IRI_FIRST_RDF_LIST,
   SHEX_EXPRESSIONS,
   IRI_REST_RDF_LIST,
+  SHEX_CLOSED_SHAPE,
+  RDF_TRUE,
 } from './constant';
 
-export function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error {
-  const mapIdPredicate: Map<string, string> = new Map();
-  const mapPrevCurrentList: Map<string, string> = new Map();
-  const mapLogicLinkIdExpressions: Map<string, string> = new Map();
-  const mapShapeExpressionId: Map<string, string> = new Map();
-  const mapPrevNextList: Map<string, string> = new Map();
-
-  for (const quad of quads) {
-    parseShapeQuads(
-      quad,
-      mapIdPredicate,
-      mapPrevCurrentList,
-      mapLogicLinkIdExpressions,
-      mapShapeExpressionId,
-      mapPrevNextList,
-    );
+export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | Error> {
+  if (Array.isArray(quads)) {
+    return new Promise(resolve => {
+      resolve(shapeFromQuadArray(quads, shapeIri));
+    });
   }
-
-  const shape = concatShapeInfo(
-    mapIdPredicate,
-    mapPrevCurrentList,
-    mapLogicLinkIdExpressions,
-    mapShapeExpressionId,
-    mapPrevNextList,
-    shapeIri,
-  );
-  if (shape === undefined) {
-    return new Error('the shape is not defined with those triples');
-  }
-  return shape;
+  return shapeFromQuadStream(quads, shapeIri);
 }
-export function shapeFromQuadStream(quadStream: RDF.Stream, shapeIri: string): Promise<IShape | Error> {
+
+function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<IShape | Error> {
   const mapIdPredicate: Map<string, string> = new Map();
   const mapPrevCurrentList: Map<string, string> = new Map();
   const mapLogicLinkIdExpressions: Map<string, string> = new Map();
   const mapShapeExpressionId: Map<string, string> = new Map();
   const mapPrevNextList: Map<string, string> = new Map();
+  const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
 
   return new Promise(resolve => {
-    quadStream.on('data', (quad: RDF.Quad) => {
+    quadSteam.on('data', (quad: RDF.Quad) => {
       parseShapeQuads(
         quad,
         mapIdPredicate,
@@ -56,19 +37,21 @@ export function shapeFromQuadStream(quadStream: RDF.Stream, shapeIri: string): P
         mapLogicLinkIdExpressions,
         mapShapeExpressionId,
         mapPrevNextList,
+        mapShapeExpressionClosedShape,
       );
     });
 
-    quadStream.on('error', error => {
+    quadSteam.on('error', error => {
       resolve(error);
     });
-    quadStream.on('end', () => {
+    quadSteam.on('end', () => {
       const shape = concatShapeInfo(
         mapIdPredicate,
         mapPrevCurrentList,
         mapLogicLinkIdExpressions,
         mapShapeExpressionId,
         mapPrevNextList,
+        mapShapeExpressionClosedShape,
         shapeIri,
       );
       if (shape === undefined) {
@@ -80,33 +63,86 @@ export function shapeFromQuadStream(quadStream: RDF.Stream, shapeIri: string): P
   });
 }
 
+function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error {
+  const mapIdPredicate: Map<string, string> = new Map();
+  const mapPrevCurrentList: Map<string, string> = new Map();
+  const mapLogicLinkIdExpressions: Map<string, string> = new Map();
+  const mapShapeExpressionId: Map<string, string> = new Map();
+  const mapPrevNextList: Map<string, string> = new Map();
+  const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
+
+  for (const quad of quads) {
+    parseShapeQuads(
+      quad,
+      mapIdPredicate,
+      mapPrevCurrentList,
+      mapLogicLinkIdExpressions,
+      mapShapeExpressionId,
+      mapPrevNextList,
+      mapShapeExpressionClosedShape,
+    );
+  }
+
+  const shape = concatShapeInfo(
+    mapIdPredicate,
+    mapPrevCurrentList,
+    mapLogicLinkIdExpressions,
+    mapShapeExpressionId,
+    mapPrevNextList,
+    mapShapeExpressionClosedShape,
+    shapeIri,
+  );
+  if (shape === undefined) {
+    return new Error('the shape is not defined with those triples');
+  }
+  return shape;
+}
+
 function concatShapeInfo(
   mapIdPredicate: Map<string, string>,
   mapPrevCurrentList: Map<string, string>,
   mapLogicLinkIdExpressions: Map<string, string>,
   mapShapeExpressionId: Map<string, string>,
   mapPrevNextList: Map<string, string>,
+  mapShapeExpressionClosedShape: Map<string, boolean>,
   shapeIri: string,
 ): IShape | undefined {
   const predicates: string[] = [];
   const expression = mapShapeExpressionId.get(shapeIri);
+
   if (expression === undefined) {
     return undefined;
   }
   const expressions = mapLogicLinkIdExpressions.get(expression);
+  let current;
+  let next;
+  // If there is only one expression
   if (expressions === undefined) {
-    return undefined;
+    const predicate = mapIdPredicate.get(expression);
+    if (predicate !== undefined) {
+      predicates.push(predicate);
+    } else {
+      return undefined;
+    }
+  } else {
+    current = mapPrevCurrentList.get(expressions);
+    next = mapPrevNextList.get(expressions);
   }
-  let current = mapPrevCurrentList.get(expressions);
 
+  // Traverse the RDF list
   while (current !== undefined) {
     const predicate = mapIdPredicate.get(current);
     if (predicate !== undefined) {
       predicates.push(predicate);
     }
-    current = mapPrevNextList.get(current);
+    if (next === undefined) {
+      return undefined;
+    }
+    current = mapPrevCurrentList.get(next);
+    next = mapPrevNextList.get(next);
   }
-  return new ShapeWithPositivePredicate(shapeIri, predicates);
+  const isClosed = mapShapeExpressionClosedShape.get(shapeIri);
+  return new ShapeWithPositivePredicate(shapeIri, predicates, isClosed);
 }
 
 function parseShapeQuads(
@@ -116,12 +152,13 @@ function parseShapeQuads(
   mapLogicLinkIdExpressions: Map<string, string>,
   mapShapeExpressionId: Map<string, string>,
   mapPrevNextList: Map<string, string>,
+  mapShapeExpressionClosedShape: Map<string, boolean>,
 ): void {
   if (quad.predicate.equals(SHEX_PREDICATE)) {
     mapIdPredicate.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(IRI_FIRST_RDF_LIST)) {
-    mapPrevCurrentList.set(quad.object.value, quad.subject.value);
+    mapPrevCurrentList.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(IRI_REST_RDF_LIST)) {
     mapPrevNextList.set(quad.subject.value, quad.object.value);
@@ -131,5 +168,8 @@ function parseShapeQuads(
   }
   if (quad.predicate.equals(SHEX_EXPRESSION)) {
     mapShapeExpressionId.set(quad.subject.value, quad.object.value);
+  }
+  if (quad.predicate.equals(SHEX_CLOSED_SHAPE)) {
+    mapShapeExpressionClosedShape.set(quad.subject.value, quad.object.equals(RDF_TRUE));
   }
 }

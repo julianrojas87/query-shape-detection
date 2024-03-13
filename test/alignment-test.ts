@@ -106,6 +106,19 @@ describe('SimplePropertyObject', () => {
       };
       expect(property_object.isAlignedWithShape(shape)).toBe(false);
     });
+
+    it('should be align if the shape is closed', () => {
+      const predicate = 'foo';
+      const object: RDF.Term = AN_OBJECT;
+      const property_object = new PropertyObject(predicate, object);
+      const shape: IShape = {
+        name: 'foo',
+        expectedPredicate: () => [ 'wrong predicate' ],
+        rejectedPredicate: () => [],
+        closed: true,
+      };
+      expect(property_object.isAlignedWithShape(shape)).toBe(true);
+    });
   });
 });
 
@@ -137,7 +150,7 @@ describe('hasOneAlign', () => {
   it('should return true given an array of properties with all the properties aligned', () => {
     const predicates = [ 'foo', 'bar', 'boo' ];
     const queryProperties: PropertyObject[] =
-            predicates.map(predicate => new PropertyObject(predicate, AN_OBJECT));
+      predicates.map(predicate => new PropertyObject(predicate, AN_OBJECT));
     const shape: IShape = {
       name: 'foo',
       expectedPredicate: () => [ ...predicates, '1', '2' ],
@@ -150,7 +163,7 @@ describe('hasOneAlign', () => {
   it('should return true given an array of properties with some properties aligned', () => {
     const predicates = [ 'foo', 'bar', 'boo' ];
     const queryProperties: PropertyObject[] =
-            [ ...predicates, 'a', 'b', 'c' ].map(predicate => new PropertyObject(predicate, AN_OBJECT));
+      [ ...predicates, 'a', 'b', 'c' ].map(predicate => new PropertyObject(predicate, AN_OBJECT));
     const shape: IShape = {
       name: 'foo',
       expectedPredicate: () => [ ...predicates, '1', '2' ],
@@ -163,7 +176,7 @@ describe('hasOneAlign', () => {
   it('should return false given an array of properties with no properties aligned', () => {
     const predicates = [ 'foo', 'bar', 'boo' ];
     const queryProperties: PropertyObject[] =
-            [ 'a', 'b', 'c' ].map(predicate => new PropertyObject(predicate, AN_OBJECT));
+      [ 'a', 'b', 'c' ].map(predicate => new PropertyObject(predicate, AN_OBJECT));
 
     const shape: IShape = {
       name: 'foo',
@@ -177,7 +190,7 @@ describe('hasOneAlign', () => {
   it('should return false given an array of properties with no align properties and a rejected predicate', () => {
     const predicates = [ 'foo', 'bar', 'boo' ];
     const queryProperties: PropertyObject[] =
-            predicates.map(predicate => new PropertyObject(predicate, AN_OBJECT));
+      predicates.map(predicate => new PropertyObject(predicate, AN_OBJECT));
     const shape: IShape = {
       name: 'foo',
       expectedPredicate: () => [ '1', '2' ],

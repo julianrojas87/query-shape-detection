@@ -20,6 +20,10 @@ export class PropertyObject implements IPropertyObject {
   }
 
   public isAlignedWithShape(shape: IShape): boolean {
+    if (shape.closed === true) {
+      return true;
+    }
+
     for (const predicat of shape.rejectedPredicate()) {
       if (predicat === this.property_iri) {
         return false;
@@ -54,15 +58,18 @@ export interface IShape {
   name: string;
   expectedPredicate: () => string[];
   rejectedPredicate: () => string[];
+  closed?: boolean;
 }
 
 export class ShapeWithPositivePredicate implements IShape {
   public readonly name: string;
   private readonly predicates: string[];
+  public readonly closed?: boolean;
 
-  public constructor(name: string, predicates: string[]) {
+  public constructor(name: string, predicates: string[], closed?: boolean) {
     this.name = name;
     this.predicates = predicates;
+    this.closed = closed === undefined ? false : closed;
   }
 
   public expectedPredicate(): string[] {
