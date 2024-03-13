@@ -107,7 +107,7 @@ describe('SimplePropertyObject', () => {
       expect(property_object.isAlignedWithShape(shape)).toBe(false);
     });
 
-    it('should be align if the shape is closed', () => {
+    it('should be align if the shape is open', () => {
       const predicate = 'foo';
       const object: RDF.Term = AN_OBJECT;
       const property_object = new PropertyObject(predicate, object);
@@ -115,7 +115,7 @@ describe('SimplePropertyObject', () => {
         name: 'foo',
         expectedPredicate: () => [ 'wrong predicate' ],
         rejectedPredicate: () => [],
-        closed: true,
+        closed: false,
       };
       expect(property_object.isAlignedWithShape(shape)).toBe(true);
     });

@@ -20,7 +20,7 @@ export class PropertyObject implements IPropertyObject {
   }
 
   public isAlignedWithShape(shape: IShape): boolean {
-    if (shape.closed === true) {
+    if (shape.closed === false) {
       return true;
     }
 
