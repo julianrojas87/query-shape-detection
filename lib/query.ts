@@ -1,8 +1,8 @@
-import type { Term, BaseQuad} from '@rdfjs/types';
+import type { Term, BaseQuad } from '@rdfjs/types';
 import { Algebra, translate, Util } from 'sparqlalgebrajs';
 import type { IPropertyObject } from './aligment';
 import { PropertyObject } from './aligment';
-import { DataFactory } from 'rdf-data-factory';
+import { DataFactory, Quad } from 'rdf-data-factory';
 
 const DF = new DataFactory<BaseQuad>();
 
@@ -41,12 +41,26 @@ export function createSimplePropertyObjectFromQuery(query: string): IPropertyObj
     return true;
   }
 
+  const addPropertyPath = (element: any): boolean => {
+    const predicate = <Term>(element.iri);
+
+    if (predicate.termType === 'NamedNode') {
+      resp.push(new PropertyObject(
+        predicate.value,
+        // for the moment we will simply ignore this
+        DF.blankNode(),
+      ));
+
+    }
+    return true;
+  }
+
   Util.recurseOperation(
     algebraQuery,
     {
       [Algebra.types.PATH]: addProperty,
       [Algebra.types.PATTERN]: addProperty,
-      [Algebra.types.SEQ]: addPropertySeq,
+      [Algebra.types.LINK]: addPropertyPath,
     },
   );
   return resp;
