@@ -2,7 +2,7 @@ import type { Term } from '@rdfjs/types';
 
 export interface ITriple extends ITripleArgs {
   isAlignedWithShape: (shape: IShape) => boolean;
-  toObject(): ITripleArgs;
+  toObject: () => ITripleArgs;
 }
 
 export interface ITripleArgs {
@@ -28,8 +28,8 @@ export class Triple implements ITriple {
     return {
       subject: this.subject,
       predicate: this.predicate,
-      object: this.object
-    }
+      object: this.object,
+    };
   }
 
   public isAlignedWithShape(shape: IShape): boolean {
@@ -115,7 +115,7 @@ export function generateExclusivePropertyShape(shapes: IShape[], intersection: I
         properties.add(property);
       }
     }
-    resp.set(shape.name, { properties })
+    resp.set(shape.name, { properties });
   }
   return resp;
 }
@@ -133,26 +133,26 @@ export function find1DeepStarPaterns(properties: ITriple[]): Map<string, ITriple
 
 export function hasOneExclusivseProperty(shapes: Map<string, ExclusivePropertyShape>, mapQuerySubject: Map<string, ITriple[]>, intersection: Intersection) {
   let alignedShapes: string[] = [];
-  for (const [_, properties] of mapQuerySubject) {
-    let hitIntersection: boolean = false;
+  for (const [ _, properties ] of mapQuerySubject) {
+    let hitIntersection = false;
     const potentiallyAlignedShapes = [];
     for (const property of properties) {
       if (intersection.has(property.predicate)) {
         hitIntersection = true;
       }
-      for (const [shapeName, { properties }] of shapes) {
+      for (const [ shapeName, { properties }] of shapes) {
         if (properties.has(property.predicate)) {
           potentiallyAlignedShapes.push(shapeName);
         }
       }
     }
     if (hitIntersection) {
-      alignedShapes = alignedShapes.concat(potentiallyAlignedShapes);
+      alignedShapes = [ ...alignedShapes, ...potentiallyAlignedShapes ];
     }
   }
   return alignedShapes;
 }
 
 interface ExclusivePropertyShape {
-  properties: Set<string>
+  properties: Set<string>;
 }

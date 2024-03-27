@@ -1,14 +1,13 @@
-import { generateQuery } from '../lib/query';
 import type { BaseQuad } from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
 import { translate } from 'sparqlalgebrajs';
-
+import { generateQuery } from '../lib/query';
 
 const DF = new DataFactory<BaseQuad>();
 
 const RDF_STRING = DF.namedNode('http://www.w3.org/2001/XMLSchema#string');
 const SNVOC_PREFIX = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/';
-const RDF_PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+const RDF_PREFIX = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 
 describe('query', () => {
   describe('generateQuery', () => {
@@ -39,18 +38,24 @@ describe('query', () => {
                 <http://sujet.cm> ?m "def" .
             }`;
       const expectedResp: Map<string, any> = new Map([
-        ['x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
-        ['z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
-        ['w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
-        ['http://sujet.cm', [{ subject: "http://sujet.cm", predicate: 'http://predicat.cm', object: DF.literal('def', RDF_STRING) }]]
+        [ 'x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
+        [ 'z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
+        [ 'w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
+        [ 'http://sujet.cm', [
+          {
+            subject: 'http://sujet.cm',
+            predicate: 'http://predicat.cm',
+            object: DF.literal('def', RDF_STRING),
+          }],
+        ],
       ]);
 
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [subject, triples] of resp) {
-        for (let i = 0; i < triples.length; ++i) {
-          expect(triples[i].toObject()).toStrictEqual(expectedResp.get(subject)![i]);
+      for (const [ subject, triples ] of resp) {
+        for (const [ i, triple ] of triples.entries()) {
+          expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
     });
@@ -75,31 +80,31 @@ describe('query', () => {
       }`;
       const comment_philippines = 'http://localhost:3000/pods/00000002199023256081/comments/Philippines#274878069404';
       const expectedResp = new Map([
-        ['s',
+        [ 's',
           [
             { subject: 's', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('messageId') },
-            { subject: 's', predicate: `${SNVOC_PREFIX}hasCreator`, object: DF.variable('messageCreator') }
-          ]
+            { subject: 's', predicate: `${SNVOC_PREFIX}hasCreator`, object: DF.variable('messageCreator') },
+          ],
         ],
         [
           'messageCreator',
           [
             { subject: 'messageCreator', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('messageCreatorId') },
-          ]
+          ],
         ],
         [
           'comment',
           [
             { subject: 'comment', predicate: `${SNVOC_PREFIX}replyOf`, object: DF.namedNode(comment_philippines) },
             { subject: 'comment', predicate: `${RDF_PREFIX}type`, object: DF.namedNode(`${SNVOC_PREFIX}Comment`) },
-          ]
+          ],
         ],
         [
           'replyAuthor',
           [
             { subject: 'replyAuthor', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('replyAuthorId') },
             { subject: 'replyAuthor', predicate: `${SNVOC_PREFIX}firstName`, object: DF.variable('replyAuthorFirstName') },
-          ]
+          ],
         ],
         [
           'messageCreator',
@@ -109,16 +114,16 @@ describe('query', () => {
             { subject: 'messageCreator', predicate: `${SNVOC_PREFIX}hasPerson`, object: DF.variable('replyAuthor') },
             { subject: 'messageCreator', predicate: `${SNVOC_PREFIX}knows`, object: DF.variable('replyAuthor') },
             { subject: 'messageCreator', predicate: `${SNVOC_PREFIX}hasPerson`, object: DF.variable('replyAuthor') },
-          ]
-        ]
+          ],
+        ],
       ]);
 
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [subject, triples] of resp) {
-        for (let i = 0; i < triples.length; ++i) {
-          expect(triples[i].toObject()).toStrictEqual(expectedResp.get(subject)![i]);
+      for (const [ subject, triples ] of resp) {
+        for (const [ i, triple ] of triples.entries()) {
+          expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
     });
@@ -156,35 +161,35 @@ describe('query', () => {
           [
             { subject: 'person', predicate: `${RDF_PREFIX}type`, object: DF.namedNode(`${SNVOC_PREFIX}Person`) },
             { subject: 'person', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('personId') },
-          ]
+          ],
         ],
         [
           'message',
           [
             { subject: 'message', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('messageId') },
-            { subject: 'message', predicate: `${SNVOC_PREFIX}replyOf`, object: DF.variable('originalPostInner') }
-          ]
+            { subject: 'message', predicate: `${SNVOC_PREFIX}replyOf`, object: DF.variable('originalPostInner') },
+          ],
         ],
         [
           'originalPostInner',
           [
-            { subject: 'originalPostInner', predicate: `${RDF_PREFIX}type`, object: DF.namedNode(`${SNVOC_PREFIX}Post`) }
-          ]
+            { subject: 'originalPostInner', predicate: `${RDF_PREFIX}type`, object: DF.namedNode(`${SNVOC_PREFIX}Post`) },
+          ],
         ],
         [
           'creator',
           [
-            { subject: 'creator', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('originalPostAuthorId') }
-          ]
-        ]
+            { subject: 'creator', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('originalPostAuthorId') },
+          ],
+        ],
       ]);
 
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [subject, triples] of resp) {
-        for (let i = 0; i < triples.length; ++i) {
-          expect(triples[i].toObject()).toStrictEqual(expectedResp.get(subject)![i]);
+      for (const [ subject, triples ] of resp) {
+        for (const [ i, triple ] of triples.entries()) {
+          expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
     });
