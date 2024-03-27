@@ -37,7 +37,7 @@ export class Triple implements ITriple {
       return true;
     }
 
-    for (const predicat of shape.rejectedPredicate()) {
+    for (const predicat of shape.rejectedPredicates()) {
       if (predicat === this.predicate) {
         return false;
       }
@@ -70,7 +70,7 @@ export function hasOneAlign(queryProperties: ITriple[], shape: IShape): boolean 
 export interface IShape {
   name: string;
   expectedPredicate: () => string[];
-  rejectedPredicate: () => string[];
+  rejectedPredicates: () => string[];
   closed?: boolean;
 }
 
@@ -89,70 +89,48 @@ export class ShapeWithPositivePredicate implements IShape {
     return this.predicates;
   }
 
-  public rejectedPredicate(): string[] {
+  public rejectedPredicates(): string[] {
     return [];
   }
 }
 
-type Intersection = Set<string>;
+export class Shape implements IShape {
+  public readonly name: string;
+  private readonly predicates: string[];
+  private readonly negativePredicates: string[];
+  public readonly closed?: boolean;
 
-export function calculateIntersection(shapes: IShape[]): Intersection {
-  const shapesProperties = [];
-  for (const shape of shapes) {
-    shapesProperties.push(shape.expectedPredicate());
+  public constructor(name: string, predicates: string[], negativePredicates: string[], closed?: boolean) {
+    this.name = name;
+    this.predicates = predicates;
+    this.negativePredicates = negativePredicates;
+    this.closed = closed ?? false;
   }
-  const intersection = shapesProperties.reduce((a: string[], b: string[]) => a.filter(c => b.includes(c)));
-  return new Set(intersection);
+
+  public expectedPredicate(): string[] {
+    return this.predicates;
+  }
+
+  public rejectedPredicates(): string[] {
+    return this.negativePredicates;
+  }
 }
 
-export function generateExclusivePropertyShape(shapes: IShape[], intersection: Intersection): Map<string, ExclusivePropertyShape> {
-  const resp: Map<string, ExclusivePropertyShape> = new Map();
+export function generateDiscriminantShape(targetShape: IShape, others: IShape[]): IShape {
+  const disciminantPredicates: string[] = [];
 
-  for (const shape of shapes) {
-    const properties: Set<string> = new Set();
-    for (const property of shape.expectedPredicate()) {
-      if (!intersection.has(property)) {
-        properties.add(property);
-      }
-    }
-    resp.set(shape.name, { properties });
-  }
-  return resp;
-}
+  const otherPredicates: Set<string> = new Set(others
+    .map((shape) => shape.expectedPredicate())
+    .reduce((acc: string[], current: string[]) => [...acc, ...current]));
 
-export function find1DeepStarPaterns(properties: ITriple[]): Map<string, ITriple[]> {
-  const mapSubject: Map<string, ITriple[]> = new Map();
-  for (const property of properties) {
-    const listSubject = mapSubject.get(property.subject);
-    if (listSubject) {
-      listSubject.push(property);
+  for (const predicate of targetShape.expectedPredicate()) {
+    if (!otherPredicates.has(predicate)) {
+      disciminantPredicates.push(predicate);
     }
   }
-  return mapSubject;
-}
-
-export function hasOneExclusivseProperty(shapes: Map<string, ExclusivePropertyShape>, mapQuerySubject: Map<string, ITriple[]>, intersection: Intersection) {
-  let alignedShapes: string[] = [];
-  for (const [ _, properties ] of mapQuerySubject) {
-    let hitIntersection = false;
-    const potentiallyAlignedShapes = [];
-    for (const property of properties) {
-      if (intersection.has(property.predicate)) {
-        hitIntersection = true;
-      }
-      for (const [ shapeName, { properties }] of shapes) {
-        if (properties.has(property.predicate)) {
-          potentiallyAlignedShapes.push(shapeName);
-        }
-      }
-    }
-    if (hitIntersection) {
-      alignedShapes = [ ...alignedShapes, ...potentiallyAlignedShapes ];
-    }
-  }
-  return alignedShapes;
-}
-
-interface ExclusivePropertyShape {
-  properties: Set<string>;
+  return new Shape(
+    targetShape.name,
+    disciminantPredicates,
+    targetShape.rejectedPredicates()
+  );
 }
