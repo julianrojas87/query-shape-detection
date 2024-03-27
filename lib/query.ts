@@ -1,67 +1,80 @@
-import type { Term, BaseQuad } from '@rdfjs/types';
-import { Algebra, translate, Util } from 'sparqlalgebrajs';
-import type { IPropertyObject } from './aligment';
-import { PropertyObject } from './aligment';
-import { DataFactory, Quad } from 'rdf-data-factory';
+import type { Term } from '@rdfjs/types';
+import { Algebra, Util } from 'sparqlalgebrajs';
+import type { ITriple } from './aligment';
+import { Triple } from './aligment';
 
-const DF = new DataFactory<BaseQuad>();
 
-export function createSimplePropertyObjectFromQuery(query: string): IPropertyObject[] {
-  const resp: IPropertyObject[] = [];
-  const algebraQuery = translate(query);
+export type Query = Map<string, ITriple[]>;
+
+export function generateQuery(algebraQuery: Algebra.Operation): Query {
+  const resp: Query = new Map();
+  const paths: [any, { subject: string, object: Term }][] = [];
 
   const addProperty = (quad: any): boolean => {
+    const subject = <Term>quad.subject;
     const predicate = <Term>quad.predicate;
     const object = <Term>quad.object;
     if (predicate.termType === 'NamedNode') {
-      const propertyIri = quad.predicate.value;
-      resp.push(new PropertyObject(
-        propertyIri,
-        object,
-      ));
+      const subjectGroup = resp.get(subject.value);
+      const propertyObject = new Triple({
+          subject: subject.value,
+          predicate: quad.predicate.value,
+          object
+        });
+      if (subjectGroup === undefined) {
+        resp.set(subject.value, [propertyObject])
+      } else {
+        subjectGroup.push(propertyObject)
+      }
     }
-
     return true;
   };
 
-  const addPropertySeq = (element: any): boolean => {
-    const quadArray = <Term[]>((<any[]>element.input).map((value) => {
-      return value.iri;
-    }));
-    for (const predicate of quadArray) {
-      if (predicate.termType === 'NamedNode') {
-        resp.push(new PropertyObject(
-          predicate.value,
-          // for the moment we will simply ignore this
-          DF.blankNode(),
-        ));
-      }
 
-    }
-    return true;
-  }
 
-  const addPropertyPath = (element: any): boolean => {
-    const predicate = <Term>(element.iri);
-
-    if (predicate.termType === 'NamedNode') {
-      resp.push(new PropertyObject(
-        predicate.value,
-        // for the moment we will simply ignore this
-        DF.blankNode(),
-      ));
-
-    }
+  const addPaths = (element: any): boolean => {
+    paths.push([element, {
+      subject: element.subject.value,
+      object: element.object
+    },]);
     return true;
   }
 
   Util.recurseOperation(
     algebraQuery,
     {
-      [Algebra.types.PATH]: addProperty,
+      [Algebra.types.PATH]: addPaths,
       [Algebra.types.PATTERN]: addProperty,
-      [Algebra.types.LINK]: addPropertyPath,
     },
   );
+
+  for (const [path, { subject, object }] of paths) {
+    const addPropertyPath = (element: any): boolean => {
+
+      const predicate = <Term>(element.iri);
+      if (predicate.termType === 'NamedNode') {
+        const subjectGroup = resp.get(subject);
+        const propertyObject = new Triple({
+          subject,
+          predicate: predicate.value,
+          object
+        });
+        if (subjectGroup === undefined) {
+          resp.set(subject, [propertyObject])
+        } else {
+          subjectGroup.push(propertyObject)
+        }
+      }
+
+      return true;
+    }
+    Util.recurseOperation(
+      path,
+      {
+        [Algebra.types.LINK]: addPropertyPath,
+
+      }
+    )
+  }
   return resp;
 }
