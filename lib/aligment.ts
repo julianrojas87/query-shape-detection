@@ -120,8 +120,8 @@ export function generateDiscriminantShape(targetShape: IShape, others: IShape[])
   const disciminantPredicates: string[] = [];
 
   const otherPredicates: Set<string> = new Set(others
-    .map((shape) => shape.expectedPredicate())
-    .reduce((acc: string[], current: string[]) => [...acc, ...current]));
+    .map(shape => shape.expectedPredicate())
+    .reduce((acc: string[], current: string[]) => [ ...acc, ...current ]));
 
   for (const predicate of targetShape.expectedPredicate()) {
     if (!otherPredicates.has(predicate)) {
@@ -131,6 +131,6 @@ export function generateDiscriminantShape(targetShape: IShape, others: IShape[])
   return new Shape(
     targetShape.name,
     disciminantPredicates,
-    targetShape.rejectedPredicates()
+    targetShape.rejectedPredicates(),
   );
 }
