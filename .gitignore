@@ -26,3 +26,5 @@ parameters-*.csv
 experiment.mjs
 example
 build
+debug.json
+debug.mjs
