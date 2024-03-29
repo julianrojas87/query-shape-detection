@@ -1,6 +1,5 @@
 import type * as RDF from '@rdfjs/types';
-import type { IShape } from './aligment';
-import { ShapeWithPositivePredicate } from './aligment';
+import { type IShape, Shape, InconsistentPositiveAndNegativePredicateError } from './Shape';
 import {
   SHEX_PREDICATE,
   SHEX_EXPRESSION,
@@ -10,9 +9,10 @@ import {
   SHEX_CLOSED_SHAPE,
   RDF_TRUE,
   SHEX_SHAPE_EXPRESSION,
+  SHEX_INVERSE,
 } from './constant';
 
-export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | Error> {
+export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError> {
   if (Array.isArray(quads)) {
     return new Promise(resolve => {
       resolve(shapeFromQuadArray(quads, shapeIri));
@@ -21,7 +21,7 @@ export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string)
   return shapeFromQuadStream(quads, shapeIri);
 }
 
-function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<IShape | Error> {
+function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError> {
   const mapIdPredicate: Map<string, string> = new Map();
   const mapPrevCurrentList: Map<string, string> = new Map();
   const mapLogicLinkIdExpressions: Map<string, string> = new Map();
@@ -29,6 +29,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
   const mapPrevNextList: Map<string, string> = new Map();
   const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
   const mapIriShapeExpression: Map<string, string> = new Map();
+  const mapIriPredicateInverse: Map<string, boolean> = new Map();
 
   return new Promise(resolve => {
     quadSteam.on('data', (quad: RDF.Quad) => {
@@ -41,6 +42,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
         mapPrevNextList,
         mapShapeExpressionClosedShape,
         mapIriShapeExpression,
+        mapIriPredicateInverse,
       );
     });
 
@@ -56,18 +58,15 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
         mapPrevNextList,
         mapShapeExpressionClosedShape,
         mapIriShapeExpression,
+        mapIriPredicateInverse,
         shapeIri,
       );
-      if (shape === undefined) {
-        resolve(new Error('the shape is not defined with those triples'));
-        return;
-      }
       resolve(shape);
     });
   });
 }
 
-function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error {
+function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError {
   const mapIdPredicate: Map<string, string> = new Map();
   const mapPrevCurrentList: Map<string, string> = new Map();
   const mapLogicLinkIdExpressions: Map<string, string> = new Map();
@@ -75,6 +74,7 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error
   const mapPrevNextList: Map<string, string> = new Map();
   const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
   const mapIriShapeExpression: Map<string, string> = new Map();
+  const mapIriPredicateInverse: Map<string, boolean> = new Map();
 
   for (const quad of quads) {
     parseShapeQuads(
@@ -86,6 +86,7 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error
       mapPrevNextList,
       mapShapeExpressionClosedShape,
       mapIriShapeExpression,
+      mapIriPredicateInverse
     );
   }
 
@@ -97,11 +98,9 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Error
     mapPrevNextList,
     mapShapeExpressionClosedShape,
     mapIriShapeExpression,
+    mapIriPredicateInverse,
     shapeIri,
   );
-  if (shape === undefined) {
-    return new Error('the shape is not defined with those triples');
-  }
   return shape;
 }
 
@@ -113,9 +112,11 @@ function concatShapeInfo(
   mapPrevNextList: Map<string, string>,
   mapShapeExpressionClosedShape: Map<string, boolean>,
   mapIriShapeExpression: Map<string, string>,
+  mapIriPredicateInverse: Map<string, boolean>,
   shapeIri: string,
-): IShape | undefined {
-  const predicates: string[] = [];
+): IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError {
+  const positivePredicates: string[] = [];
+  const negativePredicates: string[] = [];
   const shapeExpr = mapIriShapeExpression.get(shapeIri);
   let expression;
   if (shapeExpr === undefined) {
@@ -124,7 +125,7 @@ function concatShapeInfo(
     expression = mapShapeExpressionId.get(shapeExpr);
   }
   if (expression === undefined) {
-    return undefined;
+    return new ShapePoorlyFormatedError('there are no expressions in the shape');
   }
   const expressions = mapLogicLinkIdExpressions.get(expression);
   let current;
@@ -133,9 +134,16 @@ function concatShapeInfo(
   if (expressions === undefined) {
     const predicate = mapIdPredicate.get(expression);
     if (predicate !== undefined) {
-      predicates.push(predicate);
+      // A positive path is almost always explicit
+      /* istanbul ignore next */
+      const positive = mapIriPredicateInverse.has(expression) ?? false;
+      if (!positive) {
+        positivePredicates.push(predicate);
+      } else {
+        negativePredicates.push(predicate);
+      }
     } else {
-      return undefined;
+      return new ShapePoorlyFormatedError('there are no predicates in the shape');
     }
   } else {
     current = mapPrevCurrentList.get(expressions);
@@ -146,10 +154,16 @@ function concatShapeInfo(
   while (current !== undefined) {
     const predicate = mapIdPredicate.get(current);
     if (predicate !== undefined) {
-      predicates.push(predicate);
+      /* istanbul ignore next */
+      const positive = mapIriPredicateInverse.has(current) ?? false;
+      if (!positive) {
+        positivePredicates.push(predicate);
+      } else {
+        negativePredicates.push(predicate);
+      }
     }
     if (next === undefined) {
-      return undefined;
+      return new ShapePoorlyFormatedError('An RDF list is poorly defined');
     }
     current = mapPrevCurrentList.get(next);
     next = mapPrevNextList.get(next);
@@ -160,7 +174,16 @@ function concatShapeInfo(
   } else {
     isClosed = mapShapeExpressionClosedShape.get(shapeExpr);
   }
-  return new ShapeWithPositivePredicate(shapeIri, predicates, isClosed);
+  try {
+    return new Shape({
+      name: shapeIri,
+      positivePredicates,
+      negativePredicates,
+      closed: isClosed
+    });
+  } catch (error: any) {
+    return error;
+  }
 }
 
 function parseShapeQuads(
@@ -172,6 +195,7 @@ function parseShapeQuads(
   mapPrevNextList: Map<string, string>,
   mapShapeExpressionClosedShape: Map<string, boolean>,
   mapIriShapeExpression: Map<string, string>,
+  mapIriPredicateInverse: Map<string, boolean>
 ): void {
   if (quad.predicate.equals(SHEX_PREDICATE)) {
     mapIdPredicate.set(quad.subject.value, quad.object.value);
@@ -193,5 +217,16 @@ function parseShapeQuads(
   }
   if (quad.predicate.equals(SHEX_SHAPE_EXPRESSION)) {
     mapIriShapeExpression.set(quad.subject.value, quad.object.value);
+  }
+  if (quad.predicate.equals(SHEX_INVERSE)) {
+    mapIriPredicateInverse.set(quad.subject.value, quad.object.equals(RDF_TRUE))
+  }
+}
+
+export class ShapePoorlyFormatedError extends Error {
+  constructor(message: string) {
+    super(message);
+
+    Object.setPrototypeOf(this, ShapePoorlyFormatedError.prototype);
   }
 }

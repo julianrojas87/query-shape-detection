@@ -1,7 +1,6 @@
 import type { Term } from '@rdfjs/types';
 import { Algebra, Util } from 'sparqlalgebrajs';
-import type { ITriple } from './aligment';
-import { Triple } from './aligment';
+import { Triple, type ITriple } from './Triple';
 
 export type Query = Map<string, ITriple[]>;
 
@@ -21,7 +20,7 @@ export function generateQuery(algebraQuery: Algebra.Operation): Query {
         object,
       });
       if (subjectGroup === undefined) {
-        resp.set(subject.value, [ propertyObject ]);
+        resp.set(subject.value, [propertyObject]);
       } else {
         subjectGroup.push(propertyObject);
       }
@@ -30,7 +29,7 @@ export function generateQuery(algebraQuery: Algebra.Operation): Query {
   };
 
   const addPaths = (element: any): boolean => {
-    paths.push([ element, {
+    paths.push([element, {
       subject: element.subject.value,
       object: element.object,
     }]);
@@ -45,7 +44,7 @@ export function generateQuery(algebraQuery: Algebra.Operation): Query {
     },
   );
 
-  for (const [ path, { subject, object }] of paths) {
+  for (const [path, { subject, object }] of paths) {
     const addPropertyPath = (element: any): boolean => {
       const predicate = <Term>(element.iri);
       if (predicate.termType === 'NamedNode') {
@@ -56,7 +55,7 @@ export function generateQuery(algebraQuery: Algebra.Operation): Query {
           object,
         });
         if (subjectGroup === undefined) {
-          resp.set(subject, [ propertyObject ]);
+          resp.set(subject, [propertyObject]);
         } else {
           subjectGroup.push(propertyObject);
         }

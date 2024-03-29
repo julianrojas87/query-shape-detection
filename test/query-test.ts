@@ -11,7 +11,7 @@ const RDF_PREFIX = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 
 describe('query', () => {
   describe('generateQuery', () => {
-    it('should return the property with an IRI given a query with one triple', () => {
+    it('should return the triple given a query with one triple', () => {
       const query = 'SELECT * WHERE { ?x <http://exemple.ca> ?z }';
       const resp = generateQuery(translate(query));
       expect(resp.size).toBe(1);
@@ -22,13 +22,13 @@ describe('query', () => {
       expect(x[0].object.value).toBe('z');
     });
 
-    it('should return no property given a query with one triple', () => {
+    it('should return no triple  given a query with a bgp with only variable', () => {
       const query = 'SELECT * WHERE { ?x ?o ?z }';
       const resp = generateQuery(translate(query));
       expect(resp.size).toBe(0);
     });
 
-    it('should the properties with a query with multiple triples', () => {
+    it('should returns the triples given a query with multiple triples', () => {
       const query = `SELECT * WHERE { 
                 ?x ?o ?z .
                 ?x <http://exemple.ca> ?z .
@@ -60,7 +60,45 @@ describe('query', () => {
       }
     });
 
-    it('should the properties with a complex query 1', () => {
+    it(`should returns the triples 
+    given a query with a bgp where a subject group start in a predicate path`, () => {
+      const query = `SELECT * WHERE { 
+                ?x ?o ?z .
+                ?x <http://exemple.ca> ?z .
+                ?z <http://exemple.be> "abc" .
+                ?w <http://exemple.be> <http://objet.fr> .
+                <http://sujet.cm> <http://predicat.cm> "def" .
+                ?a <http://exemple.be>|<http://exemple.qc.ca> <http://objet.fr> .
+                <http://sujet.cm> ?m "def" .
+            }`;
+      const expectedResp: Map<string, any> = new Map([
+        [ 'x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
+        [ 'z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
+        [ 'w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
+        ['a', [
+          { subject: 'a', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') },
+          { subject: 'a', predicate: 'http://exemple.qc.ca', object: DF.namedNode('http://objet.fr') },
+        ]],
+        [ 'http://sujet.cm', [
+          {
+            subject: 'http://sujet.cm',
+            predicate: 'http://predicat.cm',
+            object: DF.literal('def', RDF_STRING),
+          }],
+        ],
+      ]);
+
+      const resp = generateQuery(translate(query));
+
+      expect(resp.size).toBe(expectedResp.size);
+      for (const [ subject, triples ] of resp) {
+        for (const [ i, triple ] of triples.entries()) {
+          expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
+        }
+      }
+    });
+
+    it('should returns the properties with a complex query 1', () => {
       const query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
       PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
@@ -128,7 +166,7 @@ describe('query', () => {
       }
     });
 
-    it('should the properties with a complex query 2', () => {
+    it('should returns the properties with a complex query 2', () => {
       const query = `# Recent messages of a person
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
