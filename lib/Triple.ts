@@ -2,7 +2,7 @@ import type { Term } from '@rdfjs/types';
 import { IShape } from './Shape';
 
 export interface ITriple extends ITripleArgs {
-    isAlignedWithShape: (shape: IShape) => boolean;
+    isWeaklyAlign: (shape: IShape) => boolean;
     toObject: () => ITripleArgs;
 }
 
@@ -38,7 +38,7 @@ export class Triple implements ITriple {
         };
     }
 
-    public isAlignedWithShape(shape: IShape): boolean {
+    public isWeaklyAlign(shape: IShape): boolean {
         if (shape.closed === false) {
             return true;
         }

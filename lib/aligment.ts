@@ -7,7 +7,7 @@ export function hasOneAlign(queryProperties: ITriple[], shape: IShape): boolean 
   }
 
   for (const property of queryProperties) {
-    const isAlign = property.isAlignedWithShape(shape);
+    const isAlign = property.isWeaklyAlign(shape);
     if (isAlign) {
       return true;
     }
