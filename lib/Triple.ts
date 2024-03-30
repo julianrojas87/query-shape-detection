@@ -5,7 +5,11 @@ export interface ITriple extends ITripleArgs {
     isWeaklyAlign: (shape: IShape) => boolean;
     toObject: () => ITripleArgs;
 }
-
+export enum AlignmentType {
+    WEAK,
+    STRONG,
+    None,
+}
 export interface ITripleArgs {
     subject: string;
     // / The iri of a property
