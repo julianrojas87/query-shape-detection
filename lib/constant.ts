@@ -15,7 +15,7 @@ export const SHEX_MAX = DF.namedNode('http://www.w3.org/ns/shex#max');
 export const SHEX_MIN = DF.namedNode('http://www.w3.org/ns/shex#min');
 export const SHEX_DATA_TYPE = DF.namedNode('http://www.w3.org/ns/shex#datatype');
 
-export const SHEX_LITERAL =DF.namedNode('http://www.w3.org/ns/shex#literal');
+export const SHEX_LITERAL = DF.namedNode('http://www.w3.org/ns/shex#literal');
 export const SHEX_IRI = DF.namedNode('http://www.w3.org/ns/shex#iri');
 export const SHEX_BNODE = DF.namedNode('http://www.w3.org/ns/shex#bnode');
 export const SHEX_NON_LITERAL = DF.namedNode('http://www.w3.org/ns/shex#nonliteral');

@@ -3,8 +3,8 @@ import type * as RDF from '@rdfjs/types';
 import * as N3 from 'n3';
 import { DataFactory } from 'rdf-data-factory';
 import streamifyArray from 'streamify-array';
-import { type IShape, InconsistentPositiveAndNegativePredicateError } from '../lib/Shape';
 import { SHEX_SHAPE, TYPE_DEFINITION, SHEX_PREDICATE } from '../lib/constant';
+import { type IShape } from '../lib/Shape';
 import { shapeFromQuads } from '../lib/shex';
 
 const DF = new DataFactory<RDF.BaseQuad>();
@@ -60,28 +60,26 @@ describe('shapeFromQuads', () => {
     readFileSync('./test/shape/shex_shape_inconsistent_positive_and_negative_properties.ttl').toString(),
   );
 
-
-
   describe('quad array', () => {
-    it('should returns an error given an empty quad array', async () => {
+    it('should returns an error given an empty quad array', async() => {
       expect(await shapeFromQuads(emptyQuad, shapeIri)).toBeInstanceOf(Error);
     });
 
-    it('should returns an error given unrelated quads', async () => {
+    it('should returns an error given unrelated quads', async() => {
       expect(await shapeFromQuads(unRelatedQuads, shapeIri)).toBeInstanceOf(Error);
     });
 
-    it('should returns a Shape with one property given some quads', async () => {
+    it('should returns a Shape with one property given some quads', async() => {
       const shape = await shapeFromQuads(shapeWithOneProperty, shapeIri);
 
       expect(shape).not.toBeInstanceOf(Error);
-      expect((<IShape>shape).positivePredicates).toStrictEqual(['http://example.org/state']);
+      expect((<IShape>shape).positivePredicates).toStrictEqual([ 'http://example.org/state' ]);
       expect((<IShape>shape).negativePredicates).toStrictEqual([]);
       expect((<IShape>shape).closed).toBe(false);
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a closed Shape with multiple properties given some quads', async () => {
+    it('should returns a closed Shape with multiple properties given some quads', async() => {
       const shape = await shapeFromQuads(closedShapeWithMultipleProperties, shapeIri);
       const expectedPredicates: string[] = [
         'http://ex.example/#state',
@@ -97,7 +95,7 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a  Shape with multiple properties given some quads representing two shapes', async () => {
+    it('should returns a  Shape with multiple properties given some quads representing two shapes', async() => {
       const shape = await shapeFromQuads(twoShapes, shapeIri);
       const expectedPredicates: string[] = [
         'http://foaf.example/#name',
@@ -110,16 +108,16 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns an error given quads representing a shape with no predicate', async () => {
+    it('should returns an error given quads representing a shape with no predicate', async() => {
       expect(await shapeFromQuads(shapeNoPredicate, shapeIri)).toBeInstanceOf(Error);
     });
 
-    it('should returns an error given quads representing a shape with an incomplete RDF list', async () => {
+    it('should returns an error given quads representing a shape with an incomplete RDF list', async() => {
       expect(await shapeFromQuads(shapeIncompleteRdfList, shapeIri)).toBeInstanceOf(Error);
     });
 
     it(`should returns a closed Shape with multiple properties  
-    given some quads representing a shape with a shape expression`, async () => {
+    given some quads representing a shape with a shape expression`, async() => {
       const shape = await shapeFromQuads(shapeWithShapeExpression, shapeIri);
       const prefix = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary';
       const expectedPredicates: string[] = [
@@ -140,18 +138,18 @@ describe('shapeFromQuads', () => {
       ];
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
+
       expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
       expect((<IShape>shape).negativePredicates).toStrictEqual([]);
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a Shape with a negative property', async () => {
+    it('should returns a Shape with a negative property', async() => {
       const shape = await shapeFromQuads(shapeWithANegativeProperty, shapeIri);
       const expectedPredicates: string[] = [
       ];
       const negativePredicates: string[] = [
-        'http://example.org/state'
+        'http://example.org/state',
       ];
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(false);
@@ -160,7 +158,7 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a Shape with positive and negative properties', async () => {
+    it('should returns a Shape with positive and negative properties', async() => {
       const shape = await shapeFromQuads(shapeWithInverseAndPositiveProperties, shapeIri);
       const expectedPredicates: string[] = [
         'http://xmlns.com/foaf/0.1/prop1',
@@ -168,7 +166,7 @@ describe('shapeFromQuads', () => {
       ];
       const negativePredicates: string[] = [
         'http://xmlns.com/foaf/0.1/prop3',
-        'http://xmlns.com/foaf/0.1/prop4'
+        'http://xmlns.com/foaf/0.1/prop4',
       ];
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(false);
@@ -177,14 +175,11 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should throw an error given a shape with inconsistent positive and negative properties', async () => {
+    it('should throw an error given a shape with inconsistent positive and negative properties', async() => {
       expect(
-        await shapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri)
+        await shapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri),
       ).toBeInstanceOf(Error);
-
     });
-
-
   });
 
   describe('quad stream', () => {
@@ -207,11 +202,11 @@ describe('shapeFromQuads', () => {
     let shapeIncompleteRdfList: any;
 
     // eslint-disable-next-line @typescript-eslint/no-shadow
-    let shapeWithANegativeProperty:any;
+    let shapeWithANegativeProperty: any;
     // eslint-disable-next-line @typescript-eslint/no-shadow
-    let shapeWithInverseAndPositiveProperties:any;
+    let shapeWithInverseAndPositiveProperties: any;
     // eslint-disable-next-line @typescript-eslint/no-shadow
-    let shapeWithInconsistentPositiveAndNegativeProperties:any
+    let shapeWithInconsistentPositiveAndNegativeProperties: any;
 
     const unRelatedQuadsArray: any = [
       DF.quad(
@@ -247,29 +242,33 @@ describe('shapeFromQuads', () => {
       shapeWithShapeExpression = populateStream('./test/shape/shex_with_shape_expression.ttl');
 
       shapeWithANegativeProperty = populateStream('./test/shape/shex_shape_with_a_negative_property.ttl');
-      shapeWithInverseAndPositiveProperties = populateStream('./test/shape/shex_shape_positive_and_negative_properties.ttl');
-      shapeWithInconsistentPositiveAndNegativeProperties = populateStream('./test/shape/shex_shape_inconsistent_positive_and_negative_properties.ttl');
+      shapeWithInverseAndPositiveProperties = populateStream(
+        './test/shape/shex_shape_positive_and_negative_properties.ttl',
+      );
+      shapeWithInconsistentPositiveAndNegativeProperties = populateStream(
+        './test/shape/shex_shape_inconsistent_positive_and_negative_properties.ttl',
+      );
     });
 
-    it('should returns an error given an empty stream', async () => {
+    it('should returns an error given an empty stream', async() => {
       expect(await shapeFromQuads(emptyQuad, shapeIri)).toBeInstanceOf(Error);
     });
 
-    it('should returns an error given unrelated quads', async () => {
+    it('should returns an error given unrelated quads', async() => {
       expect(await shapeFromQuads(unRelatedQuads, shapeIri)).toBeInstanceOf(Error);
     });
 
-    it('should returns a Shape with one property given some quads', async () => {
+    it('should returns a Shape with one property given some quads', async() => {
       const shape = await shapeFromQuads(shapeWithOneProperty, shapeIri);
 
       expect(shape).not.toBeInstanceOf(Error);
-      expect((<IShape>shape).positivePredicates).toStrictEqual(['http://example.org/state']);
+      expect((<IShape>shape).positivePredicates).toStrictEqual([ 'http://example.org/state' ]);
       expect((<IShape>shape).negativePredicates).toStrictEqual([]);
       expect((<IShape>shape).closed).toBe(false);
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a closed Shape with multiple properties  given some quads', async () => {
+    it('should returns a closed Shape with multiple properties  given some quads', async() => {
       const shape = await shapeFromQuads(closedShapeWithMultipleProperties, shapeIri);
       const expectedPredicates: string[] = [
         'http://ex.example/#state',
@@ -285,7 +284,7 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a  Shape with multiple properties  given some quads representing two shapes', async () => {
+    it('should returns a  Shape with multiple properties  given some quads representing two shapes', async() => {
       const shape = await shapeFromQuads(twoShapes, shapeIri);
       const expectedPredicates: string[] = [
         'http://foaf.example/#name',
@@ -298,16 +297,16 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns an error given quads representing a shape with no predicate', async () => {
+    it('should returns an error given quads representing a shape with no predicate', async() => {
       expect(await shapeFromQuads(shapeNoPredicate, shapeIri)).toBeInstanceOf(Error);
     });
 
-    it('should returns an error given quads representing a shape with an incomplete RDF list', async () => {
+    it('should returns an error given quads representing a shape with an incomplete RDF list', async() => {
       expect(await shapeFromQuads(shapeIncompleteRdfList, shapeIri)).toBeInstanceOf(Error);
     });
 
     it(`should returns a closed Shape with multiple properties  
-    given some quads representing a shape with a shape expression`, async () => {
+    given some quads representing a shape with a shape expression`, async() => {
       const shape = await shapeFromQuads(shapeWithShapeExpression, shapeIri);
       const prefix = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary';
       const expectedPredicates: string[] = [
@@ -333,12 +332,12 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a Shape with a negative property', async () => {
+    it('should returns a Shape with a negative property', async() => {
       const shape = await shapeFromQuads(shapeWithANegativeProperty, shapeIri);
       const expectedPredicates: string[] = [
       ];
       const negativePredicates: string[] = [
-        'http://example.org/state'
+        'http://example.org/state',
       ];
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(false);
@@ -347,7 +346,7 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a Shape with positive and negative properties', async () => {
+    it('should returns a Shape with positive and negative properties', async() => {
       const shape = await shapeFromQuads(shapeWithInverseAndPositiveProperties, shapeIri);
       const expectedPredicates: string[] = [
         'http://xmlns.com/foaf/0.1/prop1',
@@ -355,7 +354,7 @@ describe('shapeFromQuads', () => {
       ];
       const negativePredicates: string[] = [
         'http://xmlns.com/foaf/0.1/prop3',
-        'http://xmlns.com/foaf/0.1/prop4'
+        'http://xmlns.com/foaf/0.1/prop4',
       ];
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(false);
@@ -364,14 +363,13 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should throw an error given a shape with inconsistent positive and negative properties', async () => {
+    it('should throw an error given a shape with inconsistent positive and negative properties', async() => {
       expect(
-        await shapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri)
+        await shapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri),
       ).toBeInstanceOf(Error);
-
     });
 
-    it('should returns an error given the stream returns an error', async () => {
+    it('should returns an error given the stream returns an error', async() => {
       const stream: any =
       {
         on(event: string, callback: any) {

@@ -1,5 +1,4 @@
 import type * as RDF from '@rdfjs/types';
-import { type IShape, Shape, InconsistentPositiveAndNegativePredicateError } from './Shape';
 import {
   SHEX_PREDICATE,
   SHEX_EXPRESSION,
@@ -12,8 +11,10 @@ import {
   SHEX_MAX,
   SHEX_MIN,
 } from './constant';
+import type { InconsistentPositiveAndNegativePredicateError } from './Shape';
+import { type IShape, Shape } from './Shape';
 
-export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError> {
+export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapeError> {
   if (Array.isArray(quads)) {
     return new Promise(resolve => {
       resolve(shapeFromQuadArray(quads, shapeIri));
@@ -22,7 +23,7 @@ export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string)
   return shapeFromQuadStream(quads, shapeIri);
 }
 
-function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError> {
+function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<IShape | ShapeError> {
   const mapIdPredicate: Map<string, string> = new Map();
   const mapPrevCurrentList: Map<string, string> = new Map();
   const mapLogicLinkIdExpressions: Map<string, string> = new Map();
@@ -45,7 +46,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
         mapShapeExpressionClosedShape,
         mapIriShapeExpression,
         mapIriCardinalityMax,
-        mapIriCardinalityMin
+        mapIriCardinalityMin,
       );
     });
 
@@ -70,7 +71,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
   });
 }
 
-function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError {
+function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | ShapeError {
   const mapIdPredicate: Map<string, string> = new Map();
   const mapPrevCurrentList: Map<string, string> = new Map();
   const mapLogicLinkIdExpressions: Map<string, string> = new Map();
@@ -92,7 +93,7 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Shape
       mapShapeExpressionClosedShape,
       mapIriShapeExpression,
       mapIriCardinalityMax,
-      mapIriCardinalityMin
+      mapIriCardinalityMin,
     );
   }
 
@@ -122,7 +123,7 @@ function concatShapeInfo(
   mapIriCardinalityMax: Map<string, number>,
   mapIriCardinalityMin: Map<string, number>,
   shapeIri: string,
-): IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError {
+): IShape | ShapeError {
   const positivePredicates: string[] = [];
   const negativePredicates: string[] = [];
   const shapeExpr = mapIriShapeExpression.get(shapeIri);
@@ -187,10 +188,10 @@ function concatShapeInfo(
       name: shapeIri,
       positivePredicates,
       negativePredicates,
-      closed: isClosed
+      closed: isClosed,
     });
-  } catch (error: any) {
-    return error;
+  } catch (error: unknown) {
+    return <ShapeError> error;
   }
 }
 
@@ -204,7 +205,7 @@ function parseShapeQuads(
   mapShapeExpressionClosedShape: Map<string, boolean>,
   mapIriShapeExpression: Map<string, string>,
   mapIriCardinalityMax: Map<string, number>,
-  mapIriCardinalityMin: Map<string, number>
+  mapIriCardinalityMin: Map<string, number>,
 ): void {
   if (quad.predicate.equals(SHEX_PREDICATE)) {
     mapIdPredicate.set(quad.subject.value, quad.object.value);
@@ -236,9 +237,11 @@ function parseShapeQuads(
 }
 
 export class ShapePoorlyFormatedError extends Error {
-  constructor(message: string) {
+  public constructor(message: string) {
     super(message);
 
     Object.setPrototypeOf(this, ShapePoorlyFormatedError.prototype);
   }
 }
+
+type ShapeError = ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError;

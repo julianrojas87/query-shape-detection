@@ -75,7 +75,7 @@ describe('query', () => {
         [ 'x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
         [ 'z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
         [ 'w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
-        ['a', [
+        [ 'a', [
           { subject: 'a', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') },
           { subject: 'a', predicate: 'http://exemple.qc.ca', object: DF.namedNode('http://objet.fr') },
         ]],
