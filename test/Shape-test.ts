@@ -1,4 +1,4 @@
-import { Shape, InconsistentPositiveAndNegativePredicateError } from '../lib/Shape';
+import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType } from '../lib/Shape';
 
 describe('Shape', () => {
   describe('constructor', () => {
@@ -69,6 +69,97 @@ describe('Shape', () => {
 
       expect(() => new Shape({ name: 'foo', positivePredicates, negativePredicates }))
         .toThrow('the predicate a is defined in the positive and the negative property');
+    });
+  });
+
+  describe('get', () => {
+    const positivePredicates: any = [
+      'a',
+      {
+        name: 'b',
+        cardinality: { min: 0, max: 33 },
+        constraint: {
+          value: 'a',
+          type: ContraintType.SHAPE,
+        },
+      },
+      'c',
+    ];
+    const negativePredicates = [{ name: 'd' }, 'e', 'f' ];
+
+    const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
+
+    it('should get a predicate with no extra information', () => {
+      expect(shape.get('a')).toStrictEqual({
+        name: 'a',
+      });
+    });
+
+    it('should not get a non existant predicate', () => {
+      expect(shape.get('no')).toBeUndefined();
+    });
+
+    it('should get a negative predicate', () => {
+      expect(shape.get('d')).toStrictEqual({
+        name: 'd',
+      });
+    });
+
+    it('should get a predicate with extra information', () => {
+      expect(shape.get('b')).toStrictEqual({
+        name: 'b',
+        cardinality: { min: 0, max: 33 },
+        constraint: {
+          value: 'a',
+          type: ContraintType.SHAPE,
+        },
+      });
+    });
+  });
+
+  describe('getAll', () => {
+    const positivePredicates: any = [
+      'a',
+      {
+        name: 'b',
+        cardinality: { min: 0, max: 33 },
+        constraint: {
+          value: 'a',
+          type: ContraintType.SHAPE,
+        },
+      },
+      'c',
+    ];
+    const negativePredicates = [ 'd', 'e', 'f' ];
+
+    const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
+
+    it('should get all predicates', () => {
+      // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
+      const expectedPredicates = [
+        { name: 'a' },
+        {
+          name: 'b',
+          cardinality: { min: 0, max: 33 },
+          constraint: {
+            value: 'a',
+            type: ContraintType.SHAPE,
+          },
+        },
+        { name: 'c' },
+        { name: 'd' },
+        { name: 'e' },
+        { name: 'f' },
+      ].sort();
+
+      // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
+      expect(shape.getAll().sort()).toStrictEqual(expectedPredicates);
+    });
+
+    it('should get all predicates with a shape with no predicates', () => {
+      const shapeWithNoProperties = new Shape({ name: 'foo', positivePredicates: []});
+
+      expect(shapeWithNoProperties.getAll()).toStrictEqual([]);
     });
   });
 });

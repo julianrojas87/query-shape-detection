@@ -24,7 +24,8 @@ module.exports = {
       'import/extensions': 'off',
       'import/first': 'off',
       '@typescript-eslint/lines-between-class-members': 'off',
-      'mocha/max-top-level-suites': 'off'
+      'mocha/max-top-level-suites': 'off',
+      'unicorn/prefer-spread': 'off'
     },
     overrides: [
       {

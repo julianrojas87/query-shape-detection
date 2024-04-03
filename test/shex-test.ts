@@ -59,6 +59,9 @@ describe('shapeFromQuads', () => {
   const shapeWithInconsistentPositiveAndNegativeProperties = n3Parser.parse(
     readFileSync('./test/shape/shex_shape_inconsistent_positive_and_negative_properties.ttl').toString(),
   );
+  const shapeWithMultipleCardinality = n3Parser.parse(
+    readFileSync('./test/shape/shex_shape_multiple_cardinality.ttl').toString(),
+  );
 
   describe('quad array', () => {
     it('should returns an error given an empty quad array', async() => {
@@ -175,6 +178,39 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
+    it('should handle a shape with multiple cardinalities', async() => {
+      const shape = await shapeFromQuads(shapeWithMultipleCardinality, shapeIri);
+      const expectedPredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop1',
+        'http://xmlns.com/foaf/0.1/prop3',
+        'http://xmlns.com/foaf/0.1/prop4',
+        'http://xmlns.com/foaf/0.1/prop5',
+        'http://xmlns.com/foaf/0.1/prop6',
+        'http://xmlns.com/foaf/0.1/prop7',
+      ];
+      const negativePredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop2',
+      ];
+      const mapCardinality = new Map([
+        [ 'http://xmlns.com/foaf/0.1/prop1', { min: 1, max: 1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop3', { min: 5, max: 5 }],
+        [ 'http://xmlns.com/foaf/0.1/prop4', { min: 1, max: 4 }],
+        [ 'http://xmlns.com/foaf/0.1/prop5', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop6', { min: 0, max: 1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop7', { min: 0, max: -1 }],
+      ]);
+      expect(shape).not.toBeInstanceOf(Error);
+      expect((<IShape>shape).closed).toBe(false);
+      expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
+      expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
+      expect((<IShape>shape).name).toBe(shapeIri);
+      for (const predicate of (<IShape>shape).positivePredicates) {
+        const expectedCardinality = mapCardinality.get(predicate);
+        const cardinality = (<IShape>shape).get(predicate)?.cardinality;
+        expect(cardinality).toStrictEqual(expectedCardinality);
+      }
+    });
+
     it('should throw an error given a shape with inconsistent positive and negative properties', async() => {
       expect(
         await shapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri),
@@ -207,6 +243,9 @@ describe('shapeFromQuads', () => {
     let shapeWithInverseAndPositiveProperties: any;
     // eslint-disable-next-line @typescript-eslint/no-shadow
     let shapeWithInconsistentPositiveAndNegativeProperties: any;
+
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    let shapeWithMultipleCardinality: any;
 
     const unRelatedQuadsArray: any = [
       DF.quad(
@@ -247,6 +286,10 @@ describe('shapeFromQuads', () => {
       );
       shapeWithInconsistentPositiveAndNegativeProperties = populateStream(
         './test/shape/shex_shape_inconsistent_positive_and_negative_properties.ttl',
+      );
+
+      shapeWithMultipleCardinality = populateStream(
+        './test/shape/shex_shape_multiple_cardinality.ttl',
       );
     });
 
@@ -361,6 +404,39 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
       expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
       expect((<IShape>shape).name).toBe(shapeIri);
+    });
+
+    it('should handle a shape with multiple cardinalities', async() => {
+      const shape = await shapeFromQuads(shapeWithMultipleCardinality, shapeIri);
+      const expectedPredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop1',
+        'http://xmlns.com/foaf/0.1/prop3',
+        'http://xmlns.com/foaf/0.1/prop4',
+        'http://xmlns.com/foaf/0.1/prop5',
+        'http://xmlns.com/foaf/0.1/prop6',
+        'http://xmlns.com/foaf/0.1/prop7',
+      ];
+      const negativePredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop2',
+      ];
+      const mapCardinality = new Map([
+        [ 'http://xmlns.com/foaf/0.1/prop1', { min: 1, max: 1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop3', { min: 5, max: 5 }],
+        [ 'http://xmlns.com/foaf/0.1/prop4', { min: 1, max: 4 }],
+        [ 'http://xmlns.com/foaf/0.1/prop5', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop6', { min: 0, max: 1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop7', { min: 0, max: -1 }],
+      ]);
+      expect(shape).not.toBeInstanceOf(Error);
+      expect((<IShape>shape).closed).toBe(false);
+      expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
+      expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
+      expect((<IShape>shape).name).toBe(shapeIri);
+      for (const predicate of (<IShape>shape).positivePredicates) {
+        const expectedCardinality = mapCardinality.get(predicate);
+        const cardinality = (<IShape>shape).get(predicate)?.cardinality;
+        expect(cardinality).toStrictEqual(expectedCardinality);
+      }
     });
 
     it('should throw an error given a shape with inconsistent positive and negative properties', async() => {

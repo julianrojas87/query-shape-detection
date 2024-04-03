@@ -12,7 +12,7 @@ import {
   SHEX_MIN,
 } from './constant';
 import type { InconsistentPositiveAndNegativePredicateError } from './Shape';
-import { type IShape, Shape } from './Shape';
+import { type IShape, Shape, type IPredicate } from './Shape';
 
 export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapeError> {
   if (Array.isArray(quads)) {
@@ -124,7 +124,7 @@ function concatShapeInfo(
   mapIriCardinalityMin: Map<string, number>,
   shapeIri: string,
 ): IShape | ShapeError {
-  const positivePredicates: string[] = [];
+  const positivePredicates: IPredicate[] = [];
   const negativePredicates: string[] = [];
   const shapeExpr = mapIriShapeExpression.get(shapeIri);
   let expression;
@@ -149,7 +149,13 @@ function concatShapeInfo(
       if (min === max && min === 0) {
         negativePredicates.push(predicate);
       } else {
-        positivePredicates.push(predicate);
+        positivePredicates.push({
+          name: predicate,
+          cardinality: {
+            min: min ?? 1,
+            max: max ?? 1,
+          },
+        });
       }
     } else {
       return new ShapePoorlyFormatedError('there are no predicates in the shape');
@@ -168,7 +174,13 @@ function concatShapeInfo(
       if (min === max && min === 0) {
         negativePredicates.push(predicate);
       } else {
-        positivePredicates.push(predicate);
+        positivePredicates.push({
+          name: predicate,
+          cardinality: {
+            min: min ?? 1,
+            max: max ?? 1,
+          },
+        });
       }
     }
     if (next === undefined) {
@@ -191,7 +203,7 @@ function concatShapeInfo(
       closed: isClosed,
     });
   } catch (error: unknown) {
-    return <ShapeError> error;
+    return <ShapeError>error;
   }
 }
 
