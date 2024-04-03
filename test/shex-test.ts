@@ -4,7 +4,7 @@ import * as N3 from 'n3';
 import { DataFactory } from 'rdf-data-factory';
 import streamifyArray from 'streamify-array';
 import { SHEX_SHAPE, TYPE_DEFINITION, SHEX_PREDICATE } from '../lib/constant';
-import { type IShape } from '../lib/Shape';
+import { ContraintType, type IShape } from '../lib/Shape';
 import { shapeFromQuads } from '../lib/shex';
 
 const DF = new DataFactory<RDF.BaseQuad>();
@@ -61,6 +61,10 @@ describe('shapeFromQuads', () => {
   );
   const shapeWithMultipleCardinality = n3Parser.parse(
     readFileSync('./test/shape/shex_shape_multiple_cardinality.ttl').toString(),
+  );
+
+  const shapeWithConstraints = n3Parser.parse(
+    readFileSync('./test/shape/shex_shape_with_constraints.ttl').toString(),
   );
 
   describe('quad array', () => {
@@ -211,6 +215,62 @@ describe('shapeFromQuads', () => {
       }
     });
 
+    it('should handle a shape with constraints', async() => {
+      const shape = await shapeFromQuads(shapeWithConstraints, shapeIri);
+      const expectedPredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop1',
+        'http://xmlns.com/foaf/0.1/prop2',
+        'http://xmlns.com/foaf/0.1/prop3',
+        'http://xmlns.com/foaf/0.1/prop4',
+        'http://xmlns.com/foaf/0.1/prop5',
+        'http://xmlns.com/foaf/0.1/prop6',
+        'http://xmlns.com/foaf/0.1/prop7',
+        'http://xmlns.com/foaf/0.1/prop8',
+      ];
+      const negativePredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop9',
+      ];
+      const mapCardinality = new Map([
+        [ 'http://xmlns.com/foaf/0.1/prop1', { min: 0, max: 1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop2', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop3', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop4', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop5', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop6', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop7', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop8', { min: 1, max: -1 }],
+      ]);
+
+      const mapConstraint = new Map([
+        [ 'http://xmlns.com/foaf/0.1/prop1',
+          {
+            type: ContraintType.SHAPE,
+            value: [ 'http:exemple.ca/bar' ],
+          },
+        ],
+        [ 'http://xmlns.com/foaf/0.1/prop2', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop3', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop4', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop5', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop6', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop7', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop8', undefined ],
+      ]);
+      expect(shape).not.toBeInstanceOf(Error);
+      expect((<IShape>shape).closed).toBe(false);
+      expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
+      expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
+      expect((<IShape>shape).name).toBe(shapeIri);
+      for (const predicate of (<IShape>shape).positivePredicates) {
+        const expectedCardinality = mapCardinality.get(predicate);
+        const expectedConstraint = mapConstraint.get(predicate);
+
+        const resPredicate = (<IShape>shape).get(predicate);
+        expect(resPredicate?.cardinality).toStrictEqual(expectedCardinality);
+        expect(resPredicate?.constraint).toStrictEqual(expectedConstraint);
+      }
+    });
+
     it('should throw an error given a shape with inconsistent positive and negative properties', async() => {
       expect(
         await shapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri),
@@ -246,6 +306,9 @@ describe('shapeFromQuads', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-shadow
     let shapeWithMultipleCardinality: any;
+
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    let shapeWithConstraints: any;
 
     const unRelatedQuadsArray: any = [
       DF.quad(
@@ -290,6 +353,10 @@ describe('shapeFromQuads', () => {
 
       shapeWithMultipleCardinality = populateStream(
         './test/shape/shex_shape_multiple_cardinality.ttl',
+      );
+
+      shapeWithConstraints = populateStream(
+        './test/shape/shex_shape_with_constraints.ttl',
       );
     });
 
@@ -436,6 +503,62 @@ describe('shapeFromQuads', () => {
         const expectedCardinality = mapCardinality.get(predicate);
         const cardinality = (<IShape>shape).get(predicate)?.cardinality;
         expect(cardinality).toStrictEqual(expectedCardinality);
+      }
+    });
+
+    it('should handle a shape with constraints', async() => {
+      const shape = await shapeFromQuads(shapeWithConstraints, shapeIri);
+      const expectedPredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop1',
+        'http://xmlns.com/foaf/0.1/prop2',
+        'http://xmlns.com/foaf/0.1/prop3',
+        'http://xmlns.com/foaf/0.1/prop4',
+        'http://xmlns.com/foaf/0.1/prop5',
+        'http://xmlns.com/foaf/0.1/prop6',
+        'http://xmlns.com/foaf/0.1/prop7',
+        'http://xmlns.com/foaf/0.1/prop8',
+      ];
+      const negativePredicates: string[] = [
+        'http://xmlns.com/foaf/0.1/prop9',
+      ];
+      const mapCardinality = new Map([
+        [ 'http://xmlns.com/foaf/0.1/prop1', { min: 0, max: 1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop2', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop3', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop4', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop5', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop6', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop7', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop8', { min: 1, max: -1 }],
+      ]);
+
+      const mapConstraint = new Map([
+        [ 'http://xmlns.com/foaf/0.1/prop1',
+          {
+            type: ContraintType.SHAPE,
+            value: [ 'http:exemple.ca/bar' ],
+          },
+        ],
+        [ 'http://xmlns.com/foaf/0.1/prop2', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop3', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop4', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop5', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop6', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop7', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop8', undefined ],
+      ]);
+      expect(shape).not.toBeInstanceOf(Error);
+      expect((<IShape>shape).closed).toBe(false);
+      expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
+      expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
+      expect((<IShape>shape).name).toBe(shapeIri);
+      for (const predicate of (<IShape>shape).positivePredicates) {
+        const expectedCardinality = mapCardinality.get(predicate);
+        const expectedConstraint = mapConstraint.get(predicate);
+
+        const resPredicate = (<IShape>shape).get(predicate);
+        expect(resPredicate?.cardinality).toStrictEqual(expectedCardinality);
+        expect(resPredicate?.constraint).toStrictEqual(expectedConstraint);
       }
     });
 
