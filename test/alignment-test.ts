@@ -360,7 +360,7 @@ describe('calculateAligments', () => {
       expect(calculateAligments(arg)).toStrictEqual(expectedResult);
     });
 
-    it('should give the correct value given multiple subject group', () => {
+    it('should give the result value given multiple subject group', () => {
       const query: any = new Map(
         [
           ['x', [new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT })]],
@@ -379,6 +379,7 @@ describe('calculateAligments', () => {
               new Triple({ subject: 'z', predicate: 'no234', object: AN_OBJECT }),
             ]
           ],
+           
           ['w',
             [
               new Triple({ subject: 'w', predicate: 'foo', object: AN_OBJECT }),
@@ -386,14 +387,15 @@ describe('calculateAligments', () => {
               new Triple({ subject: 'w', predicate: 'foo2', object: AN_OBJECT }),
             ]
           ]
+          
         ]);
       const shapes = [
         new Shape({ name: 'foo', closed: true, positivePredicates: ['bar', 'bar0', 'bar1'] }),
-        new Shape({ name: 'foo1', closed: true, positivePredicates: ['foo2', 'foo', 'foo1'] }),
-        new Shape({ name: 'foo2', closed: true, positivePredicates: ['bar', 'foo2', 'foo'] }),
+        new Shape({ name: 'foo1', closed: true, positivePredicates: ['foo2', 'foo', 'foo1', 'def'] }),
+        new Shape({ name: 'foo2', closed: true, positivePredicates: ['bar', 'foo2', 'foo', 'too', 'abc'] }),
         new Shape({ name: 'foo3', closed: true, positivePredicates: ['too1', 'too', 'too2'] }),
       ];
-      const option = {};
+      const option = { shapeIntersection: true };
       const arg: any = { query, option, shapes };
       const xResults = new Map([['foo', AlignmentType.None], ['foo1', AlignmentType.WEAK], ['foo2', AlignmentType.WEAK], ['foo3', AlignmentType.None]]);
       const yResults = new Map([['foo', AlignmentType.None], ['foo1', AlignmentType.WEAK], ['foo2', AlignmentType.WEAK], ['foo3', AlignmentType.None]]);
@@ -402,7 +404,57 @@ describe('calculateAligments', () => {
       const expectedResult = {
         allSubjectGroupsHaveStrongAligment: false,
         alignedTable: new Map([['x', xResults], ['y', yResults], ['z', zResults], ['w', wResults]]),
-        unAlignedShapes: new Set(['foo3',])
+        unAlignedShapes: new Set(['foo3','foo'])
+      };
+
+      expect(calculateAligments(arg)).toStrictEqual(expectedResult);
+    });
+
+    it('should give the result value given multiple subject group and open shape', () => {
+      const query: any = new Map(
+        [
+          ['x', [new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT })]],
+
+          ['y',
+            [
+              new Triple({ subject: 'y', predicate: 'foo', object: AN_OBJECT }),
+              new Triple({ subject: 'y', predicate: 'no', object: AN_OBJECT }),
+              new Triple({ subject: 'y', predicate: 'foo2', object: AN_OBJECT }),
+            ],
+          ],
+          ['z',
+            [
+              new Triple({ subject: 'z', predicate: 'no2', object: AN_OBJECT }),
+              new Triple({ subject: 'z', predicate: 'no', object: AN_OBJECT }),
+              new Triple({ subject: 'z', predicate: 'no234', object: AN_OBJECT }),
+            ]
+          ],
+           
+          ['w',
+            [
+              new Triple({ subject: 'w', predicate: 'foo', object: AN_OBJECT }),
+              new Triple({ subject: 'w', predicate: 'bar', object: AN_OBJECT }),
+              new Triple({ subject: 'w', predicate: 'foo2', object: AN_OBJECT }),
+            ]
+          ]
+          
+        ]);
+      const shapes = [
+        new Shape({ name: 'foo', closed: true, positivePredicates: ['bar', 'bar0', 'bar1'] }),
+        new Shape({ name: 'foo1', closed: true, positivePredicates: ['foo2', 'foo', 'foo1', 'def'] }),
+        new Shape({ name: 'foo2', closed: true, positivePredicates: ['bar', 'foo2', 'foo', 'too', 'abc'] }),
+        new Shape({ name: 'foo3', closed: false, positivePredicates: ['too1', 'too', 'too2'] }),
+      ];
+      const option = { shapeIntersection: true };
+      const arg: any = { query, option, shapes };
+      const xResults = new Map([['foo', AlignmentType.None], ['foo1', AlignmentType.WEAK], ['foo2', AlignmentType.WEAK], ['foo3', AlignmentType.WEAK]]);
+      const yResults = new Map([['foo', AlignmentType.None], ['foo1', AlignmentType.WEAK], ['foo2', AlignmentType.WEAK], ['foo3', AlignmentType.WEAK]]);
+      const zResults = new Map([['foo', AlignmentType.None], ['foo1', AlignmentType.None], ['foo2', AlignmentType.None], ['foo3', AlignmentType.WEAK]]);
+      const wResults = new Map([['foo', AlignmentType.WEAK], ['foo1', AlignmentType.WEAK], ['foo2', AlignmentType.WEAK], ['foo3', AlignmentType.WEAK]]);
+      const expectedResult = {
+        allSubjectGroupsHaveStrongAligment: false,
+        alignedTable: new Map([['x', xResults], ['y', yResults], ['z', zResults], ['w', wResults]]),
+        unAlignedShapes: new Set([])
       };
 
       expect(calculateAligments(arg)).toStrictEqual(expectedResult);
