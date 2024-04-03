@@ -226,6 +226,7 @@ describe('shapeFromQuads', () => {
         'http://xmlns.com/foaf/0.1/prop6',
         'http://xmlns.com/foaf/0.1/prop7',
         'http://xmlns.com/foaf/0.1/prop8',
+        'http://xmlns.com/foaf/0.1/prop10',
       ];
       const negativePredicates: string[] = [
         'http://xmlns.com/foaf/0.1/prop9',
@@ -239,6 +240,7 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop6', { min: 1, max: -1 }],
         [ 'http://xmlns.com/foaf/0.1/prop7', { min: 1, max: -1 }],
         [ 'http://xmlns.com/foaf/0.1/prop8', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop10', { min: 1, max: -1 }],
       ]);
 
       const mapConstraint = new Map([
@@ -255,6 +257,12 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop6', undefined ],
         [ 'http://xmlns.com/foaf/0.1/prop7', undefined ],
         [ 'http://xmlns.com/foaf/0.1/prop8', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop10',
+          {
+            type: ContraintType.TYPE,
+            value: [ 'http://example.org/unassigned' ],
+          },
+        ],
       ]);
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(false);
@@ -517,6 +525,7 @@ describe('shapeFromQuads', () => {
         'http://xmlns.com/foaf/0.1/prop6',
         'http://xmlns.com/foaf/0.1/prop7',
         'http://xmlns.com/foaf/0.1/prop8',
+        'http://xmlns.com/foaf/0.1/prop10',
       ];
       const negativePredicates: string[] = [
         'http://xmlns.com/foaf/0.1/prop9',
@@ -530,6 +539,7 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop6', { min: 1, max: -1 }],
         [ 'http://xmlns.com/foaf/0.1/prop7', { min: 1, max: -1 }],
         [ 'http://xmlns.com/foaf/0.1/prop8', { min: 1, max: -1 }],
+        [ 'http://xmlns.com/foaf/0.1/prop10', { min: 1, max: -1 }],
       ]);
 
       const mapConstraint = new Map([
@@ -546,6 +556,12 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop6', undefined ],
         [ 'http://xmlns.com/foaf/0.1/prop7', undefined ],
         [ 'http://xmlns.com/foaf/0.1/prop8', undefined ],
+        [ 'http://xmlns.com/foaf/0.1/prop10',
+          {
+            type: ContraintType.TYPE,
+            value: [ 'http://example.org/unassigned' ],
+          },
+        ],
       ]);
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(false);

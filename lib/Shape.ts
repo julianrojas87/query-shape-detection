@@ -21,7 +21,8 @@ export interface ICardinality {
 }
 
 export enum ContraintType {
-  SHAPE
+  SHAPE,
+  TYPE
 }
 
 export interface IShapeObj {

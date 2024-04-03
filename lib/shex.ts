@@ -11,6 +11,7 @@ import {
   SHEX_MAX,
   SHEX_MIN,
   SHEX_VALUE_EXPR,
+  SHEX_DATA_TYPE,
 } from './constant';
 import type { IContraint, InconsistentPositiveAndNegativePredicateError } from './Shape';
 import { type IShape, Shape, type IPredicate, ContraintType } from './Shape';
@@ -25,31 +26,13 @@ export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string)
 }
 
 function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<IShape | ShapeError> {
-  const mapIdPredicate: Map<string, string> = new Map();
-  const mapPrevCurrentList: Map<string, string> = new Map();
-  const mapLogicLinkIdExpressions: Map<string, string> = new Map();
-  const mapShapeExpressionId: Map<string, string> = new Map();
-  const mapPrevNextList: Map<string, string> = new Map();
-  const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
-  const mapIriShapeExpression: Map<string, string> = new Map();
-  const mapIriCardinalityMax: Map<string, number> = new Map();
-  const mapIriCardinalityMin: Map<string, number> = new Map();
-  const mapIriConstraint: Map<string, RDF.Term> = new Map();
+  const mapTripleShex: IMapTripleShex = defaultMapTripleShex();
 
   return new Promise(resolve => {
     quadSteam.on('data', (quad: RDF.Quad) => {
       parseShapeQuads(
         quad,
-        mapIdPredicate,
-        mapPrevCurrentList,
-        mapLogicLinkIdExpressions,
-        mapShapeExpressionId,
-        mapPrevNextList,
-        mapShapeExpressionClosedShape,
-        mapIriShapeExpression,
-        mapIriCardinalityMax,
-        mapIriCardinalityMin,
-        mapIriConstraint,
+        mapTripleShex,
       );
     });
 
@@ -58,16 +41,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
     });
     quadSteam.on('end', () => {
       const shape = concatShapeInfo(
-        mapIdPredicate,
-        mapPrevCurrentList,
-        mapLogicLinkIdExpressions,
-        mapShapeExpressionId,
-        mapPrevNextList,
-        mapShapeExpressionClosedShape,
-        mapIriShapeExpression,
-        mapIriCardinalityMax,
-        mapIriCardinalityMin,
-        mapIriConstraint,
+        mapTripleShex,
         shapeIri,
       );
       resolve(shape);
@@ -76,84 +50,49 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
 }
 
 function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | ShapeError {
-  const mapIdPredicate: Map<string, string> = new Map();
-  const mapPrevCurrentList: Map<string, string> = new Map();
-  const mapLogicLinkIdExpressions: Map<string, string> = new Map();
-  const mapShapeExpressionId: Map<string, string> = new Map();
-  const mapPrevNextList: Map<string, string> = new Map();
-  const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
-  const mapIriShapeExpression: Map<string, string> = new Map();
-  const mapIriCardinalityMax: Map<string, number> = new Map();
-  const mapIriCardinalityMin: Map<string, number> = new Map();
-  const mapIriConstraint: Map<string, RDF.Term> = new Map();
+  const mapTripleShex: IMapTripleShex = defaultMapTripleShex();
 
   for (const quad of quads) {
     parseShapeQuads(
       quad,
-      mapIdPredicate,
-      mapPrevCurrentList,
-      mapLogicLinkIdExpressions,
-      mapShapeExpressionId,
-      mapPrevNextList,
-      mapShapeExpressionClosedShape,
-      mapIriShapeExpression,
-      mapIriCardinalityMax,
-      mapIriCardinalityMin,
-      mapIriConstraint,
+      mapTripleShex,
     );
   }
 
   const shape = concatShapeInfo(
-    mapIdPredicate,
-    mapPrevCurrentList,
-    mapLogicLinkIdExpressions,
-    mapShapeExpressionId,
-    mapPrevNextList,
-    mapShapeExpressionClosedShape,
-    mapIriShapeExpression,
-    mapIriCardinalityMax,
-    mapIriCardinalityMin,
-    mapIriConstraint,
+    mapTripleShex,
     shapeIri,
   );
   return shape;
 }
 
 function concatShapeInfo(
-  mapIdPredicate: Map<string, string>,
-  mapPrevCurrentList: Map<string, string>,
-  mapLogicLinkIdExpressions: Map<string, string>,
-  mapShapeExpressionId: Map<string, string>,
-  mapPrevNextList: Map<string, string>,
-  mapShapeExpressionClosedShape: Map<string, boolean>,
-  mapIriShapeExpression: Map<string, string>,
-  mapIriCardinalityMax: Map<string, number>,
-  mapIriCardinalityMin: Map<string, number>,
-  mapIriConstraint: Map<string, RDF.Term>,
+  mapTripleShex: IMapTripleShex,
   shapeIri: string,
 ): IShape | ShapeError {
   const positivePredicates: IPredicate[] = [];
   const negativePredicates: string[] = [];
-  const shapeExpr = mapIriShapeExpression.get(shapeIri);
+  const shapeExpr = mapTripleShex.mapIriShapeExpression.get(shapeIri);
   let expression;
   if (shapeExpr === undefined) {
-    expression = mapShapeExpressionId.get(shapeIri);
+    expression = mapTripleShex.mapShapeExpressionId.get(shapeIri);
   } else {
-    expression = mapShapeExpressionId.get(shapeExpr);
+    expression = mapTripleShex.mapShapeExpressionId.get(shapeExpr);
   }
   if (expression === undefined) {
     return new ShapePoorlyFormatedError('there are no expressions in the shape');
   }
-  const expressions = mapLogicLinkIdExpressions.get(expression);
+  const expressions = mapTripleShex.mapLogicLinkIdExpressions.get(expression);
   let current;
   let next;
   // If there is only one expression
   if (expressions === undefined) {
     const predicateAdded = appendPredicates(
-      mapIdPredicate,
-      mapIriCardinalityMin,
-      mapIriCardinalityMax,
-      mapIriConstraint,
+      mapTripleShex.mapIdPredicate,
+      mapTripleShex.mapIriCardinalityMin,
+      mapTripleShex.mapIriCardinalityMax,
+      mapTripleShex.mapIriConstraint,
+      mapTripleShex.mapIriDatatype,
       positivePredicates,
       negativePredicates,
       expression,
@@ -162,17 +101,18 @@ function concatShapeInfo(
       return new ShapePoorlyFormatedError('there are no predicates in the shape');
     }
   } else {
-    current = mapPrevCurrentList.get(expressions);
-    next = mapPrevNextList.get(expressions);
+    current = mapTripleShex.mapPrevCurrentList.get(expressions);
+    next = mapTripleShex.mapPrevNextList.get(expressions);
   }
 
   // Traverse the RDF list
   while (current !== undefined) {
     appendPredicates(
-      mapIdPredicate,
-      mapIriCardinalityMin,
-      mapIriCardinalityMax,
-      mapIriConstraint,
+      mapTripleShex.mapIdPredicate,
+      mapTripleShex.mapIriCardinalityMin,
+      mapTripleShex.mapIriCardinalityMax,
+      mapTripleShex.mapIriConstraint,
+      mapTripleShex.mapIriDatatype,
       positivePredicates,
       negativePredicates,
       current,
@@ -180,14 +120,14 @@ function concatShapeInfo(
     if (next === undefined) {
       return new ShapePoorlyFormatedError('An RDF list is poorly defined');
     }
-    current = mapPrevCurrentList.get(next);
-    next = mapPrevNextList.get(next);
+    current = mapTripleShex.mapPrevCurrentList.get(next);
+    next = mapTripleShex.mapPrevNextList.get(next);
   }
   let isClosed;
   if (shapeExpr === undefined) {
-    isClosed = mapShapeExpressionClosedShape.get(shapeIri);
+    isClosed = mapTripleShex.mapShapeExpressionClosedShape.get(shapeIri);
   } else {
-    isClosed = mapShapeExpressionClosedShape.get(shapeExpr);
+    isClosed = mapTripleShex.mapShapeExpressionClosedShape.get(shapeExpr);
   }
   try {
     return new Shape({
@@ -200,7 +140,11 @@ function concatShapeInfo(
     return <ShapeError>error;
   }
 }
-function interpreteConstraint(constraint: RDF.Term | undefined): IContraint | undefined {
+
+function interpreteConstraint(
+  constraint: RDF.Term | undefined,
+  mapIriDatatype: Map<string, string>,
+): IContraint | undefined {
   if (constraint === undefined) {
     return undefined;
   }
@@ -211,6 +155,17 @@ function interpreteConstraint(constraint: RDF.Term | undefined): IContraint | un
       type: ContraintType.SHAPE,
     };
   }
+
+  if (constraint.termType === 'BlankNode') {
+    const dataType = mapIriDatatype.get(constraint.value);
+    if (dataType !== undefined) {
+      return {
+        value: [ dataType ],
+        type: ContraintType.TYPE,
+      };
+    }
+  }
+
   return undefined;
 }
 
@@ -219,6 +174,7 @@ function appendPredicates(
   mapIriCardinalityMin: Map<string, number>,
   mapIriCardinalityMax: Map<string, number>,
   mapIriConstraint: Map<string, RDF.Term>,
+  mapIriDatatype: Map<string, string>,
   positivePredicates: IPredicate[],
   negativePredicates: string[],
   current: string,
@@ -231,7 +187,7 @@ function appendPredicates(
       negativePredicates.push(predicate);
     } else {
       const constraintIri = mapIriConstraint.get(current);
-      const constraint = interpreteConstraint(constraintIri);
+      const constraint = interpreteConstraint(constraintIri, mapIriDatatype);
       positivePredicates.push({
         name: predicate,
         cardinality: {
@@ -247,46 +203,40 @@ function appendPredicates(
 }
 function parseShapeQuads(
   quad: RDF.Quad,
-  mapIdPredicate: Map<string, string>,
-  mapPrevCurrentList: Map<string, string>,
-  mapLogicLinkIdExpressions: Map<string, string>,
-  mapShapeExpressionId: Map<string, string>,
-  mapPrevNextList: Map<string, string>,
-  mapShapeExpressionClosedShape: Map<string, boolean>,
-  mapIriShapeExpression: Map<string, string>,
-  mapIriCardinalityMax: Map<string, number>,
-  mapIriCardinalityMin: Map<string, number>,
-  mapIriConstraint: Map<string, RDF.Term>,
+  mapTripleShex: IMapTripleShex,
 ): void {
   if (quad.predicate.equals(SHEX_PREDICATE)) {
-    mapIdPredicate.set(quad.subject.value, quad.object.value);
+    mapTripleShex.mapIdPredicate.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(IRI_FIRST_RDF_LIST)) {
-    mapPrevCurrentList.set(quad.subject.value, quad.object.value);
+    mapTripleShex.mapPrevCurrentList.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(IRI_REST_RDF_LIST)) {
-    mapPrevNextList.set(quad.subject.value, quad.object.value);
+    mapTripleShex.mapPrevNextList.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(SHEX_EXPRESSIONS)) {
-    mapLogicLinkIdExpressions.set(quad.subject.value, quad.object.value);
+    mapTripleShex.mapLogicLinkIdExpressions.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(SHEX_EXPRESSION)) {
-    mapShapeExpressionId.set(quad.subject.value, quad.object.value);
+    mapTripleShex.mapShapeExpressionId.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(SHEX_CLOSED_SHAPE)) {
-    mapShapeExpressionClosedShape.set(quad.subject.value, quad.object.equals(RDF_TRUE));
+    mapTripleShex.mapShapeExpressionClosedShape.set(quad.subject.value, quad.object.equals(RDF_TRUE));
   }
   if (quad.predicate.equals(SHEX_SHAPE_EXPRESSION)) {
-    mapIriShapeExpression.set(quad.subject.value, quad.object.value);
+    mapTripleShex.mapIriShapeExpression.set(quad.subject.value, quad.object.value);
   }
   if (quad.predicate.equals(SHEX_MAX)) {
-    mapIriCardinalityMax.set(quad.subject.value, Number(quad.object.value));
+    mapTripleShex.mapIriCardinalityMax.set(quad.subject.value, Number(quad.object.value));
   }
   if (quad.predicate.equals(SHEX_MIN)) {
-    mapIriCardinalityMin.set(quad.subject.value, Number(quad.object.value));
+    mapTripleShex.mapIriCardinalityMin.set(quad.subject.value, Number(quad.object.value));
   }
   if (quad.predicate.equals(SHEX_VALUE_EXPR)) {
-    mapIriConstraint.set(quad.subject.value, quad.object);
+    mapTripleShex.mapIriConstraint.set(quad.subject.value, quad.object);
+  }
+  if (quad.predicate.equals(SHEX_DATA_TYPE)) {
+    mapTripleShex.mapIriDatatype.set(quad.subject.value, quad.object.value);
   }
 }
 
@@ -299,3 +249,33 @@ export class ShapePoorlyFormatedError extends Error {
 }
 
 type ShapeError = ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError;
+
+interface IMapTripleShex {
+  mapIdPredicate: Map<string, string>;
+  mapPrevCurrentList: Map<string, string>;
+  mapLogicLinkIdExpressions: Map<string, string>;
+  mapShapeExpressionId: Map<string, string>;
+  mapPrevNextList: Map<string, string>;
+  mapShapeExpressionClosedShape: Map<string, boolean>;
+  mapIriShapeExpression: Map<string, string>;
+  mapIriCardinalityMax: Map<string, number>;
+  mapIriCardinalityMin: Map<string, number>;
+  mapIriConstraint: Map<string, RDF.Term>;
+  mapIriDatatype: Map<string, string>;
+}
+
+function defaultMapTripleShex(): IMapTripleShex {
+  return {
+    mapIdPredicate: new Map(),
+    mapPrevCurrentList: new Map(),
+    mapLogicLinkIdExpressions: new Map(),
+    mapShapeExpressionId: new Map(),
+    mapPrevNextList: new Map(),
+    mapShapeExpressionClosedShape: new Map(),
+    mapIriShapeExpression: new Map(),
+    mapIriCardinalityMax: new Map(),
+    mapIriCardinalityMin: new Map(),
+    mapIriConstraint: new Map(),
+    mapIriDatatype: new Map(),
+  };
+}
