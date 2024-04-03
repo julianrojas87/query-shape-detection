@@ -9,7 +9,8 @@ import {
   SHEX_CLOSED_SHAPE,
   RDF_TRUE,
   SHEX_SHAPE_EXPRESSION,
-  SHEX_INVERSE,
+  SHEX_MAX,
+  SHEX_MIN,
 } from './constant';
 
 export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError> {
@@ -29,7 +30,8 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
   const mapPrevNextList: Map<string, string> = new Map();
   const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
   const mapIriShapeExpression: Map<string, string> = new Map();
-  const mapIriPredicateInverse: Map<string, boolean> = new Map();
+  const mapIriCardinalityMax: Map<string, number> = new Map();
+  const mapIriCardinalityMin: Map<string, number> = new Map();
 
   return new Promise(resolve => {
     quadSteam.on('data', (quad: RDF.Quad) => {
@@ -42,7 +44,8 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
         mapPrevNextList,
         mapShapeExpressionClosedShape,
         mapIriShapeExpression,
-        mapIriPredicateInverse,
+        mapIriCardinalityMax,
+        mapIriCardinalityMin
       );
     });
 
@@ -58,7 +61,8 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
         mapPrevNextList,
         mapShapeExpressionClosedShape,
         mapIriShapeExpression,
-        mapIriPredicateInverse,
+        mapIriCardinalityMax,
+        mapIriCardinalityMin,
         shapeIri,
       );
       resolve(shape);
@@ -74,7 +78,8 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Shape
   const mapPrevNextList: Map<string, string> = new Map();
   const mapShapeExpressionClosedShape: Map<string, boolean> = new Map();
   const mapIriShapeExpression: Map<string, string> = new Map();
-  const mapIriPredicateInverse: Map<string, boolean> = new Map();
+  const mapIriCardinalityMax: Map<string, number> = new Map();
+  const mapIriCardinalityMin: Map<string, number> = new Map();
 
   for (const quad of quads) {
     parseShapeQuads(
@@ -86,7 +91,8 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Shape
       mapPrevNextList,
       mapShapeExpressionClosedShape,
       mapIriShapeExpression,
-      mapIriPredicateInverse
+      mapIriCardinalityMax,
+      mapIriCardinalityMin
     );
   }
 
@@ -98,7 +104,8 @@ function shapeFromQuadArray(quads: RDF.Quad[], shapeIri: string): IShape | Shape
     mapPrevNextList,
     mapShapeExpressionClosedShape,
     mapIriShapeExpression,
-    mapIriPredicateInverse,
+    mapIriCardinalityMax,
+    mapIriCardinalityMin,
     shapeIri,
   );
   return shape;
@@ -112,7 +119,8 @@ function concatShapeInfo(
   mapPrevNextList: Map<string, string>,
   mapShapeExpressionClosedShape: Map<string, boolean>,
   mapIriShapeExpression: Map<string, string>,
-  mapIriPredicateInverse: Map<string, boolean>,
+  mapIriCardinalityMax: Map<string, number>,
+  mapIriCardinalityMin: Map<string, number>,
   shapeIri: string,
 ): IShape | ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError {
   const positivePredicates: string[] = [];
@@ -135,12 +143,12 @@ function concatShapeInfo(
     const predicate = mapIdPredicate.get(expression);
     if (predicate !== undefined) {
       // A positive path is almost always explicit
-      /* istanbul ignore next */
-      const positive = mapIriPredicateInverse.has(expression) ?? false;
-      if (!positive) {
-        positivePredicates.push(predicate);
-      } else {
+      const min = mapIriCardinalityMin.get(expression);
+      const max = mapIriCardinalityMax.get(expression);
+      if (min === max && min === 0) {
         negativePredicates.push(predicate);
+      } else {
+        positivePredicates.push(predicate);
       }
     } else {
       return new ShapePoorlyFormatedError('there are no predicates in the shape');
@@ -154,12 +162,12 @@ function concatShapeInfo(
   while (current !== undefined) {
     const predicate = mapIdPredicate.get(current);
     if (predicate !== undefined) {
-      /* istanbul ignore next */
-      const positive = mapIriPredicateInverse.has(current) ?? false;
-      if (!positive) {
-        positivePredicates.push(predicate);
-      } else {
+      const min = mapIriCardinalityMin.get(current);
+      const max = mapIriCardinalityMax.get(current);
+      if (min === max && min === 0) {
         negativePredicates.push(predicate);
+      } else {
+        positivePredicates.push(predicate);
       }
     }
     if (next === undefined) {
@@ -195,7 +203,8 @@ function parseShapeQuads(
   mapPrevNextList: Map<string, string>,
   mapShapeExpressionClosedShape: Map<string, boolean>,
   mapIriShapeExpression: Map<string, string>,
-  mapIriPredicateInverse: Map<string, boolean>
+  mapIriCardinalityMax: Map<string, number>,
+  mapIriCardinalityMin: Map<string, number>
 ): void {
   if (quad.predicate.equals(SHEX_PREDICATE)) {
     mapIdPredicate.set(quad.subject.value, quad.object.value);
@@ -218,8 +227,11 @@ function parseShapeQuads(
   if (quad.predicate.equals(SHEX_SHAPE_EXPRESSION)) {
     mapIriShapeExpression.set(quad.subject.value, quad.object.value);
   }
-  if (quad.predicate.equals(SHEX_INVERSE)) {
-    mapIriPredicateInverse.set(quad.subject.value, quad.object.equals(RDF_TRUE))
+  if (quad.predicate.equals(SHEX_MAX)) {
+    mapIriCardinalityMax.set(quad.subject.value, Number(quad.object.value));
+  }
+  if (quad.predicate.equals(SHEX_MIN)) {
+    mapIriCardinalityMin.set(quad.subject.value, Number(quad.object.value));
   }
 }
 

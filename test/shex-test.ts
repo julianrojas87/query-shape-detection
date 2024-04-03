@@ -50,7 +50,7 @@ describe('shapeFromQuads', () => {
     readFileSync('./test/shape/shex_invalid_shape_incomplete_rdf_list.ttl').toString(),
   );
 
-  const shapeWithAnInverseProperty = n3Parser.parse(
+  const shapeWithANegativeProperty = n3Parser.parse(
     readFileSync('./test/shape/shex_shape_with_a_negative_property.ttl').toString(),
   );
   const shapeWithInverseAndPositiveProperties = n3Parser.parse(
@@ -146,8 +146,8 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a Shape with negative property', async () => {
-      const shape = await shapeFromQuads(shapeWithAnInverseProperty, shapeIri);
+    it('should returns a Shape with a negative property', async () => {
+      const shape = await shapeFromQuads(shapeWithANegativeProperty, shapeIri);
       const expectedPredicates: string[] = [
       ];
       const negativePredicates: string[] = [
@@ -172,8 +172,8 @@ describe('shapeFromQuads', () => {
       ];
       expect(shape).not.toBeInstanceOf(Error);
       expect((<IShape>shape).closed).toBe(false);
-      expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
       expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
+      expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
@@ -207,7 +207,7 @@ describe('shapeFromQuads', () => {
     let shapeIncompleteRdfList: any;
 
     // eslint-disable-next-line @typescript-eslint/no-shadow
-    let shapeWithAnInverseProperty:any;
+    let shapeWithANegativeProperty:any;
     // eslint-disable-next-line @typescript-eslint/no-shadow
     let shapeWithInverseAndPositiveProperties:any;
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -246,7 +246,7 @@ describe('shapeFromQuads', () => {
       shapeIncompleteRdfList = populateStream('./test/shape/shex_invalid_shape_incomplete_rdf_list.ttl');
       shapeWithShapeExpression = populateStream('./test/shape/shex_with_shape_expression.ttl');
 
-      shapeWithAnInverseProperty = populateStream('./test/shape/shex_shape_with_a_negative_property.ttl');
+      shapeWithANegativeProperty = populateStream('./test/shape/shex_shape_with_a_negative_property.ttl');
       shapeWithInverseAndPositiveProperties = populateStream('./test/shape/shex_shape_positive_and_negative_properties.ttl');
       shapeWithInconsistentPositiveAndNegativeProperties = populateStream('./test/shape/shex_shape_inconsistent_positive_and_negative_properties.ttl');
     });
@@ -333,8 +333,8 @@ describe('shapeFromQuads', () => {
       expect((<IShape>shape).name).toBe(shapeIri);
     });
 
-    it('should returns a Shape with negative property', async () => {
-      const shape = await shapeFromQuads(shapeWithAnInverseProperty, shapeIri);
+    it('should returns a Shape with a negative property', async () => {
+      const shape = await shapeFromQuads(shapeWithANegativeProperty, shapeIri);
       const expectedPredicates: string[] = [
       ];
       const negativePredicates: string[] = [
