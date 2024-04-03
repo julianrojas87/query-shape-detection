@@ -1,6 +1,5 @@
 export interface IShape extends IShapeArgs {
     toObject: () => IShapeArgs;
-    discriminantShape: (others: IShape[]) => IShape | undefined;
 }
 
 export interface IShapeArgs {
@@ -47,40 +46,6 @@ export class Shape implements IShape {
             positivePredicates: this.positivePredicates,
             negativePredicates: this.negativePredicates
         };
-    }
-
-    public discriminantShape(others: IShape[]): IShape | undefined {
-        if (this.closed !== true) {
-            return undefined;
-        }
-
-        if (others.length === 0) {
-            return this;
-        }
-
-        const discriminantPredicates: string[] = [];
-        let otherPredicates: Set<string> = new Set();
-        
-        for(const shape of others){
-            if(shape.closed!==true){
-                return this;
-            }
-            for(const predicate of shape.positivePredicates){
-                otherPredicates.add(predicate);
-            }
-        }
-
-        for (const predicate of this.positivePredicates) {
-            if (!otherPredicates.has(predicate)) {
-                discriminantPredicates.push(predicate);
-            }
-        }
-        return new Shape({
-            name: this.name,
-            closed: true,
-            positivePredicates: discriminantPredicates,
-            negativePredicates: this.negativePredicates
-        });
     }
 }
 
