@@ -28,3 +28,6 @@ example
 build
 debug.json
 debug.mjs
+.yarn
+.pnp.cjs
+.pnp.loader.mjs
