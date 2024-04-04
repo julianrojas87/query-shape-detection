@@ -7,11 +7,13 @@ export interface IShape extends IShapeObj {
 export interface IPredicate {
   name: string;
   constraint?: IContraint;
-  cardinality?: any;
+  cardinality?: ICardinality;
+  negative?: boolean;
+  optional?: boolean;
 }
 
 export interface IContraint {
-  value: string[];
+  value: Set<string>;
   type: ContraintType;
 }
 
@@ -63,11 +65,23 @@ export class Shape implements IShape {
     this.closed = closed ?? false;
 
     this.validatePredicates();
-    for (const predicate of positivePredicates.concat(negativePredicates ?? [])) {
+    for (const predicate of positivePredicates) {
       if (typeof predicate === 'string') {
         this.predicates.set(predicate, { name: predicate });
       } else {
-        this.predicates.set(predicate.name, predicate);
+        this.predicates.set(predicate.name,
+          {
+            ...predicate,
+            optional: predicate?.cardinality?.min === 0,
+          });
+      }
+    }
+
+    for (const predicate of negativePredicates ?? []) {
+      if (typeof predicate === 'string') {
+        this.predicates.set(predicate, { name: predicate, negative: true });
+      } else {
+        this.predicates.set(predicate.name, { ...predicate, negative: true });
       }
     }
 

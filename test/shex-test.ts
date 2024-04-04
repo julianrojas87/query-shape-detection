@@ -247,7 +247,7 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop1',
           {
             type: ContraintType.SHAPE,
-            value: [ 'http:exemple.ca/bar' ],
+            value: new Set([ 'http:exemple.ca/bar' ]),
           },
         ],
         [ 'http://xmlns.com/foaf/0.1/prop2', undefined ],
@@ -260,7 +260,7 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop10',
           {
             type: ContraintType.TYPE,
-            value: [ 'http://example.org/unassigned' ],
+            value: new Set([ 'http://example.org/unassigned' ]),
           },
         ],
       ]);
@@ -546,7 +546,7 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop1',
           {
             type: ContraintType.SHAPE,
-            value: [ 'http:exemple.ca/bar' ],
+            value: new Set([ 'http:exemple.ca/bar' ]),
           },
         ],
         [ 'http://xmlns.com/foaf/0.1/prop2', undefined ],
@@ -559,7 +559,7 @@ describe('shapeFromQuads', () => {
         [ 'http://xmlns.com/foaf/0.1/prop10',
           {
             type: ContraintType.TYPE,
-            value: [ 'http://example.org/unassigned' ],
+            value: new Set([ 'http://example.org/unassigned' ]),
           },
         ],
       ]);

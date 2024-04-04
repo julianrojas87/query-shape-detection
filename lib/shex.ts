@@ -151,7 +151,7 @@ function interpreteConstraint(
 
   if (constraint.termType === 'NamedNode') {
     return {
-      value: [ constraint.value ],
+      value: new Set([ constraint.value ]),
       type: ContraintType.SHAPE,
     };
   }
@@ -160,7 +160,7 @@ function interpreteConstraint(
     const dataType = mapIriDatatype.get(constraint.value);
     if (dataType !== undefined) {
       return {
-        value: [ dataType ],
+        value: new Set([ dataType ]),
         type: ContraintType.TYPE,
       };
     }

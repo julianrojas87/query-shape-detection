@@ -102,6 +102,7 @@ describe('Shape', () => {
     it('should get a negative predicate', () => {
       expect(shape.get('d')).toStrictEqual({
         name: 'd',
+        negative: true,
       });
     });
 
@@ -113,6 +114,7 @@ describe('Shape', () => {
           value: 'a',
           type: ContraintType.SHAPE,
         },
+        optional: true,
       });
     });
   });
@@ -145,11 +147,12 @@ describe('Shape', () => {
             value: 'a',
             type: ContraintType.SHAPE,
           },
+          optional: true,
         },
         { name: 'c' },
-        { name: 'd' },
-        { name: 'e' },
-        { name: 'f' },
+        { name: 'd', negative: true },
+        { name: 'e', negative: true },
+        { name: 'f', negative: true },
       ].sort();
 
       // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
