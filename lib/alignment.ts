@@ -4,9 +4,14 @@ import { ContraintType, type IShape } from './Shape';
 import type { ITriple } from './Triple';
 import { AlignmentType } from './Triple';
 
-export function reportAlignment({ query, shapes, option }: ICalculateAlignmentArgs): IResult {
+/**
+ * Calculate the alignment of every subject group with every shape
+ * @param {IReportAlignmentArgs} args -  the parameters of the calculation of the alignment
+ * @returns {IResult} - A table of result
+ */
+export function reportAlignment({ query, shapes, option }: IReportAlignmentArgs): IResult {
   const res: IResult = {
-    allSubjectGroupsHaveStrongAligment: false,
+    allSubjectGroupsHaveStrongAlignment: false,
     alignedTable: new Map(),
     unAlignedShapes: new Set(),
   };
@@ -14,11 +19,12 @@ export function reportAlignment({ query, shapes, option }: ICalculateAlignmentAr
   if (query.size === 0 || shapes.length === 0) {
     return res;
   }
-  const aligmentFunction = option.strongAlignment === true ?
+
+  const alignmentFunction = option.strongAlignment === true ?
     subjectGroupIsAligned :
     subjectGroupIsWeaklyAligned;
 
-  calculateAligment(query, shapes, res, aligmentFunction);
+  calculateAligment(query, shapes, res, alignmentFunction);
 
   if (option.shapeIntersection ?? false) {
     calculateAlignmentWithIntersection(query, shapes, res);
@@ -59,6 +65,12 @@ function getAlignedShapes(res: AlignmentResults, shapeMap: Map<string, IShape>):
   return alignedShapes;
 }
 
+/**
+ * Consider the intersection between the shape and the query in the result
+ * @param {Query} query
+ * @param {IShape[]} shapes
+ * @param {IResult} res - the result of alignments
+ */
 function calculateAlignmentWithIntersection(query: Query, shapes: IShape[], res: IResult): void {
   if (shapes.length > 1) {
     const shapeMap: Map<string, IShape> = new Map();
@@ -68,21 +80,23 @@ function calculateAlignmentWithIntersection(query: Query, shapes: IShape[], res:
 
     for (const [ subjectGroupName, aligmentResultsVal ] of res.alignedTable) {
       const alignedShapes = getAlignedShapes(aligmentResultsVal, shapeMap);
-      const aligmentResults = res.alignedTable.get(subjectGroupName)!;
-      const prevAligmentResults = new Map(aligmentResults);
+      const alignmentResults = res.alignedTable.get(subjectGroupName)!;
+      const prevAligmentResults = new Map(alignmentResults);
+
       // If there is possible intersection
       if (alignedShapes.length > 1) {
         const highestDegree: [number, string[]] = [ Number.MIN_SAFE_INTEGER, []];
         let hasOpenShape = false;
         for (const targetShape of alignedShapes) {
+          // If there is an open shape the intersection cannot be used to discriminate
           if (targetShape.closed === false) {
             hasOpenShape = true;
             break;
           }
           const subjectGroup = query.get(subjectGroupName)!;
-          aligmentResults.set(targetShape.name, AlignmentType.None);
+          alignmentResults.set(targetShape.name, AlignmentType.None);
           const alignmentDegree = degreeOfAlignmentExclusif(subjectGroup, targetShape);
-          // If subject group is a subset of the shape then we check wich shape is more
+          // If subject group is a subset of the shape then we check which shape is more
           // aligned with the subject group
           if (alignmentDegree !== -1) {
             if (highestDegree[0] === alignmentDegree) {
@@ -94,15 +108,16 @@ function calculateAlignmentWithIntersection(query: Query, shapes: IShape[], res:
           }
         }
 
-        // We put the previous results if the alignment didn't changed anything
-        // or a shape was open
+        // We used the previous results if the alignment didn't changed anything
+        // or if one shape is open
         if (highestDegree[0] === Number.MIN_SAFE_INTEGER || hasOpenShape) {
           for (const [ key, value ] of prevAligmentResults) {
-            aligmentResults.set(key, value);
+            alignmentResults.set(key, value);
           }
         } else {
+          // Propagate the results
           for (const shapeName of highestDegree[1]) {
-            aligmentResults.set(shapeName, AlignmentType.WEAK);
+            alignmentResults.set(shapeName, AlignmentType.WEAK);
           }
         }
       }
@@ -110,12 +125,20 @@ function calculateAlignmentWithIntersection(query: Query, shapes: IShape[], res:
   }
 }
 
+/**
+ * Calculate the alignment based on the alignment function
+ * @param {Query} query
+ * @param {IShape[]} shapes
+ * @param {IResult} res
+ * @param {AlignmentFunction} alignmentFunction
+ */
 function calculateAligment(
   query: Query,
   shapes: IShape[],
   res: IResult,
   alignmentFunction: AlignmentFunction,
 ): void {
+  let allSubjectGroupHaveStrongAlignment = true;
   for (const [ subjectGroup, triple ] of query) {
     res.alignedTable.set(subjectGroup, new Map());
     let hasStrongAlignment = false;
@@ -133,10 +156,19 @@ function calculateAligment(
           res.alignedTable.get(subjectGroup)?.set(shape.name, AlignmentType.None);
         }
       }
+    } else {
+      allSubjectGroupHaveStrongAlignment = false;
     }
   }
+  res.allSubjectGroupsHaveStrongAlignment = allSubjectGroupHaveStrongAlignment;
 }
 
+/**
+ * Determine if there is a weak alignment in the subject group
+ * @param {ITriple[]} subjectGroup
+ * @param {IShape} shape
+ * @returns {WeakAligmentOrNone} - The alignment
+ */
 export function subjectGroupIsWeaklyAligned(subjectGroup: ITriple[], shape: IShape): WeakAligmentOrNone {
   if (subjectGroup.length === 0) {
     return AlignmentType.None;
@@ -155,6 +187,12 @@ export function subjectGroupIsWeaklyAligned(subjectGroup: ITriple[], shape: ISha
   return AlignmentType.None;
 }
 
+/**
+ * Determine the alignment of the subject group
+ * @param {ITriple[]} subjectGroup
+ * @param {IShape} shape
+ * @returns {AlignmentType} - The alignment
+ */
 export function subjectGroupIsAligned(subjectGroup: ITriple[], shape: IShape): AlignmentType {
   if (subjectGroup.length === 0) {
     return AlignmentType.None;
@@ -165,11 +203,14 @@ export function subjectGroupIsAligned(subjectGroup: ITriple[], shape: IShape): A
   }
 
   const alignedProperties: Set<string> = new Set();
+
   for (const triple of subjectGroup) {
+    // Check if there is a strong alignment based on the RDF class
     if (triple.predicate === TYPE_DEFINITION.value) {
       const predicateProperties = shape.get(triple.predicate);
       const hasTheRightClass = predicateProperties?.constraint?.value?.has(triple.object.value);
       const hasTheTypeConstraint = predicateProperties?.constraint?.type === ContraintType.TYPE;
+
       if (hasTheTypeConstraint && hasTheRightClass) {
         return AlignmentType.STRONG;
       }
@@ -181,6 +222,8 @@ export function subjectGroupIsAligned(subjectGroup: ITriple[], shape: IShape): A
   }
 
   const allPredicatesShape = shape.getAll();
+
+  // There cannot be a strong alignment if the subject group has more predicate than the shape
   if (subjectGroup.length > allPredicatesShape.length) {
     return alignedProperties.size > 0 ? AlignmentType.WEAK : AlignmentType.None;
   }
@@ -211,12 +254,18 @@ function degreeOfAlignmentExclusif(subjectGroup: ITriple[], shape: IShape): numb
   return deg;
 }
 
-export interface ICalculateAlignmentArgs {
+/**
+ * The argument of the report alignment function
+ */
+export interface IReportAlignmentArgs {
   query: Query;
   shapes: IShape[];
   option: IOptions;
 }
 
+/**
+ * The options for the alignment algorithm
+ */
 export interface IOptions {
   shapeIntersection?: boolean;
   strongAlignment?: boolean;
@@ -225,8 +274,12 @@ export interface IOptions {
 type subjectGroupName = string;
 type ShapeName = string;
 type AlignmentResults = Map<ShapeName, AlignmentType>;
+
+/**
+ * The alignment result
+ */
 export interface IResult {
-  allSubjectGroupsHaveStrongAligment: boolean;
+  allSubjectGroupsHaveStrongAlignment: boolean;
   alignedTable: Map<subjectGroupName, AlignmentResults>;
   unAlignedShapes: Set<ShapeName>;
 }

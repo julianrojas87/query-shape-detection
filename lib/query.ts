@@ -2,8 +2,16 @@ import type { Term } from '@rdfjs/types';
 import { Algebra, Util } from 'sparqlalgebrajs';
 import { Triple, type ITriple } from './Triple';
 
+/**
+ * A query divided into subject group
+ */
 export type Query = Map<string, ITriple[]>;
 
+/**
+ * Divide a query into subject group
+ * @param {Algebra.Operation} algebraQuery - the algebra of a query
+ * @returns {Query} - A query divided into subject group where the predicate has to be an IRI
+ */
 export function generateQuery(algebraQuery: Algebra.Operation): Query {
   const resp: Query = new Map();
   const paths: [any, { subject: string; object: Term }][] = [];
@@ -67,7 +75,6 @@ export function generateQuery(algebraQuery: Algebra.Operation): Query {
       path,
       {
         [Algebra.types.LINK]: addPropertyPath,
-
       },
     );
   }

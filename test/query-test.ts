@@ -1,13 +1,14 @@
 import type { BaseQuad } from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
 import { translate } from 'sparqlalgebrajs';
+import { TYPE_DEFINITION } from '../lib/constant';
 import { generateQuery } from '../lib/query';
 
 const DF = new DataFactory<BaseQuad>();
 
 const RDF_STRING = DF.namedNode('http://www.w3.org/2001/XMLSchema#string');
 const SNVOC_PREFIX = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/';
-const RDF_PREFIX = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+const RDF_TYPE = TYPE_DEFINITION.value;
 
 describe('query', () => {
   describe('generateQuery', () => {
@@ -22,7 +23,7 @@ describe('query', () => {
       expect(x[0].object.value).toBe('z');
     });
 
-    it('should return no triple  given a query with a bgp with only variable', () => {
+    it('should return no triple given a query with a bgp with only variable', () => {
       const query = 'SELECT * WHERE { ?x ?o ?z }';
       const resp = generateQuery(translate(query));
       expect(resp.size).toBe(0);
@@ -98,7 +99,7 @@ describe('query', () => {
       }
     });
 
-    it('should returns the properties with a complex query 1', () => {
+    it('should returns the subject groups with a complex query 1', () => {
       const query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
       PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
@@ -134,7 +135,7 @@ describe('query', () => {
           'comment',
           [
             { subject: 'comment', predicate: `${SNVOC_PREFIX}replyOf`, object: DF.namedNode(comment_philippines) },
-            { subject: 'comment', predicate: `${RDF_PREFIX}type`, object: DF.namedNode(`${SNVOC_PREFIX}Comment`) },
+            { subject: 'comment', predicate: `${RDF_TYPE}`, object: DF.namedNode(`${SNVOC_PREFIX}Comment`) },
           ],
         ],
         [
@@ -166,7 +167,7 @@ describe('query', () => {
       }
     });
 
-    it('should returns the properties with a complex query 2', () => {
+    it('should returns the subject groups with a complex query 2', () => {
       const query = `# Recent messages of a person
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -197,7 +198,7 @@ describe('query', () => {
         [
           'person',
           [
-            { subject: 'person', predicate: `${RDF_PREFIX}type`, object: DF.namedNode(`${SNVOC_PREFIX}Person`) },
+            { subject: 'person', predicate: `${RDF_TYPE}`, object: DF.namedNode(`${SNVOC_PREFIX}Person`) },
             { subject: 'person', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('personId') },
           ],
         ],
@@ -211,7 +212,7 @@ describe('query', () => {
         [
           'originalPostInner',
           [
-            { subject: 'originalPostInner', predicate: `${RDF_PREFIX}type`, object: DF.namedNode(`${SNVOC_PREFIX}Post`) },
+            { subject: 'originalPostInner', predicate: `${RDF_TYPE}`, object: DF.namedNode(`${SNVOC_PREFIX}Post`) },
           ],
         ],
         [

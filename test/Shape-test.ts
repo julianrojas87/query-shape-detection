@@ -95,7 +95,7 @@ describe('Shape', () => {
       });
     });
 
-    it('should not get a non existant predicate', () => {
+    it('should not get a non existent predicate', () => {
       expect(shape.get('no')).toBeUndefined();
     });
 

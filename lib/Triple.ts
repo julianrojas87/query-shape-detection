@@ -1,15 +1,24 @@
 import type { Term } from '@rdfjs/types';
 import type { IShape } from './Shape';
 
+/**
+ * A Triple interface
+ */
 export interface ITriple extends ITripleArgs {
   isWeaklyAlign: (shape: IShape) => boolean;
   toObject: () => ITripleArgs;
 }
+/**
+ * The type of alignment
+ */
 export enum AlignmentType {
   WEAK,
   STRONG,
   None,
 }
+/**
+ * A Triple object
+ */
 export interface ITripleArgs {
   subject: string;
   // / The iri of a property
@@ -18,12 +27,18 @@ export interface ITripleArgs {
   object: Term;
   isOptional?: boolean;
 }
-
+/**
+ * A Triple
+ */
 export class Triple implements ITriple {
   public readonly predicate: string;
   public readonly subject: string;
   public readonly object: Term;
 
+  /**
+   *
+   * @param {ITripleArgs} param0 - A triple object
+   */
   public constructor({ subject, predicate, object }: ITripleArgs) {
     this.predicate = predicate;
     this.object = object;
@@ -34,6 +49,10 @@ export class Triple implements ITriple {
     Object.freeze(this.subject);
   }
 
+  /**
+   * Return a triple object
+   * @returns {ITripleArgs} a Triple object
+   */
   public toObject(): ITripleArgs {
     return {
       subject: this.subject,
@@ -42,6 +61,11 @@ export class Triple implements ITriple {
     };
   }
 
+  /**
+   * Calculate the weak alignment with a shape
+   * @param {IShape} shape - A shape
+   * @returns {boolean} - return true if the triple is weakly aligned with the shape
+   */
   public isWeaklyAlign(shape: IShape): boolean {
     if (shape.closed === false) {
       return true;

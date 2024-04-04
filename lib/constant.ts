@@ -1,7 +1,7 @@
-import type * as RDF from '@rdfjs/types';
+import type { BaseQuad } from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
 
-const DF = new DataFactory<RDF.BaseQuad>();
+const DF = new DataFactory<BaseQuad>();
 
 export const SHEX_PREDICATE = DF.namedNode('http://www.w3.org/ns/shex#predicate');
 export const SHEX_SHAPE_EXPRESSION = DF.namedNode('http://www.w3.org/ns/shex#shapeExpr');

@@ -1,6 +1,6 @@
 import type * as RDF from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
-import { subjectGroupIsWeaklyAligned, reportAlignment, subjectGroupIsAligned } from '../lib/aligment';
+import { subjectGroupIsWeaklyAligned, reportAlignment, subjectGroupIsAligned } from '../lib/alignment';
 import { TYPE_DEFINITION } from '../lib/constant';
 import { ContraintType, Shape } from '../lib/Shape';
 import type { ITriple } from '../lib/Triple';
@@ -38,7 +38,7 @@ describe('subjectGroupIsWeaklyAligned', () => {
     expect(subjectGroupIsWeaklyAligned(triples, shapes)).toBe(AlignmentType.WEAK);
   });
 
-  it('should not be aligned given one triple is not aligned with the shape', () => {
+  it('should not be aligned given the triple is not aligned with the shape', () => {
     const argShape: any = { name: 'foo', closed: true, positivePredicates: [ 'bar' ]};
     const shapes = new Shape(argShape);
     const triples: ITriple[] = [
@@ -61,7 +61,7 @@ describe('subjectGroupIsWeaklyAligned', () => {
     expect(subjectGroupIsWeaklyAligned(triples, shapes)).toBe(AlignmentType.WEAK);
   });
 
-  it('should not be aligned given no triple are aligned with the sahpe', () => {
+  it('should not be aligned given no triple are aligned with the shape', () => {
     const argShape: any = { name: 'foo', closed: true, positivePredicates: [ 'bar', 'bar0', 'bar1' ]};
     const shapes = new Shape(argShape);
     const triples: ITriple[] = [
@@ -128,7 +128,7 @@ describe('subjectGroupIsAligned', () => {
       expect(subjectGroupIsAligned(triples, shapes)).toBe(AlignmentType.WEAK);
     });
 
-    it('should not be aligned given no triple are aligned with the sahpe', () => {
+    it('should not be aligned given no triple are aligned with the shape', () => {
       const argShape: any = { name: 'foo', closed: true, positivePredicates: [ 'bar', 'bar0', 'bar1' ]};
       const shapes = new Shape(argShape);
       const triples: ITriple[] = [
@@ -225,7 +225,7 @@ describe('subjectGroupIsAligned', () => {
       expect(subjectGroupIsAligned(triples, shapes)).toBe(AlignmentType.WEAK);
     });
 
-    it('should strongly aligned given a subject group with all the properties', () => {
+    it('should be strongly aligned given a subject group with all the properties', () => {
       const argShape: any = {
         name: 'foo',
         closed: true,
@@ -248,7 +248,7 @@ describe('subjectGroupIsAligned', () => {
       expect(subjectGroupIsAligned(triples, shapes)).toBe(AlignmentType.STRONG);
     });
 
-    it(`should strongly aligned 
+    it(`should be strongly aligned 
     given a subject group with all the properties considering optionals and negatives shape properties`, () => {
       const argShape: any = {
         name: 'foo',
@@ -299,7 +299,7 @@ describe('reportAlignment', () => {
       const arg: any = { query, option, shapes };
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map(),
         unAlignedShapes: new Set(),
       };
@@ -307,7 +307,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given an no shape it should return the default result', () => {
+    it('given no shape it should return the default result', () => {
       const query: any = new Map([
         [ 'x', [{ subject: 'x', predicate: 'foo', object: AN_OBJECT }]],
         [ 'z', [{ subject: 'z', predicate: 'foo1', object: AN_OBJECT }]],
@@ -329,7 +329,7 @@ describe('reportAlignment', () => {
       const arg: any = { query, option, shapes };
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map(),
         unAlignedShapes: new Set(),
       };
@@ -348,7 +348,7 @@ describe('reportAlignment', () => {
       const arg: any = { query, option, shapes };
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map(),
         unAlignedShapes: new Set(),
       };
@@ -373,7 +373,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo2', 'foo' ]),
       };
@@ -398,7 +398,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.WEAK ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo1' ]),
       };
@@ -406,7 +406,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given one subject group aligned no shapes should return the valid result', () => {
+    it('given one subject group aligned with no shapes should return the valid result', () => {
       const query: any = new Map([
         [ 'x', [ new Triple({ subject: 'x', predicate: 'no', object: AN_OBJECT }) ]],
       ]);
@@ -423,7 +423,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo1', 'foo', 'foo2' ]),
       };
@@ -431,7 +431,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given multiple subject groups aligned shapes should return the valid result', () => {
+    it('given multiple subject groups aligned with some shapes should return the valid result', () => {
       const query: any = new Map(
         [
           [ 'x', [ new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }) ]],
@@ -480,7 +480,7 @@ describe('reportAlignment', () => {
       ]);
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ], [ 'y', yResults ], [ 'z', zResults ]]),
         unAlignedShapes: new Set([ 'foo3' ]),
       };
@@ -507,7 +507,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo2', 'foo' ]),
       };
@@ -532,7 +532,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo2', 'foo', 'foo1' ]),
       };
@@ -551,7 +551,7 @@ describe('reportAlignment', () => {
       const arg: any = { query, option, shapes };
       const xResults = new Map([[ 'foo1', AlignmentType.WEAK ]]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([]),
       };
@@ -559,7 +559,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('should accept consider all the shapes aligned given they all have the same predicate', () => {
+    it('should not change the result given the shapes  have the same predicates', () => {
       const query: any = new Map([
         [ 'x', [ new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }) ]],
       ]);
@@ -576,7 +576,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.WEAK ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([]),
       };
@@ -584,7 +584,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('should accept some shapes aligned given the predicate from the triple target an unique attribute', () => {
+    it('should reject the intersecting shapes given the query target an unique predicate', () => {
       const query: any = new Map(
         [
           [ 'x', [
@@ -607,7 +607,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo1', 'foo2' ]),
       };
@@ -615,7 +615,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('should give the result value given multiple subject group', () => {
+    it('should handle a complex case', () => {
       const query: any = new Map(
         [
           [ 'x', [ new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }) ]],
@@ -678,7 +678,7 @@ describe('reportAlignment', () => {
         [ 'foo3', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ], [ 'y', yResults ], [ 'z', zResults ], [ 'w', wResults ]]),
         unAlignedShapes: new Set([ 'foo3', 'foo' ]),
       };
@@ -686,7 +686,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('should give the result value given multiple subject group and open shape', () => {
+    it('should handle a complex case with an open shape', () => {
       const query: any = new Map(
         [
           [ 'x', [ new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }) ]],
@@ -749,7 +749,7 @@ describe('reportAlignment', () => {
         [ 'foo3', AlignmentType.WEAK ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ], [ 'y', yResults ], [ 'z', zResults ], [ 'w', wResults ]]),
         unAlignedShapes: new Set([]),
       };
@@ -757,7 +757,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('should give the result value given multiple subject group with strong Alignment', () => {
+    it('should handle a complex case with a strong alignment', () => {
       const query: any = new Map(
         [
           [ 'x',
@@ -827,7 +827,7 @@ describe('reportAlignment', () => {
         [ 'foo3', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ], [ 'y', yResults ], [ 'z', zResults ], [ 'w', wResults ]]),
         unAlignedShapes: new Set([ 'foo3', 'foo' ]),
       };
@@ -848,7 +848,7 @@ describe('reportAlignment', () => {
       const arg: any = { query, option, shapes };
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map(),
         unAlignedShapes: new Set(),
       };
@@ -856,7 +856,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given an no shape it should return the default result', () => {
+    it('given no shape it should return the default result', () => {
       const query: any = new Map([
         [ 'x', [{ subject: 'x', predicate: 'foo', object: AN_OBJECT }]],
         [ 'z', [{ subject: 'z', predicate: 'foo1', object: AN_OBJECT }]],
@@ -878,7 +878,7 @@ describe('reportAlignment', () => {
       const arg: any = { query, option, shapes };
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map(),
         unAlignedShapes: new Set(),
       };
@@ -897,7 +897,7 @@ describe('reportAlignment', () => {
       const arg: any = { query, option, shapes };
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map(),
         unAlignedShapes: new Set(),
       };
@@ -922,7 +922,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo2', 'foo' ]),
       };
@@ -947,7 +947,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.WEAK ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo1' ]),
       };
@@ -955,7 +955,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given one subject group aligned no shapes should return the valid result', () => {
+    it('given one subject group aligned with no shapes should return the valid result', () => {
       const query: any = new Map([
         [ 'x', [ new Triple({ subject: 'x', predicate: 'no', object: AN_OBJECT }) ]],
       ]);
@@ -972,7 +972,7 @@ describe('reportAlignment', () => {
         [ 'foo2', AlignmentType.None ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo1', 'foo', 'foo2' ]),
       };
@@ -980,7 +980,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given multiple subject groups aligned shapes should return the valid result', () => {
+    it('given multiple subject groups aligned with multiple shapes should return the valid result', () => {
       const query: any = new Map(
         [
           [ 'x', [ new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }) ]],
@@ -1029,7 +1029,7 @@ describe('reportAlignment', () => {
       ]);
 
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: false,
         alignedTable: new Map([[ 'x', xResults ], [ 'y', yResults ], [ 'z', zResults ]]),
         unAlignedShapes: new Set([ 'foo3' ]),
       };
@@ -1037,7 +1037,7 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given one subject group strongly ligned because of the type should return the valid result', () => {
+    it('given one subject group strongly aligned because of the RDF type should return the valid result', () => {
       const query: any = new Map([
         [ 'x',
           [
@@ -1075,7 +1075,7 @@ describe('reportAlignment', () => {
         [ 'foo3', AlignmentType.STRONG ],
       ]);
       const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
+        allSubjectGroupsHaveStrongAlignment: true,
         alignedTable: new Map([[ 'x', xResults ]]),
         unAlignedShapes: new Set([ 'foo2', 'foo1', 'foo' ]),
       };
@@ -1083,37 +1083,38 @@ describe('reportAlignment', () => {
       expect(reportAlignment(arg)).toStrictEqual(expectedResult);
     });
 
-    it('given one subject group strongly ligned because of all the predicate should return the valid result', () => {
-      const query: any = new Map([
-        [ 'x',
-          [
-            new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }),
-            new Triple({ subject: 'x', predicate: 'bar', object: AN_OBJECT }),
+    it('given one subject group strongly ligned because of all the predicate match should return the valid result'
+      , () => {
+        const query: any = new Map([
+          [ 'x',
+            [
+              new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }),
+              new Triple({ subject: 'x', predicate: 'bar', object: AN_OBJECT }),
+            ],
           ],
-        ],
-      ]);
-      const shapes = [
-        new Shape({ name: 'foo', closed: true, positivePredicates: [ 'bar', 'bar0', 'bar1' ]}),
-        new Shape({ name: 'foo1', closed: true, positivePredicates: [ 'foo', 'foo0', 'foo1' ]}),
-        new Shape({ name: 'foo2', closed: true, positivePredicates: [ 'bar', 'foo2', 'too' ]}),
-        new Shape({ name: 'foo3', closed: true, positivePredicates: [ 'foo', 'bar' ]}),
-      ];
-      const option = { strongAlignment: true };
-      const arg: any = { query, option, shapes };
-      const xResults = new Map([
-        [ 'foo', AlignmentType.None ],
-        [ 'foo1', AlignmentType.None ],
-        [ 'foo2', AlignmentType.None ],
-        [ 'foo3', AlignmentType.STRONG ],
-      ]);
-      const expectedResult = {
-        allSubjectGroupsHaveStrongAligment: false,
-        alignedTable: new Map([[ 'x', xResults ]]),
-        unAlignedShapes: new Set([ 'foo2', 'foo1', 'foo' ]),
-      };
+        ]);
+        const shapes = [
+          new Shape({ name: 'foo', closed: true, positivePredicates: [ 'bar', 'bar0', 'bar1' ]}),
+          new Shape({ name: 'foo1', closed: true, positivePredicates: [ 'foo', 'foo0', 'foo1' ]}),
+          new Shape({ name: 'foo2', closed: true, positivePredicates: [ 'bar', 'foo2', 'too' ]}),
+          new Shape({ name: 'foo3', closed: true, positivePredicates: [ 'foo', 'bar' ]}),
+        ];
+        const option = { strongAlignment: true };
+        const arg: any = { query, option, shapes };
+        const xResults = new Map([
+          [ 'foo', AlignmentType.None ],
+          [ 'foo1', AlignmentType.None ],
+          [ 'foo2', AlignmentType.None ],
+          [ 'foo3', AlignmentType.STRONG ],
+        ]);
+        const expectedResult = {
+          allSubjectGroupsHaveStrongAlignment: true,
+          alignedTable: new Map([[ 'x', xResults ]]),
+          unAlignedShapes: new Set([ 'foo2', 'foo1', 'foo' ]),
+        };
 
-      expect(reportAlignment(arg)).toStrictEqual(expectedResult);
-    });
+        expect(reportAlignment(arg)).toStrictEqual(expectedResult);
+      });
 
     it('given multiple subject groups aligned strongly and weakly with the shapes should return the valid result',
       () => {
@@ -1160,10 +1161,10 @@ describe('reportAlignment', () => {
               {
                 name: TYPE_DEFINITION.value,
                 constraint:
-              {
-                type: ContraintType.TYPE,
-                value: new Set([ 'CoolClass' ]),
-              },
+                {
+                  type: ContraintType.TYPE,
+                  value: new Set([ 'CoolClass' ]),
+                },
               },
               'bar1' ],
           }),
@@ -1205,7 +1206,7 @@ describe('reportAlignment', () => {
         ]);
 
         const expectedResult = {
-          allSubjectGroupsHaveStrongAligment: false,
+          allSubjectGroupsHaveStrongAlignment: false,
           alignedTable: new Map([
             [ 'x', xResults ],
             [ 'y', yResults ],
@@ -1218,5 +1219,72 @@ describe('reportAlignment', () => {
 
         expect(reportAlignment(arg)).toStrictEqual(expectedResult);
       });
+
+    it(`given multiple subject groups aligned weakly and strongly with multiple shapes 
+    should return the valid result`, () => {
+      const query: any = new Map(
+        [
+          [ 'x', [ new Triple({ subject: 'x', predicate: 'foo', object: AN_OBJECT }) ]],
+
+          [ 'y',
+            [
+              new Triple({ subject: 'y', predicate: 'foo', object: AN_OBJECT }),
+              new Triple({ subject: 'y', predicate: 'yes', object: AN_OBJECT }),
+              new Triple({ subject: 'y', predicate: 'bar', object: AN_OBJECT }),
+            ],
+          ],
+          [ 'z',
+            [
+              new Triple({ subject: 'z', predicate: TYPE_DEFINITION.value, object: DF.namedNode('CoolClass') }),
+              new Triple({ subject: 'z', predicate: 'b', object: AN_OBJECT }),
+              new Triple({ subject: 'z', predicate: 'a', object: AN_OBJECT }),
+            ],
+          ],
+        ],
+      );
+      const shapes = [
+        new Shape({ name: 'foo', closed: true, positivePredicates: [ 'foo' ]}),
+        new Shape({ name: 'foo1', closed: true, positivePredicates: [ 'foo', 'yes', 'bar' ]}),
+        new Shape({
+          name: 'foo2',
+          closed: true,
+          positivePredicates: [
+            {
+              name: TYPE_DEFINITION.value,
+              constraint: {
+                value: new Set([ 'CoolClass' ]),
+                type: ContraintType.TYPE,
+              },
+            },
+            'foo2',
+            'foo' ],
+        }),
+      ];
+      const option = { strongAlignment: true };
+      const arg: any = { query, option, shapes };
+      const xResults = new Map([
+        [ 'foo', AlignmentType.STRONG ],
+        [ 'foo1', AlignmentType.None ],
+        [ 'foo2', AlignmentType.None ],
+      ]);
+      const yResults = new Map([
+        [ 'foo', AlignmentType.None ],
+        [ 'foo1', AlignmentType.STRONG ],
+        [ 'foo2', AlignmentType.None ],
+      ]);
+      const zResults = new Map([
+        [ 'foo', AlignmentType.None ],
+        [ 'foo1', AlignmentType.None ],
+        [ 'foo2', AlignmentType.STRONG ],
+      ]);
+
+      const expectedResult = {
+        allSubjectGroupsHaveStrongAlignment: true,
+        alignedTable: new Map([[ 'x', xResults ], [ 'y', yResults ], [ 'z', zResults ]]),
+        unAlignedShapes: new Set(),
+      };
+
+      expect(reportAlignment(arg)).toStrictEqual(expectedResult);
+    });
   });
 });

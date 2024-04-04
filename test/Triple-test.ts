@@ -9,7 +9,7 @@ const AN_OBJECT = DF.namedNode('an object');
 
 describe('Triple', () => {
   describe('toObject', () => {
-    it('should return the subject object and predicat', () => {
+    it('should return the object triple', () => {
       const objectTriple: any = {
         subject: 'a',
         predicate: 'b',
@@ -33,7 +33,7 @@ describe('Triple', () => {
       expect(triple.isWeaklyAlign(shape)).toBe(true);
     });
 
-    it('should align with a close shape with a shared predicate', () => {
+    it('should align with a close shape given a shared predicate', () => {
       const triple = new Triple({
         subject: 'a',
         predicate: 'b',
