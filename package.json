@@ -29,7 +29,7 @@
     }
   },
   "scripts": {
-    "test": "jest ${1}",
+    "test": "yarn jest ${1}",
     "test-watch": "jest ${1} --watch",
     "lint": "eslint . --ext .ts --cache",
     "build": "npm run build:ts",
