@@ -29,7 +29,7 @@
     }
   },
   "scripts": {
-    "test": "yarn jest ${1}",
+    "test": "jest ${1}",
     "test-watch": "jest ${1} --watch",
     "lint": "eslint . --ext .ts --cache",
     "build": "npm run build:ts",
@@ -58,7 +58,7 @@
     "n3": "^1.17.2",
     "streamify-array": "^1.0.1",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.4.4"
   },
   "packageManager": "yarn@4.1.1"
 }

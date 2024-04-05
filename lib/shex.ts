@@ -48,7 +48,7 @@ function shapeFromQuadStream(quadSteam: RDF.Stream, shapeIri: string): Promise<I
       );
     });
 
-    quadSteam.on('error', error => {
+    quadSteam.on('error', (error:any) => {
       resolve(error);
     });
     quadSteam.on('end', () => {

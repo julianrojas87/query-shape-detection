@@ -31,3 +31,4 @@ debug.mjs
 .yarn
 .pnp.cjs
 .pnp.loader.mjs
+.vscode
