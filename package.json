@@ -40,9 +40,6 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@shexjs/parser": "1.0.0-alpha.26",
-    "@shexjs/visitor": "1.0.0-alpha.25",
-    "@types/shexj": "^2.1.4",
     "rdf-data-factory": "^1.1.2",
     "sparqlalgebrajs": "^4.3.0"
   },
