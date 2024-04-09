@@ -49,7 +49,7 @@ export interface ICardinality {
 /**
  * A constraint type
  */
-export enum ContraintType {
+export const enum ContraintType {
   // Is bound to another shape
   SHAPE,
   // Is bound by an RDF type

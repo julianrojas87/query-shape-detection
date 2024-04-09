@@ -11,7 +11,7 @@ export interface ITriple extends ITripleArgs {
 /**
  * The type of alignment
  */
-export enum AlignmentType {
+export const enum AlignmentType {
   WEAK,
   STRONG,
   None,
