@@ -14,6 +14,7 @@ export type Query = Map<string, ITriple[]>;
  * @todo add support for value eg: VALUES (?type) {(snvoc:Comment) (snvoc:Post)}
  * @todo add support for depencies between subject group
  * @todo add support for the bind operator
+ * @todo add support for optional property path
  */
 export function generateQuery(algebraQuery: Algebra.Operation): Query {
   const resp: Query = new Map();
