@@ -9,6 +9,7 @@ import { AlignmentType } from './Triple';
  * @param {IReportAlignmentArgs} args -  the parameters of the calculation of the alignment
  * @returns {IResult} - A table of result
  * @todo get unaligned properties
+ * @todo tell if all the subject group have been target
  */
 export function reportAlignment({ query, shapes, option }: IReportAlignmentArgs): IResult {
   const res: IResult = {
