@@ -21,6 +21,27 @@ describe('query', () => {
       expect(x[0].predicate).toBe('http://exemple.ca');
       expect(x[0].object.termType).toBe('Variable');
       expect(x[0].object.value).toBe('z');
+      expect(x[0].getLinkedSubjectGroup()).toBe('z');
+    });
+
+    it('should return the triple given a query with two triples where one triple have a dependence', () => {
+      const query = `SELECT * WHERE { 
+        ?x <http://exemple.ca> ?z .
+        ?y <http://exemple.ca> ?x .
+      }`;
+      const expectedResp: Map<string, any> = new Map([
+        [ 'x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
+        [ 'y', [{ subject: 'y', predicate: 'http://exemple.ca', object: DF.variable('x') }]],
+      ]);
+
+      const resp = generateQuery(translate(query));
+
+      expect(resp.size).toBe(expectedResp.size);
+      for (const [ subject, triples ] of resp) {
+        for (const [ i, triple ] of triples.entries()) {
+          expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
+        }
+      }
     });
 
     it('should return no triple given a query with a bgp with only variable', () => {

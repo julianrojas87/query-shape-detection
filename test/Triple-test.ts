@@ -65,4 +65,26 @@ describe('Triple', () => {
       expect(triple.isWeaklyAlign(shape)).toBe(false);
     });
   });
+
+  describe('getLinkedSubjectGroup', ()=>{
+    it('should return undefined if the object is not a variable', ()=>{
+      const triple = new Triple({
+        subject: 'a',
+        predicate: 'b',
+        object: AN_OBJECT,
+      });
+
+      expect(triple.getLinkedSubjectGroup()).toBeUndefined();
+    });
+
+    it('should return the variable', ()=>{
+      const triple = new Triple({
+        subject: 'a',
+        predicate: 'b',
+        object: DF.variable('foo'),
+      });
+
+      expect(triple.getLinkedSubjectGroup()).toBe('foo');
+    });
+  });
 });

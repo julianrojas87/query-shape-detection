@@ -7,6 +7,7 @@ import type { IShape } from './Shape';
 export interface ITriple extends ITripleArgs {
   isWeaklyAlign: (shape: IShape) => boolean;
   toObject: () => ITripleArgs;
+  getLinkedSubjectGroup: () => string | undefined
 }
 /**
  * The type of alignment
@@ -37,7 +38,7 @@ export class Triple implements ITriple {
 
   /**
    *
-   * @param {ITripleArgs} param0 - A triple object
+   * @param {ITripleArgs} tripleObject - A triple object
    */
   public constructor({ subject, predicate, object }: ITripleArgs) {
     this.predicate = predicate;
@@ -59,6 +60,12 @@ export class Triple implements ITriple {
       predicate: this.predicate,
       object: this.object,
     };
+  }
+
+  public getLinkedSubjectGroup(): string | undefined {
+    if (this.object.termType === "Variable") {
+      return this.object.value
+    }
   }
 
   /**
