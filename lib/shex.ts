@@ -21,6 +21,7 @@ import { type IShape, Shape, type IPredicate, ContraintType } from './Shape';
  * @param {RDF.Stream | RDF.Quad[]} quads - Quads representing a shape
  * @param {string} shapeIri - The iri of the desired shape
  * @returns {Promise<IShape | ShapeError>} The shape
+ * @todo support for `OR` statement
  */
 export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapeError> {
   if (Array.isArray(quads)) {

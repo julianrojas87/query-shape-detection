@@ -8,6 +8,7 @@ import { AlignmentType } from './Triple';
  * Calculate the alignment of every subject group with every shape
  * @param {IReportAlignmentArgs} args -  the parameters of the calculation of the alignment
  * @returns {IResult} - A table of result
+ * @todo get unaligned properties
  */
 export function reportAlignment({ query, shapes, option }: IReportAlignmentArgs): IResult {
   const res: IResult = {
