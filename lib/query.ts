@@ -11,7 +11,6 @@ export type Query = Map<string, ITriple[]>;
  * Divide a query into subject group
  * @param {Algebra.Operation} algebraQuery - the algebra of a query
  * @returns {Query} - A query divided into subject group where the predicate has to be an IRI
- * @todo add support for value eg: VALUES (?type) {(snvoc:Comment) (snvoc:Post)}
  * @todo add support for the bind operator
  * @todo add support for optional property path
  */
