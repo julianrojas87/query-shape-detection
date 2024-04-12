@@ -18,7 +18,7 @@ describe.each([
 ])('$name', ({ populateFunction, name }) => {
   const emptyQuad: any = populateFunction([]);
   const unRelatedQuads: any = populateFunction(
-    <RDF.Quad[]>[
+    ([
       DF.quad(
         DF.namedNode('foo'),
         DF.namedNode(shapeIri),
@@ -39,7 +39,7 @@ describe.each([
         SHEX_PREDICATE,
         DF.blankNode(),
       ),
-    ],
+    ] as RDF.Quad[]),
   );
 
   const shapeWithOneProperty: any = populateFunction('./test/shape/shex_shape_one_property.ttl');
@@ -71,10 +71,10 @@ describe.each([
     const shape = await shapeFromQuads(shapeWithOneProperty, shapeIri);
 
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).positivePredicates).toStrictEqual([ 'http://example.org/state' ]);
-    expect((<IShape>shape).negativePredicates).toStrictEqual([]);
-    expect((<IShape>shape).closed).toBe(false);
-    expect((<IShape>shape).name).toBe(shapeIri);
+    expect((shape as IShape).positivePredicates).toStrictEqual([ 'http://example.org/state' ]);
+    expect((shape as IShape).negativePredicates).toStrictEqual([]);
+    expect((shape as IShape).closed).toBe(false);
+    expect((shape as IShape).name).toBe(shapeIri);
   });
 
   it('should returns a closed Shape with multiple properties', async() => {
@@ -87,10 +87,10 @@ describe.each([
       'http://foaf.example/#me',
     ];
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).closed).toBe(true);
-    expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
-    expect((<IShape>shape).negativePredicates).toStrictEqual([]);
-    expect((<IShape>shape).name).toBe(shapeIri);
+    expect((shape as IShape).closed).toBe(true);
+    expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+    expect((shape as IShape).negativePredicates).toStrictEqual([]);
+    expect((shape as IShape).name).toBe(shapeIri);
   });
 
   it('should returns a Shape with multiple properties given some quads representing two shapes', async() => {
@@ -100,10 +100,10 @@ describe.each([
       'http://foaf.example/#mbox',
     ];
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).closed).toBe(false);
-    expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
-    expect((<IShape>shape).negativePredicates).toStrictEqual([]);
-    expect((<IShape>shape).name).toBe(shapeIri);
+    expect((shape as IShape).closed).toBe(false);
+    expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+    expect((shape as IShape).negativePredicates).toStrictEqual([]);
+    expect((shape as IShape).name).toBe(shapeIri);
   });
 
   it('should returns an error given quads representing a shape with no predicate', async() => {
@@ -135,11 +135,11 @@ describe.each([
       `${prefix}/studyAt`,
     ];
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).closed).toBe(true);
+    expect((shape as IShape).closed).toBe(true);
 
-    expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
-    expect((<IShape>shape).negativePredicates).toStrictEqual([]);
-    expect((<IShape>shape).name).toBe(shapeIri);
+    expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+    expect((shape as IShape).negativePredicates).toStrictEqual([]);
+    expect((shape as IShape).name).toBe(shapeIri);
   });
 
   it('should returns a Shape with a negative property', async() => {
@@ -150,10 +150,10 @@ describe.each([
       'http://example.org/state',
     ];
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).closed).toBe(false);
-    expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
-    expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
-    expect((<IShape>shape).name).toBe(shapeIri);
+    expect((shape as IShape).closed).toBe(false);
+    expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+    expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
+    expect((shape as IShape).name).toBe(shapeIri);
   });
 
   it('should returns a Shape with positive and negative properties', async() => {
@@ -167,10 +167,10 @@ describe.each([
       'http://xmlns.com/foaf/0.1/prop4',
     ];
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).closed).toBe(false);
-    expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
-    expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
-    expect((<IShape>shape).name).toBe(shapeIri);
+    expect((shape as IShape).closed).toBe(false);
+    expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
+    expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+    expect((shape as IShape).name).toBe(shapeIri);
   });
 
   it('should handle a shape with multiple cardinalities', async() => {
@@ -195,13 +195,13 @@ describe.each([
       [ 'http://xmlns.com/foaf/0.1/prop7', { min: 0, max: -1 }],
     ]);
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).closed).toBe(false);
-    expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
-    expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
-    expect((<IShape>shape).name).toBe(shapeIri);
-    for (const predicate of (<IShape>shape).positivePredicates) {
+    expect((shape as IShape).closed).toBe(false);
+    expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
+    expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+    expect((shape as IShape).name).toBe(shapeIri);
+    for (const predicate of (shape as IShape).positivePredicates) {
       const expectedCardinality = mapCardinality.get(predicate);
-      const cardinality = (<IShape>shape).get(predicate)?.cardinality;
+      const cardinality = (shape as IShape).get(predicate)?.cardinality;
       expect(cardinality).toStrictEqual(expectedCardinality);
     }
   });
@@ -256,15 +256,15 @@ describe.each([
       ],
     ]);
     expect(shape).not.toBeInstanceOf(Error);
-    expect((<IShape>shape).closed).toBe(false);
-    expect((<IShape>shape).negativePredicates).toStrictEqual(negativePredicates);
-    expect((<IShape>shape).positivePredicates).toStrictEqual(expectedPredicates);
-    expect((<IShape>shape).name).toBe(shapeIri);
-    for (const predicate of (<IShape>shape).positivePredicates) {
+    expect((shape as IShape).closed).toBe(false);
+    expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
+    expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+    expect((shape as IShape).name).toBe(shapeIri);
+    for (const predicate of (shape as IShape).positivePredicates) {
       const expectedCardinality = mapCardinality.get(predicate);
       const expectedConstraint = mapConstraint.get(predicate);
 
-      const resPredicate = (<IShape>shape).get(predicate);
+      const resPredicate = (shape as IShape).get(predicate);
       expect(resPredicate?.cardinality).toStrictEqual(expectedCardinality);
       expect(resPredicate?.constraint).toStrictEqual(expectedConstraint);
     }
@@ -286,7 +286,7 @@ describe.each([
       };
       const err = await shapeFromQuads(stream, shapeIri);
       expect(err).toBeInstanceOf(Error);
-      expect((<Error>err).message).toBe('foo');
+      expect((err as Error).message).toBe('foo');
     });
   }
 });

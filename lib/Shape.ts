@@ -82,7 +82,7 @@ export class Shape implements IShape {
   public readonly negativePredicates: string[];
   public readonly closed?: boolean;
   // All the predicate with extra information
-  private readonly predicates: Map<string, IPredicate> = new Map();
+  private readonly predicates = new Map<string, IPredicate>();
 
   /**
    *

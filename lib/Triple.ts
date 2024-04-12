@@ -22,10 +22,13 @@ export const enum AlignmentType {
  */
 export interface ITripleArgs {
   subject: string;
-  // / The iri of a property
+  // The iri of a property
   predicate: string;
-  // / The object related to the property
-  object: Term;
+  // The object related to the property
+  // if there are multiple object than it means that
+  // the object was a variable and a VALUES clase was used
+  // to bind it to multiple values
+  object: Term | Term[];
   isOptional?: boolean;
 }
 /**
@@ -34,7 +37,7 @@ export interface ITripleArgs {
 export class Triple implements ITriple {
   public readonly predicate: string;
   public readonly subject: string;
-  public readonly object: Term;
+  public readonly object: Term | Term[];
 
   /**
    *
@@ -63,7 +66,7 @@ export class Triple implements ITriple {
   }
 
   public getLinkedSubjectGroup(): string | undefined {
-    if (this.object.termType === "Variable") {
+    if (!Array.isArray(this.object) && this.object?.termType === "Variable") {
       return this.object.value
     }
   }

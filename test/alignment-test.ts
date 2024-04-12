@@ -172,6 +172,64 @@ describe('subjectGroupIsAligned', () => {
       expect(subjectGroupIsAligned(triples, shapes)).toBe(AlignmentType.STRONG);
     });
 
+    it('should strongly aligned given a matching RDF type with a triple with multiple objects', () => {
+      const argShape: any = {
+        name: 'foo',
+        closed: true,
+        positivePredicates:
+          [
+            'bar',
+            'bar0',
+            {
+              name: TYPE_DEFINITION.value,
+              constraint:
+              {
+                value: new Set([ 'bar' ]),
+                type: ContraintType.TYPE,
+              },
+            },
+          ],
+      };
+      const shapes = new Shape(argShape);
+      const triples: ITriple[] = [
+        new Triple({ subject: 'foo', predicate: 'too', object: AN_OBJECT }),
+        new Triple({ subject: 'foo', predicate: 'bar', object: AN_OBJECT }),
+        new Triple({ subject: 'foo', predicate: 'too2', object: AN_OBJECT }),
+        new Triple({ subject: 'foo', predicate: TYPE_DEFINITION.value, object: [DF.namedNode('foo'), DF.namedNode('bar')] }),
+      ];
+
+      expect(subjectGroupIsAligned(triples, shapes)).toBe(AlignmentType.STRONG);
+    });
+
+    it('should be weakly aligned given a shape defining an RDF type with a triple with multiple objects', () => {
+      const argShape: any = {
+        name: 'foo',
+        closed: true,
+        positivePredicates:
+          [
+            'bar',
+            'bar0',
+            {
+              name: TYPE_DEFINITION.value,
+              constraint:
+              {
+                value: new Set([ 'too' ]),
+                type: ContraintType.TYPE,
+              },
+            },
+          ],
+      };
+      const shapes = new Shape(argShape);
+      const triples: ITriple[] = [
+        new Triple({ subject: 'foo', predicate: 'too', object: AN_OBJECT }),
+        new Triple({ subject: 'foo', predicate: 'bar', object: AN_OBJECT }),
+        new Triple({ subject: 'foo', predicate: 'too2', object: AN_OBJECT }),
+        new Triple({ subject: 'foo', predicate: TYPE_DEFINITION.value, object: [DF.namedNode('foo'), DF.namedNode('bar')] }),
+      ];
+
+      expect(subjectGroupIsAligned(triples, shapes)).toBe(AlignmentType.WEAK);
+    });
+
     it('should not be strongly aligned given a non-matching RDF type', () => {
       const argShape: any = {
         name: 'foo',

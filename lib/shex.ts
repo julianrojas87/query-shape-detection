@@ -122,7 +122,7 @@ function concatShapeInfo(
   // If there is only one expression
   if (expressions === undefined) {
     argsFunctionPredicate.current = expression;
-    const predicateAdded = appendPredicates(<Required<IAppendPredicateArgs>> argsFunctionPredicate);
+    const predicateAdded = appendPredicates((argsFunctionPredicate as Required<IAppendPredicateArgs>));
     if (!predicateAdded) {
       return new ShapePoorlyFormatedError('there are no predicates in the shape');
     }
@@ -134,7 +134,7 @@ function concatShapeInfo(
   // Traverse the RDF list
   while (current !== undefined) {
     argsFunctionPredicate.current = current;
-    appendPredicates(<Required<IAppendPredicateArgs>> argsFunctionPredicate);
+    appendPredicates((argsFunctionPredicate as Required<IAppendPredicateArgs>));
     if (next === undefined) {
       return new ShapePoorlyFormatedError('An RDF list is poorly defined');
     }
@@ -155,7 +155,7 @@ function concatShapeInfo(
       closed: isClosed,
     });
   } catch (error: unknown) {
-    return <ShapeError>error;
+    return error as ShapeError;
   }
 }
 

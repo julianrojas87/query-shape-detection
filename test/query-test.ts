@@ -19,9 +19,8 @@ describe('query', () => {
       const x = resp.get('x')!;
       expect(x).toBeDefined();
       expect(x[0].predicate).toBe('http://exemple.ca');
-      expect(x[0].object.termType).toBe('Variable');
-      expect(x[0].object.value).toBe('z');
-      expect(x[0].getLinkedSubjectGroup()).toBe('z');
+      expect((x[0].object as any).termType).toBe('Variable');
+      expect((x[0].object as any).value).toBe('z');
     });
 
     it('should return the triple given a query with two triples where one triple have a dependence', () => {
@@ -29,16 +28,16 @@ describe('query', () => {
         ?x <http://exemple.ca> ?z .
         ?y <http://exemple.ca> ?x .
       }`;
-      const expectedResp: Map<string, any> = new Map([
-        [ 'x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
-        [ 'y', [{ subject: 'y', predicate: 'http://exemple.ca', object: DF.variable('x') }]],
+      const expectedResp = new Map<string, any>([
+        ['x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
+        ['y', [{ subject: 'y', predicate: 'http://exemple.ca', object: DF.variable('x') }]],
       ]);
 
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [ subject, triples ] of resp) {
-        for (const [ i, triple ] of triples.entries()) {
+      for (const [subject, triples] of resp) {
+        for (const [i, triple] of triples.entries()) {
           expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
@@ -59,11 +58,11 @@ describe('query', () => {
                 <http://sujet.cm> <http://predicat.cm> "def" .
                 <http://sujet.cm> ?m "def" .
             }`;
-      const expectedResp: Map<string, any> = new Map([
-        [ 'x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
-        [ 'z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
-        [ 'w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
-        [ 'http://sujet.cm', [
+      const expectedResp = new Map<string, any>([
+        ['x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
+        ['z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
+        ['w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
+        ['http://sujet.cm', [
           {
             subject: 'http://sujet.cm',
             predicate: 'http://predicat.cm',
@@ -75,8 +74,8 @@ describe('query', () => {
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [ subject, triples ] of resp) {
-        for (const [ i, triple ] of triples.entries()) {
+      for (const [subject, triples] of resp) {
+        for (const [i, triple] of triples.entries()) {
           expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
@@ -93,15 +92,15 @@ describe('query', () => {
                 ?a <http://exemple.be>|<http://exemple.qc.ca> <http://objet.fr> .
                 <http://sujet.cm> ?m "def" .
             }`;
-      const expectedResp: Map<string, any> = new Map([
-        [ 'x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
-        [ 'z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
-        [ 'w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
-        [ 'a', [
+      const expectedResp = new Map<string, any>([
+        ['x', [{ subject: 'x', predicate: 'http://exemple.ca', object: DF.variable('z') }]],
+        ['z', [{ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }]],
+        ['w', [{ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }]],
+        ['a', [
           { subject: 'a', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') },
           { subject: 'a', predicate: 'http://exemple.qc.ca', object: DF.namedNode('http://objet.fr') },
         ]],
-        [ 'http://sujet.cm', [
+        ['http://sujet.cm', [
           {
             subject: 'http://sujet.cm',
             predicate: 'http://predicat.cm',
@@ -113,8 +112,42 @@ describe('query', () => {
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [ subject, triples ] of resp) {
-        for (const [ i, triple ] of triples.entries()) {
+      for (const [subject, triples] of resp) {
+        for (const [i, triple] of triples.entries()) {
+          expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
+        }
+      }
+    });
+
+    it('should return the subject group with a VALUES clause', () => {
+      const query = `
+      SELECT * WHERE
+      {
+          VALUES (?type ?person) {(UNDEF <http://exemple.be/Person>) (<http://exemple.be/Post> <http://exemple.be/Persoon>)}
+
+          ?x a ?person .
+          ?y <http://exemple.be> ?type .
+      }
+      `;
+      const expectedResp = new Map<string, any>([
+        ['x', [
+          {
+            subject: 'x', predicate: RDF_TYPE, object: [
+              DF.namedNode('http://exemple.be/Person'),
+              DF.namedNode('http://exemple.be/Persoon')
+            ]
+          }
+        ]
+        ],
+
+        ['y', [{ subject: 'y', predicate: 'http://exemple.be', object: [DF.namedNode('http://exemple.be/Post')] }]],
+      ]);
+
+      const resp = generateQuery(translate(query));
+
+      expect(resp.size).toBe(expectedResp.size);
+      for (const [subject, triples] of resp) {
+        for (const [i, triple] of triples.entries()) {
           expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
@@ -140,7 +173,7 @@ describe('query', () => {
       }`;
       const comment_philippines = 'http://localhost:3000/pods/00000002199023256081/comments/Philippines#274878069404';
       const expectedResp = new Map([
-        [ 's',
+        ['s',
           [
             { subject: 's', predicate: `${SNVOC_PREFIX}id`, object: DF.variable('messageId') },
             { subject: 's', predicate: `${SNVOC_PREFIX}hasCreator`, object: DF.variable('messageCreator') },
@@ -181,8 +214,8 @@ describe('query', () => {
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [ subject, triples ] of resp) {
-        for (const [ i, triple ] of triples.entries()) {
+      for (const [subject, triples] of resp) {
+        for (const [i, triple] of triples.entries()) {
           expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
@@ -247,8 +280,8 @@ describe('query', () => {
       const resp = generateQuery(translate(query));
 
       expect(resp.size).toBe(expectedResp.size);
-      for (const [ subject, triples ] of resp) {
-        for (const [ i, triple ] of triples.entries()) {
+      for (const [subject, triples] of resp) {
+        for (const [i, triple] of triples.entries()) {
           expect(triple.toObject()).toStrictEqual(expectedResp.get(subject)![i]);
         }
       }
