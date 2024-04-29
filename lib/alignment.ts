@@ -15,7 +15,7 @@ import type { Term } from '@rdfjs/types';
  */
 export function reportAlignment({ query, shapes, option }: IReportAlignmentArgs): IResult {
   const res: IResult = {
-    allSubjectGroupsHaveStrongAlignment: false,
+    knownSearchDomain: false,
     alignedTable: new Map(),
     unAlignedShapes: new Set(),
   };
@@ -23,10 +23,8 @@ export function reportAlignment({ query, shapes, option }: IReportAlignmentArgs)
   if (query.size === 0 || shapes.length === 0) {
     return res;
   }
+  const [alignmentFunction, weakAlignment] = setAlignmentFunction(option);
 
-  const alignmentFunction = option.strongAlignment === true ?
-    subjectGroupIsAligned :
-    subjectGroupIsWeaklyAligned;
 
   calculateAligment(query, shapes, res, alignmentFunction);
 
@@ -34,7 +32,23 @@ export function reportAlignment({ query, shapes, option }: IReportAlignmentArgs)
     calculateAlignmentWithIntersection(query, shapes, res);
   }
   reportUnalignedShapes(shapes, res);
+
+  if (!weakAlignment) {
+    res.knownSearchDomain = (option.completeSearchSpace ?? false) ||
+      res.unAlignedShapes.size === 0;
+  }
   return res;
+}
+
+
+function setAlignmentFunction(option: IOptions): [AlignmentFunction, boolean] {
+  if (option.strongAlignment === true) {
+    return [subjectGroupIsAligned, false];
+  }
+  if (option.containment === true || option.shapeIntersection === true) {
+    return [subjectGroupIsContained, false]
+  }
+  return [subjectGroupIsWeaklyAligned, true]
 }
 
 function reportUnalignedShapes(shapes: IShape[], res: IResult): void {
@@ -164,7 +178,7 @@ function calculateAligment(
       allSubjectGroupHaveStrongAlignment = false;
     }
   }
-  res.allSubjectGroupsHaveStrongAlignment = allSubjectGroupHaveStrongAlignment;
+  res.knownSearchDomain = allSubjectGroupHaveStrongAlignment;
 }
 
 /**
@@ -189,6 +203,27 @@ export function subjectGroupIsWeaklyAligned(subjectGroup: ITriple[], shape: ISha
     }
   }
   return AlignmentType.None;
+}
+
+/**
+ * Determine if a subject group is contained inside a shape
+ * @param {ITriple[]} subjectGroup
+ * @param {IShape[]} shapes
+ * @returns {WeakAligmentOrNone}
+ */
+export function subjectGroupIsContained(subjectGroup: ITriple[], shape: IShape): WeakAligmentOrNone {
+
+  if (shape.closed === false) {
+    return AlignmentType.WEAK;
+  }
+
+  for (const triple of subjectGroup) {
+    const isAlign = triple.isWeaklyAlign(shape);
+    if (!isAlign) {
+      return AlignmentType.None;
+    }
+  }
+  return AlignmentType.WEAK;
 }
 
 /**
@@ -256,6 +291,7 @@ function checkIfTripleHasTheRightClass(object: Term | Term[], predicatePropertie
   }
   return false;
 }
+
 function degreeOfAlignmentExclusif(subjectGroup: ITriple[], shape: IShape): number {
   let deg = 0;
 
@@ -283,8 +319,14 @@ export interface IReportAlignmentArgs {
  * The options for the alignment algorithm
  */
 export interface IOptions {
+  // Prioritize based on a distance metric with a containment
   shapeIntersection?: boolean;
+  // Prioritize the RDF class of a shape
   strongAlignment?: boolean;
+  // Use a containment algorithm
+  containment?: boolean;
+  // Indicate that the search space is complete
+  completeSearchSpace?: boolean;
 }
 
 type subjectGroupName = string;
@@ -295,7 +337,7 @@ type AlignmentResults = Map<ShapeName, AlignmentType>;
  * The alignment result
  */
 export interface IResult {
-  allSubjectGroupsHaveStrongAlignment: boolean;
+  knownSearchDomain: boolean;
   alignedTable: Map<subjectGroupName, AlignmentResults>;
   unAlignedShapes: Set<ShapeName>;
 }
