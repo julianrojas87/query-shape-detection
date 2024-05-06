@@ -18,6 +18,11 @@ export interface IShape extends IShapeObj {
    * @returns {IPredicate[]} - all the predicates with extra information
    */
   getAll: () => IPredicate[];
+  /**
+   * get the IRIs of the shape necessary for the constraint
+   * @returns {Set<string>} - IRIs of the shape necessary for the constraint
+   */
+  getLinkedShapeIri: () => Set<string>;
 }
 
 /**
@@ -71,6 +76,7 @@ export interface IShapeObj {
 export interface IShapeArgs extends Omit<IShapeObj, 'positivePredicates' | 'negativePredicates'> {
   positivePredicates: (IPredicate | string)[];
   negativePredicates?: (IPredicate | string)[];
+  linkedShapeIri?: string[]
 }
 
 /**
@@ -81,6 +87,7 @@ export class Shape implements IShape {
   public readonly positivePredicates: string[];
   public readonly negativePredicates: string[];
   public readonly closed?: boolean;
+  public readonly linkedShapeIri: Set<string>;
   // All the predicate with extra information
   private readonly predicates = new Map<string, IPredicate>();
 
@@ -91,6 +98,7 @@ export class Shape implements IShape {
   public constructor({ name, positivePredicates, negativePredicates, closed }: IShapeArgs) {
     this.name = name;
     this.closed = closed ?? false;
+    const linkedShapeIri: Set<string> = new Set();
 
     this.positivePredicates = positivePredicates.map(val => {
       if (typeof val === 'string') {
@@ -113,6 +121,11 @@ export class Shape implements IShape {
       if (typeof predicate === 'string') {
         this.predicates.set(predicate, { name: predicate });
       } else {
+        if (predicate.constraint !== undefined && predicate?.constraint.type === ContraintType.SHAPE) {
+          for (const value of predicate.constraint.value) {
+            linkedShapeIri.add(value);
+          }
+        }
         this.predicates.set(predicate.name,
           {
             ...predicate,
@@ -120,6 +133,8 @@ export class Shape implements IShape {
           });
       }
     }
+
+    this.linkedShapeIri = linkedShapeIri;
 
     for (const predicate of negativePredicates ?? []) {
       if (typeof predicate === 'string') {
@@ -165,7 +180,11 @@ export class Shape implements IShape {
   }
 
   public getAll(): IPredicate[] {
-    return [ ...this.predicates.values() ];
+    return [...this.predicates.values()];
+  }
+
+  public getLinkedShapeIri(): Set<string> {
+    return this.linkedShapeIri;
   }
 }
 /**

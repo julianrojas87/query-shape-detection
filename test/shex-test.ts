@@ -260,6 +260,8 @@ describe.each([
     expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
     expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
     expect((shape as IShape).name).toBe(shapeIri);
+    expect((shape as IShape).getLinkedShapeIri()).toStrictEqual(new Set(['http:exemple.ca/bar']));
+
     for (const predicate of (shape as IShape).positivePredicates) {
       const expectedCardinality = mapCardinality.get(predicate);
       const expectedConstraint = mapConstraint.get(predicate);

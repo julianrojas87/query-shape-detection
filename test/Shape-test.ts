@@ -4,14 +4,14 @@ describe('Shape', () => {
   describe('constructor', () => {
     it('should throw an error given a shape with inconsistent positive and negative properties', () => {
       expect(() =>
-        new Shape({ name: 'foo', positivePredicates: [ 'a', 'b' ], negativePredicates: [ 'c', 'a' ]}))
+        new Shape({ name: 'foo', positivePredicates: ['a', 'b'], negativePredicates: ['c', 'a'] }))
         .toThrow(InconsistentPositiveAndNegativePredicateError);
     });
   });
 
   describe('toObject', () => {
     it('should return a shape with no predicate', () => {
-      const shape = new Shape({ name: '', positivePredicates: []});
+      const shape = new Shape({ name: '', positivePredicates: [] });
       const expectedShape = {
         name: '',
         positivePredicates: [],
@@ -23,7 +23,7 @@ describe('Shape', () => {
     });
 
     it('should return a shape with positive predicates', () => {
-      const predicates = [ 'a', 'b', 'c' ];
+      const predicates = ['a', 'b', 'c'];
       const shape = new Shape({ name: 'foo', positivePredicates: predicates, closed: true });
       const expectedShape = {
         name: 'foo',
@@ -36,7 +36,7 @@ describe('Shape', () => {
     });
 
     it('should return a shape with negative predicates', () => {
-      const predicates = [ 'a', 'b', 'c' ];
+      const predicates = ['a', 'b', 'c'];
       const shape = new Shape({ name: 'foo', positivePredicates: [], negativePredicates: predicates, closed: true });
       const expectedShape = {
         name: 'foo',
@@ -49,8 +49,8 @@ describe('Shape', () => {
     });
 
     it('should return a shape with positive and negative predicates', () => {
-      const positivePredicates = [ 'a', 'b', 'c' ];
-      const negativePredicates = [ 'd', 'e', 'f' ];
+      const positivePredicates = ['a', 'b', 'c'];
+      const negativePredicates = ['d', 'e', 'f'];
 
       const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
       const expectedShape = {
@@ -64,8 +64,8 @@ describe('Shape', () => {
     });
 
     it('should throw an error if a the negative and positive predicate are shared', () => {
-      const positivePredicates = [ 'a', 'b', 'c' ];
-      const negativePredicates = [ 'd', 'a', 'f' ];
+      const positivePredicates = ['a', 'b', 'c'];
+      const negativePredicates = ['d', 'a', 'f'];
 
       expect(() => new Shape({ name: 'foo', positivePredicates, negativePredicates }))
         .toThrow('the predicate a is defined in the positive and the negative property');
@@ -85,7 +85,7 @@ describe('Shape', () => {
       },
       'c',
     ];
-    const negativePredicates = [{ name: 'd' }, 'e', 'f' ];
+    const negativePredicates = [{ name: 'd' }, 'e', 'f'];
 
     const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
 
@@ -132,7 +132,7 @@ describe('Shape', () => {
       },
       'c',
     ];
-    const negativePredicates = [ 'd', 'e', 'f' ];
+    const negativePredicates = ['d', 'e', 'f'];
 
     const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
 
@@ -160,9 +160,52 @@ describe('Shape', () => {
     });
 
     it('should get all predicates with a shape with no predicates', () => {
-      const shapeWithNoProperties = new Shape({ name: 'foo', positivePredicates: []});
+      const shapeWithNoProperties = new Shape({ name: 'foo', positivePredicates: [] });
 
       expect(shapeWithNoProperties.getAll()).toStrictEqual([]);
     });
   });
+
+  describe('getLinkedShapeIri', () => {
+    const positivePredicates: any = [
+      'a',
+      {
+        name: 'b',
+        cardinality: { min: 0, max: 33 },
+        constraint: {
+          value: new Set(['foo']),
+          type: ContraintType.SHAPE,
+        },
+      },
+      {
+        name: 'c',
+        cardinality: { min: 0, max: 33 },
+        constraint: {
+          value: new Set(['bar']),
+          type: ContraintType.SHAPE,
+        },
+      },
+    ];
+    const negativePredicates = ['d', 'e', 'f'];
+
+    const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
+
+    it('should return the linked shape IRI', () => {
+      const expectedLinkedShapeIri = new Set(['foo', 'bar']);
+      expect(shape.getLinkedShapeIri()).toStrictEqual(expectedLinkedShapeIri);
+    });
+
+    it('should return an empty set given there are no shape constraint', () => {
+      const shapeWithNoLink = new Shape({
+        name: 'foo', positivePredicates: ['a', 'b', {
+          name: 'c', constraint: {
+            value: new Set(['bar']),
+            type: ContraintType.TYPE,
+          },
+        }]
+      });
+      const expectedLinkedShapeIri = new Set();
+      expect(shapeWithNoLink.getLinkedShapeIri()).toStrictEqual(expectedLinkedShapeIri);
+    });
+  })
 });
