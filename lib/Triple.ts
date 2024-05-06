@@ -2,6 +2,20 @@ import type { Term } from '@rdfjs/types';
 import type { IShape } from './Shape';
 
 /**
+ * The information to create a query from a star pattern
+ */
+export interface IStarPatternWithDependencies {
+  // indexed by predicate
+  starPattern: Map<string, ITripleWithDependencies>;
+  filterExpression?: string;
+}
+
+export interface ITripleWithDependencies {
+  triple: ITriple;
+  dependencies: ITriple[];
+}
+
+/**
  * A Triple interface
  */
 export interface ITriple extends ITripleArgs {
