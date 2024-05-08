@@ -19,9 +19,9 @@ export interface ITripleWithDependencies {
  * A Triple interface
  */
 export interface ITriple extends ITripleArgs {
-  isWeaklyAlign: (shape: IShape) => boolean;
   toObject: () => ITripleArgs;
   getLinkedSubjectGroup: () => string | undefined
+  toString: () => string;
 }
 /**
  * The type of alignment
@@ -65,6 +65,7 @@ export class Triple implements ITriple {
     Object.freeze(this.predicate);
     Object.freeze(this.object);
     Object.freeze(this.subject);
+    Object.freeze(this);
   }
 
   /**
@@ -85,22 +86,8 @@ export class Triple implements ITriple {
     }
   }
 
-  /**
-   * Calculate the weak alignment with a shape
-   * @param {IShape} shape - A shape
-   * @returns {boolean} - return true if the triple is weakly aligned with the shape
-   */
-  public isWeaklyAlign(shape: IShape): boolean {
-    if (shape.closed === false) {
-      return true;
-    }
-
-    for (const predicat of shape.positivePredicates) {
-      if (predicat === this.predicate) {
-        return true;
-      }
-    }
-
-    return false;
+  public toString(): string {
+    return `<${this.subject}> <${this.predicate}> <${JSON.stringify(this.object)}>`;
   }
+
 }

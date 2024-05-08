@@ -1,4 +1,4 @@
-import type * as RDF from '@rdfjs/types';
+import * as RDF from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
 import { Shape } from '../lib/Shape';
 import { Triple } from '../lib/Triple';
@@ -21,53 +21,24 @@ describe('Triple', () => {
     });
   });
 
-  describe('isWeaklyAlign', () => {
-    it('should align with an open shape', () => {
-      const triple = new Triple({
+  describe('toString', () => {
+    it('should return the string version of the triple', () => {
+      const object = [DF.literal('foo', DF.namedNode('bar'))];
+      const objectTriple: any = {
         subject: 'a',
         predicate: 'b',
-        object: AN_OBJECT,
-      });
-      const shape = new Shape({ closed: false, positivePredicates: [ 'b' ], name: 'foo' });
+        object
+      };
+      const triple = new Triple(objectTriple);
 
-      expect(triple.isWeaklyAlign(shape)).toBe(true);
-    });
+      const resp = `<a> <b> <${JSON.stringify(object)}>`;
 
-    it('should align with a close shape given a shared predicate', () => {
-      const triple = new Triple({
-        subject: 'a',
-        predicate: 'b',
-        object: AN_OBJECT,
-      });
-      const shape = new Shape({
-        closed: true,
-        positivePredicates: [ 'd', 'e', 'b' ],
-        negativePredicates: [ '1', '2' ],
-        name: 'foo',
-      });
-
-      expect(triple.isWeaklyAlign(shape)).toBe(true);
-    });
-
-    it('should not align with a close shape with no shared predicate', () => {
-      const triple = new Triple({
-        subject: 'a',
-        predicate: 'b',
-        object: AN_OBJECT,
-      });
-      const shape = new Shape({
-        closed: true,
-        positivePredicates: [ 'd', 'e', 'a' ],
-        negativePredicates: [ '1', '2', 'b' ],
-        name: 'foo',
-      });
-
-      expect(triple.isWeaklyAlign(shape)).toBe(false);
+      expect(triple.toString()).toStrictEqual(resp);
     });
   });
 
-  describe('getLinkedSubjectGroup', ()=>{
-    it('should return undefined if the object is not a variable', ()=>{
+  describe('getLinkedSubjectGroup', () => {
+    it('should return undefined if the object is not a variable', () => {
       const triple = new Triple({
         subject: 'a',
         predicate: 'b',
@@ -77,7 +48,7 @@ describe('Triple', () => {
       expect(triple.getLinkedSubjectGroup()).toBeUndefined();
     });
 
-    it('should return the variable', ()=>{
+    it('should return the variable', () => {
       const triple = new Triple({
         subject: 'a',
         predicate: 'b',
