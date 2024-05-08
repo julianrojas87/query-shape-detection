@@ -82,6 +82,95 @@ describe('query', () => {
 
     });
 
+    it('should return the triple given a query with nested dependence', () => {
+      const query = `SELECT * WHERE { 
+        ?x <http://exemple.be> ?y .
+        ?x <http://exemple.ca> ?w .
+        ?y <http://exemple.be> ?z .
+        ?z <http://exemple.be> ?w .
+      }`;
+
+      const zStarPattern: [string, IStarPatternWithDependencies] = ['z',
+        {
+          starPattern: new Map([
+            [
+              'http://exemple.be',
+              {
+                triple: new Triple({
+                  subject: 'z',
+                  predicate: 'http://exemple.be',
+                  object: DF.variable('w')
+                }),
+                dependencies: undefined
+              }
+            ]
+          ])
+        }
+      ];
+
+      const yStarPattern: [string, IStarPatternWithDependencies] = ['y',
+        {
+          starPattern: new Map([
+            [
+              'http://exemple.be',
+              {
+                triple: new Triple({
+                  subject: 'y',
+                  predicate: 'http://exemple.be',
+                  object: DF.variable('z')
+                }),
+                dependencies: zStarPattern[1]
+              }
+            ]
+          ])
+        }
+      ];
+
+      const xStarPattern: [string, IStarPatternWithDependencies] = ['x',
+        {
+          starPattern: new Map([
+            [
+              'http://exemple.be',
+              {
+                triple: new Triple({
+                  subject: 'x',
+                  predicate: 'http://exemple.be',
+                  object: DF.variable('y')
+                }),
+                dependencies: yStarPattern[1]
+              }
+            ],
+            [
+              'http://exemple.ca',
+              {
+                triple: new Triple({
+                  subject: 'x',
+                  predicate: 'http://exemple.ca',
+                  object: DF.variable('w')
+                }),
+                dependencies: undefined
+              }
+            ]
+          ])
+        }
+      ];
+      
+      const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
+        xStarPattern,
+        yStarPattern,
+        zStarPattern,
+      ]);
+
+      const resp = generateQuery(translate(query));
+
+      expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
+      expect(resp.filterExpression).toBe('');
+      for (const [subject, starPatterns] of resp.starPatterns) {
+        expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+      }
+
+    });
+
     it('should return no triple given a query with a bgp with only variable', () => {
       const query = 'SELECT * WHERE { ?x ?o ?z }';
       const resp = generateQuery(translate(query));

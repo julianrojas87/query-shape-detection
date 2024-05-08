@@ -142,8 +142,9 @@ function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, value
 
   for (const [subjectGroup, starPatternWithDependencies] of innerQuery) {
     for (const [predicat, { triple }] of starPatternWithDependencies.starPattern) {
-      if (!Array.isArray(triple.object) && triple.object?.termType === "Variable") {
-        const dependenStarPattern = innerQuery.get(triple.object.value);
+      const linkedSubjectGroup = triple.getLinkedSubjectGroup();
+      if (linkedSubjectGroup!==undefined) {
+        const dependenStarPattern = innerQuery.get(linkedSubjectGroup);
         if (dependenStarPattern !== undefined) {
           innerQuery.get(subjectGroup)!.starPattern.get(predicat)!.dependencies = dependenStarPattern;
         }
