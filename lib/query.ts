@@ -111,8 +111,6 @@ export function generateQuery(algebraQuery: Algebra.Operation): IQuery {
 function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, values: Map<string, Term[]>): IQuery {
   const innerQuery: Map<string, IStarPatternWithDependencies> = new Map();
   const resp: IQuery = { starPatterns: innerQuery, filterExpression: "" };
-  // map of the dependencies by star pattern by predicate
-  const dependencyMap: Map<string, Map<string, string[]>> = new Map();
 
   for (const [subjectGroupName, tripleArgArray] of tripleArgs) {
     for (const tripleArg of tripleArgArray) {
@@ -123,56 +121,34 @@ function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, value
           tripleArg.object = value;
           triple = new Triple(tripleArg);
         }
-        const dependenciesOfTheStarPattern = dependencyMap.get(subjectGroupName);
 
-        if (!Array.isArray(tripleArg.object)) {
-          if (dependenciesOfTheStarPattern === undefined) {
-            dependencyMap.set(subjectGroupName, new Map([[triple.predicate, [tripleArg.object.value]]]));
-          } else {
-            const predicateDependency = dependenciesOfTheStarPattern.get(triple.predicate);
-            if (predicateDependency !== undefined) {
-              predicateDependency.push(tripleArg.object.value);
-            } else {
-              dependenciesOfTheStarPattern.set(triple.predicate, [tripleArg.object.value]);
-            }
-          }
-        }
       }
 
       const starPattern = innerQuery.get(subjectGroupName);
 
       if (starPattern === undefined) {
-        const predicateWithDependencies: ITripleWithDependencies = { triple: triple, dependencies: [] };
+        const predicateWithDependencies: ITripleWithDependencies = { triple: triple, dependencies: undefined };
         innerQuery.set(subjectGroupName, {
           starPattern: new Map([
             [triple.predicate, predicateWithDependencies]
           ])
         });
       } else {
-        const predicateWithDependencies: ITripleWithDependencies = { triple: triple, dependencies: [] };
+        const predicateWithDependencies: ITripleWithDependencies = { triple: triple, dependencies: undefined };
         starPattern.starPattern.set(triple.predicate, predicateWithDependencies);
       }
     }
   }
 
-  for (const [subjectGroupName, tripleDependency] of dependencyMap) {
-    for (const [predicate, subjectDependencies] of tripleDependency) {
-      const starPattern = innerQuery.get(subjectGroupName);
-      if (starPattern !== undefined) {
-        const triplePatternWithDependencies = starPattern.starPattern.get(predicate);
-        if (triplePatternWithDependencies !== undefined) {
-          for (const subjectDependency of subjectDependencies) {
-            if (innerQuery.has(subjectDependency)) {
-              const triples = Array.from(innerQuery.get(subjectDependency)!.starPattern.values()).map(({ triple }) => triple);
-              triplePatternWithDependencies.dependencies = triplePatternWithDependencies.dependencies.concat(triples);
-            }
-
-          }
+  for (const [subjectGroup, starPatternWithDependencies] of innerQuery) {
+    for (const [predicat, { triple }] of starPatternWithDependencies.starPattern) {
+      if (!Array.isArray(triple.object) && triple.object?.termType === "Variable") {
+        const dependenStarPattern = innerQuery.get(triple.object.value);
+        if (dependenStarPattern !== undefined) {
+          innerQuery.get(subjectGroup)!.starPattern.get(predicat)!.dependencies = dependenStarPattern;
         }
       }
     }
   }
-
-
   return resp;
 }

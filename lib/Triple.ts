@@ -12,7 +12,7 @@ export interface IStarPatternWithDependencies {
 
 export interface ITripleWithDependencies {
   triple: ITriple;
-  dependencies: ITriple[];
+  dependencies?: IStarPatternWithDependencies;
 }
 
 /**

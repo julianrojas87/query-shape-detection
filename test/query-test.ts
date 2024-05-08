@@ -3,7 +3,7 @@ import { DataFactory } from 'rdf-data-factory';
 import { translate } from 'sparqlalgebrajs';
 import { TYPE_DEFINITION } from '../lib/constant';
 import { generateQuery } from '../lib/query';
-import { Triple } from '../lib/Triple';
+import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 
 const DF = new DataFactory<BaseQuad>();
 
@@ -31,47 +31,45 @@ describe('query', () => {
         ?x <http://exemple.ca> ?z .
         ?y <http://exemple.be> ?x .
       }`;
-      const expectedStarPattern = new Map<string, any>([
-        ['x',
-          {
-            starPattern: new Map([
-              [
-                'http://exemple.ca',
+
+      const xStarPattern: [string, IStarPatternWithDependencies] = ['x',
+        {
+          starPattern: new Map([
+            [
+              'http://exemple.ca',
+              {
+                triple: new Triple({
+                  subject: 'x',
+                  predicate: 'http://exemple.ca',
+                  object: DF.variable('z')
+                }),
+                dependencies: undefined
+              }
+            ]
+          ])
+        }
+      ];
+      const yStarPattern: [string, IStarPatternWithDependencies] = ['y',
+        {
+          starPattern: new Map(
+            [
+              ['http://exemple.be',
                 {
                   triple: new Triple({
-                    subject: 'x',
-                    predicate: 'http://exemple.ca',
-                    object: DF.variable('z')
+                    subject: 'y',
+                    predicate: 'http://exemple.be',
+                    object: DF.variable('x')
                   }),
-                  dependencies: []
+                  dependencies: xStarPattern[1]
                 }
               ]
-            ])
-          }
-
-        ],
-        ['y',
-          {
-            starPattern: new Map(
-              [
-                ['http://exemple.be',
-                  {
-                    triple: new Triple({
-                      subject: 'y',
-                      predicate: 'http://exemple.be',
-                      object: DF.variable('x')
-                    }),
-                    dependencies: [new Triple({
-                      subject: 'x',
-                      predicate: 'http://exemple.ca',
-                      object: DF.variable('z')
-                    })]
-                  }
-                ]
-              ]
-            )
-          }
-        ],
+            ]
+          )
+        }
+      ];
+      const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
+        xStarPattern,
+        yStarPattern,
       ]);
 
       const resp = generateQuery(translate(query));
@@ -100,88 +98,85 @@ describe('query', () => {
                 <http://sujet.cm> <http://predicat.cm> "def" .
                 <http://sujet.cm> ?m "def" .
             }`;
-      const expectedStarPattern = new Map<string, any>([
-        [
-          'x',
-          {
-            starPattern: new Map([
-              ['http://exemple.ca',
-                {
-                  triple: new Triple({
-                    subject: 'x',
-                    predicate: 'http://exemple.ca',
-                    object: DF.variable('z')
-                  }),
-                  dependencies: [
-                    new Triple({
-                      subject: 'z',
-                      predicate: 'http://exemple.be',
-                      object: DF.literal('abc', RDF_STRING)
-                    }),
-                    new Triple({
-                      subject: 'z',
-                      predicate: 'http://exemple.qc.ca',
-                      object: DF.literal('abc', RDF_STRING)
-                    })
-                  ]
-                }
-              ]
-            ]),
 
-          }
-        ],
-        [
-          'z',
-          {
-            starPattern: new Map([
-              [
-                'http://exemple.be',
-                {
-                  triple: new Triple({ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }),
-                  dependencies: []
-                }
-              ],
-              [
-                'http://exemple.qc.ca',
-                {
-                  triple: new Triple({ subject: 'z', predicate: 'http://exemple.qc.ca', object: DF.literal('abc', RDF_STRING) }),
-                  dependencies: []
-                }
-              ]
-            ])
-          }
-        ],
-        [
-          'w',
-          {
-            starPattern: new Map([
-              [
-                'http://exemple.be',
-                {
-                  triple: new Triple({ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }),
-                  dependencies: []
-                }
-              ]
-            ])
-          }
-        ],
-        [
-          'http://sujet.cm',
-          {
-            starPattern: new Map([
-              ['http://predicat.cm',
-                {
-                  triple: new Triple({
-                    subject: 'http://sujet.cm',
-                    predicate: 'http://predicat.cm',
-                    object: DF.literal('def', RDF_STRING),
-                  }),
-                  dependencies: []
-                }
-              ]
-            ])
-          }
-        ]
+
+
+      const zStarPattern: [string, IStarPatternWithDependencies] = [
+        'z',
+        {
+          starPattern: new Map([
+            [
+              'http://exemple.be',
+              {
+                triple: new Triple({ subject: 'z', predicate: 'http://exemple.be', object: DF.literal('abc', RDF_STRING) }),
+                dependencies: undefined
+              }
+            ],
+            [
+              'http://exemple.qc.ca',
+              {
+                triple: new Triple({ subject: 'z', predicate: 'http://exemple.qc.ca', object: DF.literal('abc', RDF_STRING) }),
+                dependencies: undefined
+              }
+            ]
+          ])
+        }
+      ];
+
+      const xStarPattern: [string, IStarPatternWithDependencies] = [
+        'x',
+        {
+          starPattern: new Map([
+            ['http://exemple.ca',
+              {
+                triple: new Triple({
+                  subject: 'x',
+                  predicate: 'http://exemple.ca',
+                  object: DF.variable('z')
+                }),
+                dependencies: zStarPattern[1]
+              }
+            ]
+          ]),
+        }
+      ];
+
+      const wStarPattern: [string, IStarPatternWithDependencies] = [
+        'w',
+        {
+          starPattern: new Map([
+            [
+              'http://exemple.be',
+              {
+                triple: new Triple({ subject: 'w', predicate: 'http://exemple.be', object: DF.namedNode('http://objet.fr') }),
+                dependencies: undefined
+              }
+            ]
+          ])
+        }
+      ];
+      const sujetStarPattern: [string, IStarPatternWithDependencies] = [
+        'http://sujet.cm',
+        {
+          starPattern: new Map([
+            ['http://predicat.cm',
+              {
+                triple: new Triple({
+                  subject: 'http://sujet.cm',
+                  predicate: 'http://predicat.cm',
+                  object: DF.literal('def', RDF_STRING),
+                }),
+                dependencies: undefined
+              }
+            ]
+          ])
+        }
+      ];
+      const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
+        xStarPattern,
+        zStarPattern,
+        wStarPattern,
+        sujetStarPattern
       ]);
 
       const resp = generateQuery(translate(query));
@@ -325,44 +320,48 @@ describe('query', () => {
           ?y <http://exemple.be> ?type .
       }
       `;
+
+      const xStarPattern: [string, IStarPatternWithDependencies] = [
+        'x',
+        {
+          starPattern: new Map([
+            [
+              RDF_TYPE,
+              {
+                triple: new Triple({
+                  subject: 'x', predicate: RDF_TYPE, object: [
+                    DF.namedNode('http://exemple.be/Person'),
+                    DF.namedNode('http://exemple.be/Persoon')
+                  ]
+                }),
+                dependencies: undefined
+              }
+            ],
+          ])
+        }
+      ];
+      const yStarPattern: [string, IStarPatternWithDependencies] = [
+        'y',
+        {
+          starPattern: new Map([
+            [
+              'http://exemple.be',
+              {
+                triple: new Triple({
+                  subject: 'y',
+                  predicate: 'http://exemple.be',
+                  object: [DF.namedNode('http://exemple.be/Post')]
+                }),
+                dependencies: undefined
+              }
+            ],
+          ])
+        }
+      ];
+
       const expectedStarPattern = new Map<string, any>([
-        [
-          'x',
-          {
-            starPattern: new Map([
-              [
-                RDF_TYPE,
-                {
-                  triple: new Triple({
-                    subject: 'x', predicate: RDF_TYPE, object: [
-                      DF.namedNode('http://exemple.be/Person'),
-                      DF.namedNode('http://exemple.be/Persoon')
-                    ]
-                  }),
-                  dependencies: []
-                }
-              ],
-            ])
-          }
-        ],
-        [
-          'y',
-          {
-            starPattern: new Map([
-              [
-                'http://exemple.be',
-                {
-                  triple: new Triple({
-                    subject: 'y',
-                    predicate: 'http://exemple.be',
-                    object: [DF.namedNode('http://exemple.be/Post')]
-                  }),
-                  dependencies: []
-                }
-              ],
-            ])
-          }
-        ],
+        xStarPattern,
+        yStarPattern
       ]);
 
       const resp = generateQuery(translate(query));
