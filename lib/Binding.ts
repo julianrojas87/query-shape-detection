@@ -1,4 +1,3 @@
-import { Term } from "@rdfjs/types";
 import { ContraintType, IContraint, IPredicate, IShape } from "./Shape";
 import { IStarPatternWithDependencies, type ITriple } from "./Triple";
 
