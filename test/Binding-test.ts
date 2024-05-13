@@ -1,9 +1,8 @@
 import { DataFactory } from 'rdf-data-factory';
 import { Bindings, VisitStatus } from '../lib/Binding';
 import { ContraintType, IShape, Shape } from '../lib/Shape';
-import { IStarPatternWithDependencies, ITripleWithDependencies, Triple } from '../lib/Triple';
+import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 import { BaseQuad } from '@rdfjs/types';
-import { TYPE_DEFINITION } from '../lib/constant';
 
 const DF = new DataFactory<BaseQuad>();
 
