@@ -1,16 +1,43 @@
 import { ContraintType, IContraint, IShape } from "./Shape";
 import { IStarPatternWithDependencies, type ITriple } from "./Triple";
 
+/**
+ * A binding from a query to a shape
+ */
 export interface IBindings {
+    /**
+     * Indicate if a star pattern is contained in a shape
+     * @returns {boolean} indicate if the query is contained in a shape
+     */
     isFullyBounded: () => boolean;
+    /**
+     * Indicate that the documents linked to the shapes should be visited if there are
+     * complete or partial binding
+     * @returns {boolean} indicate if the documents link to the shapes should be visited
+     */
     shouldVisitShape: () => boolean;
+    /**
+     * 
+     * Return the unbounded triples
+     * @returns {ITriple[]} The binded triples 
+     */
     getUnboundedTriple: () => ITriple[];
+    /**
+     * Return the bindings, the value is undefined if the triple cannot be bind to the shape
+     * @returns {Map<string, ITriple | undefined>} the internal bindings
+     */
     getBindings: () => Map<string, ITriple | undefined>;
+    /**
+     * Return the bind triple
+     * @returns {ITriple[]} the bind triple
+     */
     getBoundTriple: () => ITriple[];
 }
 
+/**
+ * Calculate the bindings from a shape and a query
+ */
 export class Bindings implements IBindings {
-    // indexed by iri
     // indexed by predicate
     private bindings = new Map<string, ITriple | undefined>();
     private unboundTriple: ITriple[] = [];

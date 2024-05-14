@@ -3,6 +3,13 @@ import type { IQuery } from './query';
 import { IShape } from './Shape';
 import type { ITriple } from './Triple';
 
+/**
+ * Determine if a query is contained inside a shape.
+ * It provide detail information about the containment and weither or not 
+ * the documents linked with the shape should be followed.
+ * @param param {IContainementArg} - the shape and the query to evaluate
+ * @returns {IResult} result relative to the containement of the query inside of the shape
+ */
 export function solveShapeQueryContainment({ query, shapes }: IContainementArg): IResult {
   const bindingResult = new Map<ShapeName, Map<StarPatternName, Bindings>>();
   const starPatternsContainment = new Map<StarPatternName, IContainmentResult>();
@@ -106,7 +113,7 @@ function generateVisitStatus(bindings: Map<ShapeName, Map<StarPatternName, Bindi
 }
 
 
-export interface IShapeWithDependencies {
+interface IShapeWithDependencies {
   shape: IShape;
   dependencies: Map<string, IShape>;
 }
@@ -120,30 +127,56 @@ type QueryStarPattern = Map<string, ITriple | undefined>;
 export interface IContainementArg {
   query: IQuery;
   shapes: IShape[];
+  // additional shapes to not be calculated
   dependentShapes?: IShape[];
 }
 
 
 export type ShapeName = string;
 
+/**
+ * The result of the alignment
+ */
 export interface IResult {
+  // URL from the object of triples that are not bound by a shape
   conditionalLink: IConditionalLink[];
+  // The documents associated with a shape that can be followed
   visitShapeBoundedResource: Map<ShapeName, boolean>;
+  // The type of containment of each star patterns with there associated shapes
   starPatternsContainment: Map<StarPatternName, IContainmentResult>;
 }
 
+/**
+ * The result of a containement
+ */
 export interface IContainmentResult {
+  // The type of containement
   result: ContainmentResult;
+  /**
+   * The shape iri associated with the containement
+   * Will be undefined if the the star pattern has no alignment with any shape
+   */
   target?: string[];
 }
 
+/**
+ * The result of a containement
+ */
 export enum ContainmentResult {
+  // Is contained
   CONTAIN,
+  // Has at least one binding
   ALIGNED,
+  // Has no binding
   REJECTED,
 }
 
+/**
+ * A conditional link
+ */
 export interface IConditionalLink {
+  // The URL of the link
   link: string,
+  // The star pattern associated with it
   starPatternName: string
 }
