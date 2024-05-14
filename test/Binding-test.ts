@@ -1,5 +1,5 @@
 import { DataFactory } from 'rdf-data-factory';
-import { Bindings, VisitStatus } from '../lib/Binding';
+import { Bindings} from '../lib/Binding';
 import { ContraintType, IShape, Shape } from '../lib/Shape';
 import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 import { BaseQuad } from '@rdfjs/types';
@@ -10,7 +10,7 @@ describe('Bindings', () => {
     describe('empty values',()=>{
         it('should have no binding given an empty star pattern', () => {
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ['prop1'], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
             const starPattern: IStarPatternWithDependencies = {
                 starPattern: new Map()
             };
@@ -18,7 +18,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.REJECT);
+            expect(bindings.shouldVisitShape()).toBe(false);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(new Map());
             expect(bindings.getBoundTriple()).toStrictEqual([]);
@@ -26,7 +26,7 @@ describe('Bindings', () => {
     
         it('should have no binding given a shape with no properties', () => {
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: [], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -51,7 +51,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.REJECT);
+            expect(bindings.shouldVisitShape()).toBe(false);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([]);
@@ -61,7 +61,7 @@ describe('Bindings', () => {
     describe('no constraint',()=>{
         it('should have one binding', () => {
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["p0"], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -86,7 +86,40 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
+            expect(bindings.getUnboundedTriple()).toStrictEqual([]);
+            expect(bindings.getBindings()).toStrictEqual(expectedBindings);
+            expect(bindings.getBoundTriple()).toStrictEqual([triple]);
+        });
+
+        it('should have one binding with an open shape', () => {
+            const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["p_0"], closed: false });
+            const linkedShape = new Map<string, IShape>();
+    
+            const triple: Triple = new Triple({
+                subject: 'y',
+                predicate: 'p0',
+                object: [DF.namedNode('o0')]
+            });
+            const starPattern: IStarPatternWithDependencies = {
+                starPattern: new Map([
+                    [
+                        'p0',
+                        {
+                            triple,
+                            dependencies: undefined
+                        }
+                    ],
+                ])
+            };
+    
+            const expectedBindings = new Map([[triple.predicate, triple]]);
+    
+    
+            const bindings = new Bindings(shape, starPattern, linkedShape);
+    
+            expect(bindings.isFullyBounded()).toBe(true);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
@@ -94,7 +127,7 @@ describe('Bindings', () => {
 
         it('should not binding', () => {
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["p"], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -119,7 +152,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.REJECT);
+            expect(bindings.shouldVisitShape()).toBe(false);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([]);
@@ -127,7 +160,7 @@ describe('Bindings', () => {
 
         it('should have multiple bindings', () => {
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["p0", "p1", "p2"], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple1: Triple = new Triple({
                 subject: 'y',
@@ -180,7 +213,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
@@ -188,7 +221,7 @@ describe('Bindings', () => {
 
         it('should not bind multiple triple', () => {
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["p_", "p1_", "p2_"], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple1: Triple = new Triple({
                 subject: 'y',
@@ -241,7 +274,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.REJECT);
+            expect(bindings.shouldVisitShape()).toBe(false);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple1, triple2, triple3]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([]);
@@ -249,7 +282,7 @@ describe('Bindings', () => {
     
         it('should have one binding and unbounded triples', () => {
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["p0"], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple0: Triple = new Triple({
                 subject: 'y',
@@ -302,7 +335,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.VISIT);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple1, triple2]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple0]);
@@ -330,7 +363,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([['foo1', shapeP1]]);
+            const linkedShape = new Map<string, IShape>([['foo1', shapeP1]]);
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -374,7 +407,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
@@ -394,7 +427,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -438,7 +471,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
@@ -467,7 +500,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([['foo1', shapeP1]]);
+            const linkedShape = new Map<string, IShape>([['foo1', shapeP1]]);
     
             const triple1: Triple = new Triple({
                 subject: 'y',
@@ -541,7 +574,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
@@ -567,7 +600,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([['foo1', shapeP1]]);
+            const linkedShape = new Map<string, IShape>([['foo1', shapeP1]]);
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -593,7 +626,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
@@ -619,7 +652,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([['foo1', shapeP1]]);
+            const linkedShape = new Map<string, IShape>([['foo1', shapeP1]]);
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -663,7 +696,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.REJECT);
+            expect(bindings.shouldVisitShape()).toBe(false);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([]);
@@ -742,7 +775,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([
+            const linkedShape = new Map<string, IShape>([
                 [shapeP1.name, shapeP1],
                 [shapeP2.name, shapeP2],
                 [shapeP3.name, shapeP3],
@@ -909,7 +942,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
@@ -988,7 +1021,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([
+            const linkedShape = new Map<string, IShape>([
                 [shapeP1.name, shapeP1],
                 [shapeP2.name, shapeP2],
                 [shapeP3.name, shapeP3],
@@ -1155,7 +1188,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.VISIT);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple3]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2]);
@@ -1234,7 +1267,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([
+            const linkedShape = new Map<string, IShape>([
                 [shapeP1.name, shapeP1],
                 [shapeP2.name, shapeP2],
                 [shapeP3.name, shapeP3],
@@ -1402,7 +1435,7 @@ describe('Bindings', () => {
     
             expect(bindings.isFullyBounded()).toBe(false);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.REJECT);
+            expect(bindings.shouldVisitShape()).toBe(false);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple1, triple2, triple3]);
             expect(bindings.getBoundTriple()).toStrictEqual([]);
         });
@@ -1419,7 +1452,7 @@ describe('Bindings', () => {
                     }
                 }
             ], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -1444,7 +1477,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
@@ -1460,7 +1493,7 @@ describe('Bindings', () => {
                     }
                 }
             ], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple: Triple = new Triple({
                 subject: 'y',
@@ -1485,7 +1518,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.REJECT);
+            expect(bindings.shouldVisitShape()).toBe(false);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([]);
@@ -1515,7 +1548,7 @@ describe('Bindings', () => {
                     }
                 }
             ], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple1: Triple = new Triple({
                 subject: 'y',
@@ -1568,7 +1601,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
@@ -1598,7 +1631,7 @@ describe('Bindings', () => {
                     }
                 }
             ], closed: true });
-            const linkedShape: Map<string, IShape> = new Map();
+            const linkedShape = new Map<string, IShape>();
     
             const triple1: Triple = new Triple({
                 subject: 'y',
@@ -1651,7 +1684,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.VISIT);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple3]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2]);
@@ -1738,7 +1771,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([
+            const linkedShape = new Map<string, IShape>([
                 [shapeP1.name, shapeP1],
                 [shapeP2.name, shapeP2],
                 [shapeP3.name, shapeP3],
@@ -1905,7 +1938,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(true);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.CONTAIN);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
@@ -1990,7 +2023,7 @@ describe('Bindings', () => {
             });
     
     
-            const linkedShape: Map<string, IShape> = new Map([
+            const linkedShape = new Map<string, IShape>([
                 [shapeP1.name, shapeP1],
                 [shapeP2.name, shapeP2],
                 [shapeP3.name, shapeP3],
@@ -2157,7 +2190,7 @@ describe('Bindings', () => {
             const bindings = new Bindings(shape, starPattern, linkedShape);
     
             expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.getVisitStatus()).toStrictEqual(VisitStatus.VISIT);
+            expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([triple1]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([ triple2, triple3]);

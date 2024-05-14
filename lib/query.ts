@@ -1,6 +1,6 @@
 import type { Term } from '@rdfjs/types';
 import { Algebra, Util } from 'sparqlalgebrajs';
-import { ITriple, ITripleArgs, ITripleWithDependencies, Triple, type IStarPatternWithDependencies } from './Triple';
+import { ITripleArgs, ITripleWithDependencies, Triple, type IStarPatternWithDependencies } from './Triple';
 
 /**
  * A query divided into subject group
@@ -20,7 +20,6 @@ export interface IQuery {
  */
 export function generateQuery(algebraQuery: Algebra.Operation): IQuery {
   const resp = new Map<string, ITripleArgs[]>();
-  const paths: [any, { subject: string; object: Term }][] = [];
   // the binding value to the value
   const values = new Map<string, Term[]>();
 
@@ -44,13 +43,6 @@ export function generateQuery(algebraQuery: Algebra.Operation): IQuery {
     return true;
   };
 
-  const addPaths = (element: any): boolean => {
-    paths.push([element, {
-      subject: element.subject.value,
-      object: element.object,
-    }]);
-    return true;
-  };
 
   const addValues = (element: any): boolean => {
     const bindings: Record<string, Term>[] = element.bindings;
@@ -72,44 +64,17 @@ export function generateQuery(algebraQuery: Algebra.Operation): IQuery {
   Util.recurseOperation(
     algebraQuery,
     {
-      [Algebra.types.PATH]: addPaths,
       [Algebra.types.PATTERN]: addProperty,
       [Algebra.types.VALUES]: addValues,
     },
   );
 
-  for (const [path, { subject, object }] of paths) {
-    const addPropertyPath = (element: any): boolean => {
-      const predicate = element.iri as Term;
-      if (predicate.termType === 'NamedNode') {
-        const subjectGroup = resp.get(subject);
-        const propertyObject: ITripleArgs = {
-          subject,
-          predicate: predicate.value,
-          object,
-        };
-        if (subjectGroup === undefined) {
-          resp.set(subject, [propertyObject]);
-        } else {
-          subjectGroup.push(propertyObject);
-        }
-      }
 
-      return true;
-    };
-
-    Util.recurseOperation(
-      path,
-      {
-        [Algebra.types.LINK]: addPropertyPath,
-      },
-    );
-  }
   return joinTriplesWithProperties(resp, values);
 }
 
 function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, values: Map<string, Term[]>): IQuery {
-  const innerQuery: Map<string, IStarPatternWithDependencies> = new Map();
+  const innerQuery = new Map<string, IStarPatternWithDependencies>();
   const resp: IQuery = { starPatterns: innerQuery, filterExpression: "" };
 
   for (const [subjectGroupName, tripleArgArray] of tripleArgs) {
@@ -143,7 +108,7 @@ function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, value
   for (const [subjectGroup, starPatternWithDependencies] of innerQuery) {
     for (const [predicat, { triple }] of starPatternWithDependencies.starPattern) {
       const linkedSubjectGroup = triple.getLinkedSubjectGroup();
-      if (linkedSubjectGroup!==undefined) {
+      if (linkedSubjectGroup !== undefined) {
         const dependenStarPattern = innerQuery.get(linkedSubjectGroup);
         if (dependenStarPattern !== undefined) {
           innerQuery.get(subjectGroup)!.starPattern.get(predicat)!.dependencies = dependenStarPattern;

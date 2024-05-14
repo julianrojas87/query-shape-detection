@@ -1,5 +1,4 @@
 import type { Term } from '@rdfjs/types';
-import type { IShape } from './Shape';
 
 /**
  * The information to create a query from a star pattern

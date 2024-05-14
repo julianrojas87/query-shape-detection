@@ -65,7 +65,7 @@ export const enum ContraintType {
  */
 export interface IShapeObj {
   name: string;
-  closed?: boolean;
+  closed: boolean;
   positivePredicates: string[];
   negativePredicates?: string[];
 }
@@ -73,10 +73,11 @@ export interface IShapeObj {
 /**
  * The argument to generate a {Shape} instance
  */
-export interface IShapeArgs extends Omit<IShapeObj, 'positivePredicates' | 'negativePredicates'> {
+export interface IShapeArgs extends Omit<IShapeObj, 'positivePredicates' | 'negativePredicates' | 'closed'> {
   positivePredicates: (IPredicate | string)[];
   negativePredicates?: (IPredicate | string)[];
   linkedShapeIri?: string[]
+  closed?: boolean;
 }
 
 /**
@@ -86,7 +87,7 @@ export class Shape implements IShape {
   public readonly name: string;
   public readonly positivePredicates: string[];
   public readonly negativePredicates: string[];
-  public readonly closed?: boolean;
+  public readonly closed: boolean;
   public readonly linkedShapeIri: Set<string>;
   // All the predicate with extra information
   private readonly predicates = new Map<string, IPredicate>();
@@ -98,7 +99,7 @@ export class Shape implements IShape {
   public constructor({ name, positivePredicates, negativePredicates, closed }: IShapeArgs) {
     this.name = name;
     this.closed = closed ?? false;
-    const linkedShapeIri: Set<string> = new Set();
+    const linkedShapeIri = new Set<string>();
 
     this.positivePredicates = positivePredicates.map(val => {
       if (typeof val === 'string') {

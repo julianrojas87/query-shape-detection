@@ -8,7 +8,7 @@ import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 const DF = new DataFactory<BaseQuad>();
 
 const RDF_STRING = DF.namedNode('http://www.w3.org/2001/XMLSchema#string');
-const SNVOC_PREFIX = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/';
+//const SNVOC_PREFIX = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/';
 const RDF_TYPE = TYPE_DEFINITION.value;
 
 describe('query', () => {
@@ -17,7 +17,7 @@ describe('query', () => {
       const query = 'SELECT * WHERE { ?x <http://exemple.ca> ?z }';
       const resp = generateQuery(translate(query));
       expect(resp.starPatterns.size).toBe(1);
-      const x = resp.starPatterns.get('x')?.starPattern!;
+      const x = resp.starPatterns.get('x')!.starPattern;
       expect(x).toBeDefined();
       const element = x.get('http://exemple.ca')!;
       element.triple
