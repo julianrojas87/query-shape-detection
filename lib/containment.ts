@@ -154,7 +154,7 @@ export interface IResult {
 /**
  * The result of a containement
  */
-export interface IContainmentResult {
+export type IContainmentResult  = Readonly<{
   // The type of containement
   result: ContainmentResult;
   /**
@@ -167,7 +167,7 @@ export interface IContainmentResult {
    * that have a binding with RDF class
    */
   bindingByRdfClass?: string[];
-}
+}>;
 
 /**
  * The result of a containement
