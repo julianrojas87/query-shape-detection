@@ -32,7 +32,7 @@
     "test": "jest ${1}",
     "test-watch": "jest ${1} --watch",
     "lint": "eslint --fix .",
-    "build": "npm run build:ts",
+    "build": "rm -r build; npm run build:ts",
     "build:ts": "tsc",
     "validate": "npm ls",
     "prepare": "npm run build",
