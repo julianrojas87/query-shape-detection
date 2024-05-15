@@ -127,6 +127,13 @@ export class Bindings implements IBindings {
             return true;
         } else if (constraint.type === ContraintType.TYPE &&
             !Array.isArray(triple.object) &&
+            triple.object.termType === "NamedNode"
+            && constraint.value.has(triple.object.value)) {
+            this.bindings.set(triple.predicate, triple);
+            return true;
+
+        } else if (constraint.type === ContraintType.TYPE &&
+            !Array.isArray(triple.object) &&
             triple.object.termType === "Literal"
             && !constraint.value.has(triple.object.datatype.value)) {
             this.unboundTriple.push(triple);

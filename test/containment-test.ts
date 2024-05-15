@@ -5,6 +5,7 @@ import { ContainmentResult, IContainmentResult, IResult, StarPatternName, solveS
 import { DataFactory } from 'rdf-data-factory';
 import { BaseQuad } from '@rdfjs/types';
 import { IQuery, generateQuery } from '../lib/query';
+import { TYPE_DEFINITION } from '../lib/constant';
 
 const DF = new DataFactory<BaseQuad>();
 
@@ -92,6 +93,32 @@ describe('solveShapeQueryContainment', () => {
     const shapeP6: Shape = new Shape({
         name: 'foo6', positivePredicates: [
             "https://www.example.ca/p1000000"
+        ], closed: true
+    });
+
+    const shapeP7: Shape = new Shape({
+        name: 'foo7', positivePredicates: [
+            {
+                name: TYPE_DEFINITION.value,
+                constraint: {
+                    value: new Set(['<https://www.example.ca/Type>']),
+                    type: ContraintType.SHAPE
+                }
+            }
+
+        ], closed: true
+    });
+
+    const shapeP8: Shape = new Shape({
+        name: 'foo8', positivePredicates: [
+            {
+                name: TYPE_DEFINITION.value,
+                constraint: {
+                    value: new Set(['<https://www.example.ca/Type>']),
+                    type: ContraintType.SHAPE
+                }
+            }
+
         ], closed: true
     });
 
@@ -230,7 +257,7 @@ describe('solveShapeQueryContainment', () => {
             ["x", { result: ContainmentResult.CONTAIN, target: [shape.name] }],
             ["y", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP1.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
             ["z", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
-            ["w", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP1.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name]}],
+            ["w", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP1.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
             ["w1", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP1.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
             ["w2", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
         ]);
@@ -251,7 +278,7 @@ describe('solveShapeQueryContainment', () => {
 
     });
 
-    it('should handle a query contained in every shape', () => {
+    it('should handle a query with partial containment', () => {
         const query = generateAlignedQuery();
 
         const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5, shapeP6];
@@ -260,7 +287,7 @@ describe('solveShapeQueryContainment', () => {
             ["x", { result: ContainmentResult.REJECTED }],
             ["y", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP1.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
             ["z", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
-            ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name]}],
+            ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name], bindingByRdfClass: [] }],
         ]);
         const expectedResult: IResult = {
             conditionalLink: [],
@@ -280,7 +307,55 @@ describe('solveShapeQueryContainment', () => {
 
     });
 
-})
+    it('should handle a query with partial containment and a binding by a class', () => {
+        const query = generateAlignedWithRdfTypeQuery();
+
+        const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5, shapeP7, shapeP8];
+
+        const expectedStarPatternsContainment = new Map<StarPatternName, IContainmentResult>([
+            ["x", { result: ContainmentResult.REJECTED }],
+            ["y", { result: ContainmentResult.CONTAIN, target: [shapeP7.name, shapeP8.name] }],
+            ["z", {
+                result: ContainmentResult.ALIGNED,
+                target: [shapeP7.name, shapeP8.name],
+                bindingByRdfClass: [shapeP7.name, shapeP8.name]
+            }],
+            ["zz", {
+                result: ContainmentResult.ALIGNED,
+                target: [shapeP7.name, shapeP8.name],
+                bindingByRdfClass: [shapeP7.name, shapeP8.name]
+            }],
+            ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name], bindingByRdfClass: [] }],
+        ]);
+        const expectedResult: IResult = {
+            conditionalLink: [
+                {
+                    link: "https://www.example.ca/Type",
+                    starPatternName: "z",
+                },
+                {
+                    link: "https://www.example.ca/IDK",
+                    starPatternName: "zz",
+                },
+            ],
+            starPatternsContainment: expectedStarPatternsContainment,
+            visitShapeBoundedResource: new Map([
+                [shape.name, false],
+                [shapeP1.name, false],
+                [shapeP2.name, false],
+                [shapeP3.name, true],
+                [shapeP4.name, true],
+                [shapeP5.name, false],
+                [shapeP7.name, true],
+                [shapeP8.name, true],
+            ])
+        };
+
+        expect(solveShapeQueryContainment({ query, shapes, dependentShapes: [shapeP6] })).toStrictEqual(expectedResult);
+
+    });
+
+});
 
 function generateMatchingQuery(): IQuery {
     const queryString = `
@@ -319,6 +394,31 @@ function generateAlignedQuery(): IQuery {
         
         ?w <https://www.example.ca/p3> ?w1 .
         ?w <https://www.example.ca/p10> ?w1 .
+      }
+    `;
+    const querySparql = translate(queryString);
+
+
+    return generateQuery(querySparql);
+}
+
+function generateAlignedWithRdfTypeQuery(): IQuery {
+    const queryString = `
+    SELECT * WHERE { 
+        ?x <https://www.example.ca/p7> ?y .
+        ?x <https://www.example.ca/p6> ?z .
+        ?x <https://www.example.ca/p5> ?w .
+
+        ?y <${TYPE_DEFINITION.value}> <https://www.example.ca/Type> .
+
+        ?z <${TYPE_DEFINITION.value}> <https://www.example.ca/Type> .
+        ?z <https://www.example.ca/p0972> <https://www.example.ca/Type> .
+        
+        ?w <https://www.example.ca/p3> ?w1 .
+        ?w <https://www.example.ca/p10> ?w1 .
+
+        ?zz <${TYPE_DEFINITION.value}> <https://www.example.ca/Kipe> .
+        ?zz <https://www.example.ca/p0972> <https://www.example.ca/IDK> .
       }
     `;
     const querySparql = translate(queryString);

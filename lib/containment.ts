@@ -1,4 +1,5 @@
 import { Bindings, IBindings } from './Binding'
+import { TYPE_DEFINITION } from './constant';
 import type { IQuery } from './query';
 import { IShape } from './Shape';
 import type { ITriple } from './Triple';
@@ -61,9 +62,13 @@ function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IC
   const prevContainmentResult = starPatternsContainment.get(starPatternName)!;
 
   if (bindings.shouldVisitShape() && bindings.getUnboundedTriple().length > 0 && prevContainmentResult.result !== ContainmentResult.CONTAIN) {
+    const classBinding = bindings.getBindings().get(TYPE_DEFINITION.value);
+
     starPatternsContainment.set(starPatternName, {
       result: ContainmentResult.ALIGNED,
-      target: (prevContainmentResult.target ?? []).concat(shape.name)
+      target: (prevContainmentResult.target ?? []).concat(shape.name),
+      bindingByRdfClass: (prevContainmentResult.bindingByRdfClass ?? [])
+        .concat(classBinding !== undefined ? shape.name : [])
     });
 
   }
@@ -157,6 +162,11 @@ export interface IContainmentResult {
    * Will be undefined if the the star pattern has no alignment with any shape
    */
   target?: string[];
+  /**
+   * If the result is an alignment then we record the shape
+   * that have a binding with RDF class
+   */
+  bindingByRdfClass?: string[];
 }
 
 /**
