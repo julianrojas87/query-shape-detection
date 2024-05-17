@@ -7,6 +7,7 @@ export interface IStarPatternWithDependencies {
   // indexed by predicate
   starPattern: Map<string, ITripleWithDependencies>;
   filterExpression?: string;
+  name:string;
 }
 
 export interface ITripleWithDependencies {

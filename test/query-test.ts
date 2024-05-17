@@ -46,7 +46,8 @@ describe('query', () => {
                 dependencies: undefined
               }
             ]
-          ])
+          ]),
+          name: "x"
         }
       ];
       const yStarPattern: [string, IStarPatternWithDependencies] = ['y',
@@ -64,7 +65,8 @@ describe('query', () => {
                 }
               ]
             ]
-          )
+          ),
+          name: "y"
         }
       ];
       const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
@@ -104,7 +106,8 @@ describe('query', () => {
                 dependencies: undefined
               }
             ]
-          ])
+          ]),
+          name: "z"
         }
       ];
 
@@ -122,7 +125,8 @@ describe('query', () => {
                 dependencies: zStarPattern[1]
               }
             ]
-          ])
+          ]),
+          name: "y"
         }
       ];
 
@@ -151,10 +155,11 @@ describe('query', () => {
                 dependencies: undefined
               }
             ]
-          ])
+          ]),
+          name: "x"
         }
       ];
-      
+
       const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
         xStarPattern,
         yStarPattern,
@@ -208,7 +213,8 @@ describe('query', () => {
                 dependencies: undefined
               }
             ]
-          ])
+          ]),
+          name: "z"
         }
       ];
 
@@ -227,6 +233,7 @@ describe('query', () => {
               }
             ]
           ]),
+          name: "x"
         }
       ];
 
@@ -241,7 +248,8 @@ describe('query', () => {
                 dependencies: undefined
               }
             ]
-          ])
+          ]),
+          name: "w"
         }
       ];
       const sujetStarPattern: [string, IStarPatternWithDependencies] = [
@@ -258,7 +266,8 @@ describe('query', () => {
                 dependencies: undefined
               }
             ]
-          ])
+          ]),
+          name: "http://sujet.cm"
         }
       ];
       const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
@@ -426,7 +435,8 @@ describe('query', () => {
                 dependencies: undefined
               }
             ],
-          ])
+          ]),
+          name: "x"
         }
       ];
       const yStarPattern: [string, IStarPatternWithDependencies] = [
@@ -444,7 +454,8 @@ describe('query', () => {
                 dependencies: undefined
               }
             ],
-          ])
+          ]),
+          name: "y"
         }
       ];
 

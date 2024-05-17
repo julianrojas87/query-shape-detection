@@ -96,7 +96,8 @@ function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, value
         innerQuery.set(subjectGroupName, {
           starPattern: new Map([
             [triple.predicate, predicateWithDependencies]
-          ])
+          ]),
+          name: subjectGroupName
         });
       } else {
         const predicateWithDependencies: ITripleWithDependencies = { triple: triple, dependencies: undefined };

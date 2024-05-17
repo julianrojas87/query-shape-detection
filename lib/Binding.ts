@@ -32,6 +32,11 @@ export interface IBindings {
      * @returns {ITriple[]} the bind triple
      */
     getBoundTriple: () => ITriple[];
+    /**
+     * Return the name of the decendent star pattern if the current star pattern is contained
+     * @returns {string} the star pattern name of the decendent if the current star pattern is contained
+     */
+    getNestedContainedStarPatternName: () => string[];
 }
 
 /**
@@ -43,6 +48,7 @@ export class Bindings implements IBindings {
     private unboundTriple: ITriple[] = [];
     private fullyBounded = false;
     private readonly closedShape: boolean;
+    private nestedContainedStarPatternName: string[] = [];
 
     public constructor(shape: IShape, starPattern: IStarPatternWithDependencies, linkedShape: Map<string, IShape>) {
         this.closedShape = shape.closed;
@@ -86,6 +92,47 @@ export class Bindings implements IBindings {
         } else {
             this.fullyBounded = this.unboundTriple.length === 0 && starPattern.starPattern.size !== 0;
         }
+        if (this.fullyBounded) {
+            const cycle: Set<string> = new Set();
+            const rejectedValues: Set<string> = new Set();
+            const result: Map<string, string[]> = new Map();
+            this.fillNestedContainedStarPatternName(starPattern, cycle, starPattern.name, rejectedValues, result);
+            for (const starPattern of rejectedValues) {
+                result.delete(starPattern);
+            }
+            for (const [_, nestedConstrainStarPattern] of result) {
+                this.nestedContainedStarPatternName = this.nestedContainedStarPatternName.concat(nestedConstrainStarPattern);
+            }
+            // delete duplicate
+            this.nestedContainedStarPatternName = Array.from(new Set(this.nestedContainedStarPatternName));
+        }
+    }
+
+    private fillNestedContainedStarPatternName(starPattern: IStarPatternWithDependencies, cycle: Set<string>, originalName: string, rejectedValues: Set<string>, result: Map<string, string[]>) {
+        for (const { dependencies } of starPattern.starPattern.values()) {
+            if (dependencies !== undefined) {
+                const currentBranch = result.get(starPattern.name);
+                if (currentBranch !== undefined) {
+                    currentBranch.push(dependencies.name);
+                } else {
+                    result.set(starPattern.name, [dependencies.name]);
+                }
+                if (result.has(dependencies.name)) {
+                    cycle.add(dependencies.name);
+                    cycle.add(starPattern.name);
+                }
+                // we don't make dependent star pattern directly cycled connected to the current star pattern
+                if(result.has(dependencies.name) && dependencies.name === originalName){
+                    rejectedValues.add(dependencies.name);
+                    rejectedValues.add(starPattern.name);
+                }
+                // to avoid infinite loop
+                if (!cycle.has(dependencies.name)) {
+                    this.fillNestedContainedStarPatternName(dependencies, cycle, originalName, rejectedValues, result);
+                }
+            }
+        }
+
     }
 
     private handleShapeConstraint(
@@ -168,5 +215,8 @@ export class Bindings implements IBindings {
 
     public shouldVisitShape(): boolean {
         return this.getBoundTriple().length > 0;
+    }
+    public getNestedContainedStarPatternName(): string[] {
+        return this.nestedContainedStarPatternName;
     }
 }
