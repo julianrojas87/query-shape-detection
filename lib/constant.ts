@@ -21,6 +21,9 @@ export const SHEX_BNODE = DF.namedNode('http://www.w3.org/ns/shex#bnode');
 export const SHEX_NON_LITERAL = DF.namedNode('http://www.w3.org/ns/shex#nonliteral');
 export const SHEX_VALUES = DF.namedNode('http://www.w3.org/ns/shex#values');
 
+export const SHEX_EACH_OF = DF.namedNode("http://www.w3.org/ns/shex#EachOf");
+export const SHEX_ONE_OF = DF.namedNode("http://www.w3.org/ns/shex#OneOf");
+
 export const TYPE_DEFINITION = DF.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
 export const IRI_FIRST_RDF_LIST = DF.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#first');
 export const IRI_REST_RDF_LIST = DF.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#rest');

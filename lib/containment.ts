@@ -1,4 +1,4 @@
-import { Bindings, IBindings } from './Binding'
+import { Bindings, IBindings, IDependentStarPattern } from './Binding'
 import { TYPE_DEFINITION } from './constant';
 import type { IQuery } from './query';
 import { IShape } from './Shape';
@@ -26,7 +26,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
   }
 
   // dependent, origin 
-  const nestedContainedStarPatterns: Map<string, Set<string>> = new Map();
+  const nestedContainedStarPatterns: Map<string, Map<string, IDependentStarPattern>> = new Map();
 
   for (const { shape, dependencies } of groupedShapes) {
     bindingResult.set(shape.name, new Map());
@@ -35,14 +35,14 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
       const bindings = new Bindings(shape, starPattern, dependencies);
       const currentNestedStarPattern = bindings.getNestedContainedStarPatternName();
       for (const starPattern of currentNestedStarPattern) {
-        const currentNestedContainedStarPatterns = nestedContainedStarPatterns.get(starPattern);
+        const currentNestedContainedStarPatterns = nestedContainedStarPatterns.get(starPattern.starPattern);
         if (currentNestedContainedStarPatterns === undefined) {
-          nestedContainedStarPatterns.set(starPattern, new Set([starPatternName]));
+          nestedContainedStarPatterns.set(starPattern.starPattern, new Map([[starPatternName, starPattern]]));
         } else {
-          currentNestedContainedStarPatterns.add(starPatternName);
+          currentNestedContainedStarPatterns.set(starPatternName, starPattern);
         }
       }
-      bindingResultofShape.set(starPatternName, { result: bindings, shape, dependent: false });
+      bindingResultofShape.set(starPatternName, { result: bindings, shape });
       for (const triple of bindings.getBoundTriple()) {
         queryStarPattern.set(triple.toString(), undefined);
       }
@@ -54,9 +54,9 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
     for (const [starPatternName, bindingResult] of starPatternBinding) {
       const originOfDependency = nestedContainedStarPatterns.get(starPatternName);
       // validate that there are no cycle if there are cycle we analyse the star pattern independently
-      for (const origin of originOfDependency ?? []) {
+      for (const [origin, dependencyInfo] of originOfDependency ?? []) {
         if (!nestedContainedStarPatterns.has(origin)) {
-          currentShapeBindingResult.set(starPatternName, { ...bindingResult, dependent: true });
+          currentShapeBindingResult.set(starPatternName, { ...bindingResult, dependent: dependencyInfo });
           break;
         }
       }
@@ -65,10 +65,10 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
 
   for (const [_, starPatternBinding] of bindingResult) {
     for (const [starPatternName, bindingResult] of starPatternBinding) {
-      if (bindingResult.dependent === false) {
+      if (bindingResult.dependent === undefined) {
         updateStarPatternContainment(starPatternsContainment, bindingResult.result, starPatternName, bindingResult.shape);
       } else {
-        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND });
+        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target: bindingResult.dependent.shape !== undefined ? [bindingResult.dependent.shape] : undefined });
       }
     }
   }
@@ -158,7 +158,7 @@ function generateVisitStatus(bindings: Map<ShapeName, Map<StarPatternName, IBind
 interface IBindingStatus {
   result: IBindings;
   shape: IShape;
-  dependent: boolean;
+  dependent?: IDependentStarPattern;
 }
 
 interface IShapeWithDependencies {

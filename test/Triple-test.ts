@@ -37,14 +37,14 @@ describe('Triple', () => {
   });
 
   describe('getLinkedSubjectGroup', () => {
-    it('should return undefined if the object is not a variable', () => {
+    it('should return the linked object if it is a named node', () => {
       const triple = new Triple({
         subject: 'a',
         predicate: 'b',
         object: AN_OBJECT,
       });
 
-      expect(triple.getLinkedSubjectGroup()).toBeUndefined();
+      expect(triple.getLinkedSubjectGroup()).toStrictEqual(AN_OBJECT.value);
     });
 
     it('should return the variable', () => {

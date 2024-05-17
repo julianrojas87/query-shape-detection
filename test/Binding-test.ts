@@ -5,6 +5,15 @@ import { IStarPatternWithDependencies, ITriple, Triple } from '../lib/Triple';
 import { BaseQuad } from '@rdfjs/types';
 import { translate } from 'sparqlalgebrajs';
 import { IQuery, generateQuery } from '../lib/query';
+import { ContainmentResult, IConditionalLink, IContainmentResult, IResult, StarPatternName, solveShapeQueryContainment } from '../lib/containment';
+import { TYPE_DEFINITION } from '../lib/constant';
+import type * as RDF from '@rdfjs/types';
+import * as N3 from 'n3';
+import { readFileSync } from 'fs';
+import streamifyArray from 'streamify-array';
+import { shapeFromQuads } from '../lib/shex';
+
+const n3Parser = new N3.Parser();
 
 const DF = new DataFactory<BaseQuad>();
 
@@ -431,7 +440,10 @@ describe('Bindings', () => {
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["z"]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
+                shape: "foo1",
+                starPattern: "z"
+            }]);
         });
 
         it('should have one binding with shape constraint with no linked shape', () => {
@@ -498,7 +510,10 @@ describe('Bindings', () => {
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["z"]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
+                starPattern: "z",
+                shape: undefined
+            }]);
         });
 
         it('should have one binding with shape constraint with multiple triples', () => {
@@ -604,7 +619,10 @@ describe('Bindings', () => {
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["z"]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
+                shape: "foo1",
+                starPattern: "z"
+            }]);
         });
 
         it('should have one binding with shape constraint with no dependencies', () => {
@@ -770,7 +788,13 @@ describe('Bindings', () => {
             const shapeP2: Shape = new Shape({
                 name: 'foo2', positivePredicates: [
                     "p1",
-                    "p2"
+                    {
+                        name: "p2",
+                        constraint: {
+                            value: new Set(['foo3']),
+                            type: ContraintType.SHAPE
+                        }
+                    }
                 ], closed: true
             });
 
@@ -795,7 +819,13 @@ describe('Bindings', () => {
                             type: ContraintType.SHAPE
                         }
                     },
-                    "p2"
+                    {
+                        name: "p2",
+                        constraint: {
+                            value: new Set(['foo3']),
+                            type: ContraintType.SHAPE
+                        }
+                    }
                 ], closed: true
             });
 
@@ -983,7 +1013,28 @@ describe('Bindings', () => {
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["z", "zz", "zzz", "zzzz", "zzzzz"]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
+                {
+                    shape: "foo1",
+                    starPattern: "z"
+                },
+                {
+                    shape: "foo2",
+                    starPattern: "zz"
+                },
+                {
+                    shape: "foo3",
+                    starPattern: "zzz"
+                },
+                {
+                    shape: "foo4",
+                    starPattern: "zzzz"
+                },
+                {
+                    shape: "foo5",
+                    starPattern: "zzzzz"
+                }
+            ]);
         });
 
         it('should handle a not fully binding complex case', () => {
@@ -1630,7 +1681,7 @@ describe('Bindings', () => {
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([]);
         });
 
-        it('should have multiple bindings', () => {
+        it('should have multiple bindings and a list of objects', () => {
             const shape: Shape = new Shape({
                 name: 'foo', positivePredicates: [
                     {
@@ -1661,7 +1712,7 @@ describe('Bindings', () => {
             const triple1: Triple = new Triple({
                 subject: 'y',
                 predicate: 'p0',
-                object: [DF.literal('o0', DF.namedNode('t0'))]
+                object: [DF.namedNode('t0')]
             });
             const triple2: Triple = new Triple({
                 subject: 'y',
@@ -1671,7 +1722,7 @@ describe('Bindings', () => {
             const triple3: Triple = new Triple({
                 subject: 'y',
                 predicate: 'p2',
-                object: [DF.literal('o0', DF.namedNode('t2'))]
+                object: [DF.literal('o0', DF.namedNode('t2')), DF.literal('o0', DF.namedNode('?'))]
             });
             const starPattern: IStarPatternWithDependencies = {
                 starPattern: new Map([
@@ -2062,7 +2113,28 @@ describe('Bindings', () => {
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["z", "zz", "zzz", "zzzz", "zzzzz"]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
+                {
+                    shape: "foo1",
+                    starPattern: "z"
+                },
+                {
+                    shape: "foo2",
+                    starPattern: "zz"
+                },
+                {
+                    shape: "foo3",
+                    starPattern: "zzz"
+                },
+                {
+                    shape: "foo4",
+                    starPattern: "zzzz"
+                },
+                {
+                    shape: "foo5",
+                    starPattern: "zzzzz"
+                }
+            ]);
         });
 
         it('should handle shape constraint and type constraint where a type constraint is not valid', () => {
@@ -2375,7 +2447,10 @@ describe('Bindings', () => {
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["v"]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
+                shape: undefined,
+                starPattern: "v"
+            }]);
         });
 
         it('should handle multiple cycles', () => {
@@ -2438,7 +2513,65 @@ describe('Bindings', () => {
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["y", "z"]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
+                {
+                    shape: undefined,
+                    starPattern: "y"
+                },
+                {
+                    shape: undefined,
+                    starPattern: "z"
+                }
+            ]);
+        });
+
+        it('interactive-complex-8', async () => {
+            const stringQuery = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            SELECT ?personId ?personFirstName ?personLastName ?commentCreationDate ?commentId ?commentContent WHERE {
+              VALUES ?type {
+                snvoc:Comment
+                snvoc:Post
+              }
+              <http://localhost:3000/pods/00000002199023256816/profile/card#me> rdf:type snvoc:Person.
+              ?message snvoc:hasCreator <http://localhost:3000/pods/00000002199023256816/profile/card#me>;
+                rdf:type ?type.
+              ?comment rdf:type snvoc:Comment;
+                snvoc:replyOf ?message;
+                snvoc:creationDate ?commentCreationDate;
+                snvoc:id ?commentId;
+                snvoc:content ?commentContent;
+                snvoc:hasCreator ?person.
+              ?person snvoc:id ?personId;
+                snvoc:firstName ?personFirstName;
+                snvoc:lastName ?personLastName.
+            }
+            ORDER BY DESC (?commentCreationDate) (?commentId)
+            LIMIT 20`;
+            const query = generateQuery(translate(stringQuery));
+            const commentStarPattern = query.starPatterns.get("comment")!;
+            const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
+            const shape: IShape = shapeIndexed.get("http://example.com#Comment")!;
+
+
+            const bindings = new Bindings(shape, commentStarPattern, new Map());
+
+            expect(bindings.isFullyBounded()).toBe(true);
+            expect(bindings.shouldVisitShape()).toBe(true);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
+                {
+                    shape: undefined,
+                    starPattern: "message"
+                },
+                {
+                    shape:undefined,
+                    starPattern:"person"
+                },
+                {
+                    shape: undefined,
+                    starPattern: "http://localhost:3000/pods/00000002199023256816/profile/card#me"
+                }
+            ]);
         });
 
         it('should handle no cycle', () => {
@@ -2480,8 +2613,58 @@ describe('Bindings', () => {
             expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
-            expect(bindings.getBoundTriple()).toStrictEqual([tripleP0,tripleP1,tripleP2]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual(["y","z","w","w1","w2"]);
+            expect(bindings.getBoundTriple()).toStrictEqual([tripleP0, tripleP1, tripleP2]);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
+                {
+                    shape: undefined,
+                    starPattern: "y"
+                },
+                {
+                    shape: undefined,
+                    starPattern: "z"
+                },
+                {
+                    shape: undefined,
+                    starPattern: "w"
+                },
+                {
+                    shape: undefined,
+                    starPattern: "w1"
+                },
+                {
+                    shape: undefined,
+                    starPattern: "w2"
+                }
+            ]);
         });
+
+        async function generateSolidBenchShapes(): Promise<Map<string, IShape>> {
+            const commentShapeFile = "./test/shape/solidbench_comment.ttl";
+            const postShapeFile = "./test/shape/solidbench_post.ttl";
+            const profileShapeFile = "./test/shape/solidbench_profile.ttl";
+
+            const commentShape = await shapeFromQuads(populateStream(commentShapeFile), "http://example.com#Comment");
+            const postShape = await shapeFromQuads(populateStream(postShapeFile), "http://example.com#Post");
+            const profileShape = await shapeFromQuads(populateStream(profileShapeFile), "http://example.com#Profile");
+            if ((commentShape instanceof Error) || (postShape instanceof Error) || (profileShape instanceof Error)) {
+                throw commentShape
+            }
+
+            return new Map([
+                [commentShape.name, commentShape],
+                [postShape.name, postShape],
+                [profileShape.name, profileShape]
+            ]);
+        }
+
+        function populateStream(source: string | RDF.Quad[]) {
+            let quads;
+            if (Array.isArray(source)) {
+                quads = source;
+            } else {
+                quads = n3Parser.parse(readFileSync(source).toString());
+            }
+            return streamifyArray(quads);
+        }
     });
 });

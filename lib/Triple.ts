@@ -7,7 +7,7 @@ export interface IStarPatternWithDependencies {
   // indexed by predicate
   starPattern: Map<string, ITripleWithDependencies>;
   filterExpression?: string;
-  name:string;
+  name: string;
 }
 
 export interface ITripleWithDependencies {
@@ -81,7 +81,7 @@ export class Triple implements ITriple {
   }
 
   public getLinkedSubjectGroup(): string | undefined {
-    if (!Array.isArray(this.object) && this.object?.termType === "Variable") {
+    if (!Array.isArray(this.object) && (this.object?.termType === "Variable" || this.object?.termType === "NamedNode")) {
       return this.object.value
     }
   }

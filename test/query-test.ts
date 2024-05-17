@@ -8,7 +8,7 @@ import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 const DF = new DataFactory<BaseQuad>();
 
 const RDF_STRING = DF.namedNode('http://www.w3.org/2001/XMLSchema#string');
-//const SNVOC_PREFIX = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/';
+const SNVOC_PREFIX = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/';
 const RDF_TYPE = TYPE_DEFINITION.value;
 
 describe('query', () => {
@@ -462,6 +462,211 @@ describe('query', () => {
       const expectedStarPattern = new Map<string, any>([
         xStarPattern,
         yStarPattern
+      ]);
+
+      const resp = generateQuery(translate(query));
+
+      expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
+      expect(resp.filterExpression).toBe('');
+      for (const [subject, starPatterns] of resp.starPatterns) {
+        expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+      }
+    });
+
+    it('interactive-complex-8', () => {
+      const query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+      SELECT ?personId ?personFirstName ?personLastName ?commentCreationDate ?commentId ?commentContent WHERE {
+        VALUES ?type {
+          snvoc:Comment
+          snvoc:Post
+        }
+        <http://localhost:3000/pods/00000002199023256816/profile/card#me> rdf:type snvoc:Person.
+        ?message snvoc:hasCreator <http://localhost:3000/pods/00000002199023256816/profile/card#me>;
+          rdf:type ?type.
+        ?comment rdf:type snvoc:Comment;
+          snvoc:replyOf ?message;
+          snvoc:creationDate ?commentCreationDate;
+          snvoc:id ?commentId;
+          snvoc:content ?commentContent;
+          snvoc:hasCreator ?person.
+        ?person snvoc:id ?personId;
+          snvoc:firstName ?personFirstName;
+          snvoc:lastName ?personLastName.
+      }
+      ORDER BY DESC (?commentCreationDate) (?commentId)
+      LIMIT 20`;
+
+      const meStarPattern: [string, IStarPatternWithDependencies] = [
+        'http://localhost:3000/pods/00000002199023256816/profile/card#me',
+        {
+          starPattern: new Map([
+            [
+              RDF_TYPE,
+              {
+                triple: new Triple({
+                  subject: 'http://localhost:3000/pods/00000002199023256816/profile/card#me',
+                  predicate: RDF_TYPE,
+                  object: DF.namedNode(`${SNVOC_PREFIX}Person`)
+                }),
+                dependencies: undefined
+              }
+            ],
+          ]),
+          name: 'http://localhost:3000/pods/00000002199023256816/profile/card#me'
+        }
+      ];
+      const messageStarPattern: [string, IStarPatternWithDependencies] = [
+        'message',
+        {
+          starPattern: new Map([
+            [
+              `${SNVOC_PREFIX}hasCreator`,
+              {
+                triple: new Triple({
+                  subject: 'message',
+                  predicate: `${SNVOC_PREFIX}hasCreator`,
+                  object: DF.namedNode("http://localhost:3000/pods/00000002199023256816/profile/card#me"),
+                }),
+                dependencies: meStarPattern[1]
+              }
+            ],
+            [
+              RDF_TYPE,
+              {
+                triple: new Triple({
+                  subject: 'message',
+                  predicate: RDF_TYPE,
+                  object: [DF.namedNode(`${SNVOC_PREFIX}Comment`), DF.namedNode(`${SNVOC_PREFIX}Post`)]
+                }),
+                dependencies: undefined
+              }
+            ],
+          ]),
+          name: "message"
+        }
+      ];
+      const personStarPattern: [string, IStarPatternWithDependencies] = [
+        'person',
+        {
+          starPattern: new Map([
+            [
+              `${SNVOC_PREFIX}id`,
+              {
+                triple: new Triple({
+                  subject: 'person',
+                  predicate: `${SNVOC_PREFIX}id`,
+                  object: DF.variable("personId"),
+                }),
+                dependencies: undefined
+              }
+            ],
+            [
+              `${SNVOC_PREFIX}firstName`,
+              {
+                triple: new Triple({
+                  subject: 'person',
+                  predicate: `${SNVOC_PREFIX}firstName`,
+                  object: DF.variable("personFirstName"),
+                }),
+                dependencies: undefined
+              }
+            ],
+            [
+              `${SNVOC_PREFIX}lastName`,
+              {
+                triple: new Triple({
+                  subject: 'person',
+                  predicate: `${SNVOC_PREFIX}lastName`,
+                  object: DF.variable("personLastName"),
+                }),
+                dependencies: undefined
+              }
+            ]
+          ]),
+          name: "person"
+        }
+      ];
+      const commentStarPattern: [string, IStarPatternWithDependencies] = [
+        'comment',
+        {
+          starPattern: new Map([
+            [
+              RDF_TYPE,
+              {
+                triple: new Triple({
+                  subject: 'comment',
+                  predicate: RDF_TYPE,
+                  object: DF.namedNode(`${SNVOC_PREFIX}Comment`),
+                }),
+                dependencies: undefined
+              }
+            ],
+            [
+              `${SNVOC_PREFIX}replyOf`,
+              {
+                triple: new Triple({
+                  subject: 'comment',
+                  predicate: `${SNVOC_PREFIX}replyOf`,
+                  object: DF.variable("message"),
+                }),
+                dependencies: messageStarPattern[1]
+              }
+            ],
+            [
+              `${SNVOC_PREFIX}creationDate`,
+              {
+                triple: new Triple({
+                  subject: 'comment',
+                  predicate: `${SNVOC_PREFIX}creationDate`,
+                  object: DF.variable("commentCreationDate"),
+                }),
+                dependencies: undefined
+              }
+            ],
+            [
+              `${SNVOC_PREFIX}id`,
+              {
+                triple: new Triple({
+                  subject: 'comment',
+                  predicate: `${SNVOC_PREFIX}id`,
+                  object: DF.variable("commentId"),
+                }),
+                dependencies: undefined
+              }
+            ],
+            [
+              `${SNVOC_PREFIX}content`,
+              {
+                triple: new Triple({
+                  subject: 'comment',
+                  predicate: `${SNVOC_PREFIX}content`,
+                  object: DF.variable("commentContent"),
+                }),
+                dependencies: undefined
+              }
+            ],
+            [
+              `${SNVOC_PREFIX}hasCreator`,
+              {
+                triple: new Triple({
+                  subject: 'comment',
+                  predicate: `${SNVOC_PREFIX}hasCreator`,
+                  object: DF.variable("person"),
+                }),
+                dependencies: personStarPattern[1]
+              }
+            ]
+          ]),
+          name: "comment"
+        }
+      ];
+
+      const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
+        meStarPattern,
+        messageStarPattern,
+        commentStarPattern,
+        personStarPattern
       ]);
 
       const resp = generateQuery(translate(query));
