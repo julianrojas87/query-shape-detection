@@ -1,4 +1,4 @@
-import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType } from '../lib/Shape';
+import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType, OneOf } from '../lib/Shape';
 
 describe('Shape', () => {
   describe('constructor', () => {
@@ -207,5 +207,44 @@ describe('Shape', () => {
       const expectedLinkedShapeIri = new Set();
       expect(shapeWithNoLink.getLinkedShapeIri()).toStrictEqual(expectedLinkedShapeIri);
     });
-  })
+  });
+
+  describe('getOneOfs', () => {
+    it('should return no one of(s)', () => {
+      const shape = new Shape({ name: '', positivePredicates: [] });
+      expect(shape.getOneOfs()).toStrictEqual([]);
+    });
+    
+    it('should return one of(s)', () => {
+      const oneOf: OneOf[] = [
+        [
+          [{ name: "foo" }],
+          [{ name: "foo1" }]
+        ],
+        [
+          [
+            {
+              name: 'b',
+              cardinality: { min: 0, max: 33 },
+              constraint: {
+                value: new Set('a'),
+                type: ContraintType.SHAPE,
+              }
+            },
+            {
+              name: 'c',
+              cardinality: { min: 0, max: 33 },
+              constraint: {
+                value: new Set('a'),
+                type: ContraintType.SHAPE,
+              }
+            },
+            { name: "foo1" }
+          ],
+        ]
+      ];
+      const shape = new Shape({ name: '', positivePredicates: [], oneOf });
+      expect(shape.getOneOfs()).toStrictEqual(oneOf);
+    });
+  });
 });
