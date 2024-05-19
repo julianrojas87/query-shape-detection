@@ -2,3 +2,4 @@
 - Property path
 - Union
 - Nested queries
+- Handle IRI, BLANK NODE, LITTERAL constraint
