@@ -609,7 +609,7 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
                 ["city", { result: ContainmentResult.DEPEND }]
             ]);
@@ -641,9 +641,9 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["http://localhost:3000/pods/00000000000000000150/comments/Mexico#68719564521", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                ["creator", { result: ContainmentResult.DEPEND }]
+                ["creator", { result: ContainmentResult.DEPEND, target:["http://example.com#Profile"] }]
             ]);
 
 
@@ -674,7 +674,7 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Post"] }],
             ]);
 
@@ -706,7 +706,7 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", false]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ["tag", { result: ContainmentResult.DEPEND }],
             ]);
@@ -740,7 +740,7 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment"] }],
                 ["location", { result: ContainmentResult.DEPEND }],
             ]);
@@ -768,7 +768,7 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
             ]);
 
@@ -797,7 +797,7 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ["forum",
                     {
@@ -834,7 +834,7 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ["forum", { result: ContainmentResult.REJECTED }],
                 ["moderator", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
@@ -880,8 +880,8 @@ WHERE
                 ["http://example.com#Post", true],
                 ["http://example.com#Profile", true]
             ]);
-            const starPatternsContainment: Map<StarPatternName, IContainmentResult> = new Map([
-                ["<http://localhost:3000/pods/00000002199023256816/profile/card#me>", { result: ContainmentResult.DEPEND, target:["http://example.com#Profile"] }],
+            const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
+                ["http://localhost:3000/pods/00000002199023256816/profile/card#me", { result: ContainmentResult.DEPEND, target:["http://example.com#Profile"] }],
                 ["message", { result: ContainmentResult.DEPEND, target:["http://example.com#Post", "http://example.com#Comment"] }],
                 ["comment", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment"] }],
                 ["person", { result: ContainmentResult.DEPEND, target:["http://example.com#Profile"] }],

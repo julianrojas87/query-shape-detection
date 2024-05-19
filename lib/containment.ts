@@ -26,7 +26,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
   }
 
   // dependent, origin 
-  const nestedContainedStarPatterns: Map<string, Map<string, IDependentStarPattern>> = new Map();
+  const nestedContainedStarPatterns = new Map<string, Map<string, IDependentStarPattern>>();
 
   for (const { shape, dependencies } of groupedShapes) {
     bindingResult.set(shape.name, new Map());
@@ -63,12 +63,12 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
     }
   }
 
-  for (const [_, starPatternBinding] of bindingResult) {
+  for (const starPatternBinding of bindingResult.values()) {
     for (const [starPatternName, bindingResult] of starPatternBinding) {
       if (bindingResult.dependent === undefined) {
         updateStarPatternContainment(starPatternsContainment, bindingResult.result, starPatternName, bindingResult.shape);
       } else {
-        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target: bindingResult.dependent.shape !== undefined ? [bindingResult.dependent.shape] : undefined });
+        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target: bindingResult.dependent.shape !== undefined ? bindingResult.dependent.shape : undefined });
       }
     }
   }

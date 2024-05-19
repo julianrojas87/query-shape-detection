@@ -23,11 +23,6 @@ export interface IShape extends IShapeObj {
    * @returns {Set<string>} - IRIs of the shape necessary for the constraint
    */
   getLinkedShapeIri: () => Set<string>;
-  /**
-   * get the other version of the shape that are produce by or statement
-   * @returns {IShape[]|undefined} - The other version of the shape
-   */
-  getOneOfs: () => OneOf[];
 }
 
 /**
@@ -73,7 +68,8 @@ export interface IShapeObj {
   closed: boolean;
   positivePredicates: string[];
   negativePredicates?: string[];
-  oneOf?: OneOf[]
+  oneOf?: OneOf[];
+  oneOfIndexed?: OneOfIndexed[];
 }
 
 /**
@@ -84,12 +80,14 @@ export interface IShapeArgs extends Omit<IShapeObj, 'positivePredicates' | 'nega
   negativePredicates?: (IPredicate | string)[];
   linkedShapeIri?: string[]
   closed?: boolean;
-  oneOf?: OneOf[]
+  oneOf?: OneOf[];
 }
 
 export type OneOf = OneOfPath[];
+export type OneOfPath = IPredicate[];
 
-export type OneOfPath = IPredicate[]
+export type OneOfPathIndexed = Map<string, IPredicate>;
+export type OneOfIndexed = OneOfPathIndexed[];
 
 /**
  * A shape
@@ -102,7 +100,8 @@ export class Shape implements IShape {
   public readonly linkedShapeIri: Set<string>;
   // All the predicate with extra information
   private readonly predicates = new Map<string, IPredicate>();
-  public readonly oneOf?: OneOf[]
+  public readonly oneOf?: OneOf[];
+  public readonly oneOfIndexed?: OneOfIndexed[] = [];
 
   /**
    *
@@ -113,6 +112,14 @@ export class Shape implements IShape {
     this.closed = closed ?? false;
     this.oneOf = (oneOf ?? []).length !== 0 ? oneOf : undefined;
     const linkedShapeIri = new Set<string>();
+    for (const oneOf of this.oneOf ?? []) {
+      const currentOneOf: OneOfIndexed = [];
+      for (const oneOfPath of oneOf) {
+        const currentOneOfPath: OneOfPathIndexed = new Map(oneOfPath.map((predicate) => [predicate.name, predicate]));
+        currentOneOf.push(currentOneOfPath);
+      }
+      this.oneOfIndexed?.push(currentOneOf);
+    }
 
     this.positivePredicates = positivePredicates.map(val => {
       if (typeof val === 'string') {
@@ -137,7 +144,9 @@ export class Shape implements IShape {
       } else {
         if (predicate.constraint !== undefined && predicate?.constraint.type === ContraintType.SHAPE) {
           for (const value of predicate.constraint.value) {
-            linkedShapeIri.add(value);
+            if (value !== name) {
+              linkedShapeIri.add(value);
+            }
           }
         }
         this.predicates.set(predicate.name,
@@ -145,6 +154,20 @@ export class Shape implements IShape {
             ...predicate,
             optional: predicate?.cardinality?.min === 0,
           });
+      }
+    }
+    
+    for (const paths of this.oneOf ?? []) {
+      for (const path of paths) {
+        for (const predicate of path) {
+          if (predicate.constraint !== undefined && predicate?.constraint.type === ContraintType.SHAPE) {
+            for (const value of predicate.constraint.value) {
+              if (value !== name) {
+                linkedShapeIri.add(value);
+              }
+            }
+          }
+        }
       }
     }
 
@@ -164,6 +187,7 @@ export class Shape implements IShape {
     Object.freeze(this.predicates);
     Object.freeze(this.closed);
     Object.freeze(this.oneOf);
+    Object.freeze(this.oneOfIndexed);
     Object.freeze(this);
   }
 
@@ -201,10 +225,6 @@ export class Shape implements IShape {
 
   public getLinkedShapeIri(): Set<string> {
     return this.linkedShapeIri;
-  }
-
-  public getOneOfs(): OneOf[] {
-    return this.oneOf ?? [];
   }
 }
 /**

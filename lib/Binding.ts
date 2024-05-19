@@ -1,4 +1,4 @@
-import { ContraintType, IContraint, IShape } from "./Shape";
+import { ContraintType, IContraint, IPredicate, IShape, OneOfPathIndexed } from "./Shape";
 import { IStarPatternWithDependencies, type ITriple } from "./Triple";
 
 /**
@@ -41,7 +41,7 @@ export interface IBindings {
 
 export interface IDependentStarPattern {
     starPattern: string;
-    shape?: string;
+    shape?: string[];
 }
 
 /**
@@ -54,14 +54,19 @@ export class Bindings implements IBindings {
     private fullyBounded = false;
     private readonly closedShape: boolean;
     private nestedContainedStarPatternName: IDependentStarPattern[] = [];
-    private nestedContainedStarPatternNameShapesContained: Map<string, string> = new Map();
+    private nestedContainedStarPatternNameShapesContained = new Map<string, string[]>();
+    private readonly oneOfs: OneOfBinding[];
 
     public constructor(shape: IShape, starPattern: IStarPatternWithDependencies, linkedShape: Map<string, IShape>) {
         this.closedShape = shape.closed;
         for (const { triple } of starPattern.starPattern.values()) {
             this.bindings.set(triple.predicate, undefined);
         }
+        this.oneOfs = (shape.oneOfIndexed ?? []).map((oneOfs: OneOfPathIndexed[]) => new OneOfBinding(oneOfs));
         this.calculateBinding(shape, starPattern, linkedShape);
+
+        // delete duplicate
+        this.unboundTriple = Array.from(new Set(this.unboundTriple));
     }
 
 
@@ -71,26 +76,40 @@ export class Bindings implements IBindings {
                 this.bindings.set(triple.predicate, triple);
                 continue;
             }
-            const predicate = shape.get(triple.predicate);
-            if (predicate === undefined) {
+            const singlePredicate = shape.get(triple.predicate);
+            let predicates: IPredicate[] = [];
+            for (const oneOfBinding of this.oneOfs) {
+                const predicatesOneOf = oneOfBinding.get(triple.predicate);
+                if (predicatesOneOf !== undefined) {
+                    predicates = predicates.concat(predicatesOneOf);
+                }
+            }
+            if (singlePredicate === undefined && predicates.length === 0) {
                 this.unboundTriple.push(triple);
                 continue;
             }
-            const constraint = predicate.constraint;
-            if (constraint === undefined) {
+            if (singlePredicate !== undefined) {
+                predicates.push(singlePredicate);
+            }
+
+            for (const predicate of predicates) {
+                const constraint = predicate.constraint;
+                if (constraint === undefined) {
+                    this.bindings.set(triple.predicate, triple);
+                    continue;
+                }
+
+                if (this.handleShapeConstraint(constraint, triple, linkedShape, shape, dependencies)) {
+                    continue;
+                }
+
+                if (this.handleShapeType(constraint, triple)) {
+                    continue;
+                }
+
                 this.bindings.set(triple.predicate, triple);
-                continue;
             }
 
-            if (this.handleShapeConstraint(constraint, triple, linkedShape, dependencies)) {
-                continue;
-            }
-
-            if (this.handleShapeType(constraint, triple)) {
-                continue;
-            }
-
-            this.bindings.set(triple.predicate, triple);
         }
 
         if (shape.closed === false) {
@@ -99,15 +118,15 @@ export class Bindings implements IBindings {
             this.fullyBounded = this.unboundTriple.length === 0 && starPattern.starPattern.size !== 0;
         }
         if (this.fullyBounded) {
-            const cycle: Set<string> = new Set();
-            const rejectedValues: Set<string> = new Set();
-            const result: Map<string, string[]> = new Map();
+            const cycle = new Set<string>();
+            const rejectedValues = new Set<string>();
+            const result = new Map<string, string[]>();
             this.fillNestedContainedStarPatternName(starPattern, cycle, starPattern.name, rejectedValues, result);
             for (const starPattern of rejectedValues) {
                 result.delete(starPattern);
             }
             let nestedContainedStarPatternName: string[] = []
-            for (const [_, nestedConstrainStarPattern] of result) {
+            for (const  nestedConstrainStarPattern of result.values()) {
                 nestedContainedStarPatternName = nestedContainedStarPatternName.concat(nestedConstrainStarPattern);
             }
             // delete duplicate
@@ -155,10 +174,11 @@ export class Bindings implements IBindings {
         constraint: IContraint,
         triple: ITriple,
         linkedShape: Map<string, IShape>,
+        currentShape: IShape,
         dependencies?: IStarPatternWithDependencies): boolean {
         if (constraint.type === ContraintType.SHAPE && dependencies !== undefined && constraint.value.size == 1) {
             const shapeName: string = constraint.value.values().next().value;
-            const currentLinkedShape = linkedShape.get(shapeName);
+            const currentLinkedShape = currentShape.name === shapeName ? currentShape : linkedShape.get(shapeName);
             if (currentLinkedShape === undefined) {
                 this.bindings.set(triple.predicate, triple);
                 return true;
@@ -172,7 +192,12 @@ export class Bindings implements IBindings {
                         ...this.nestedContainedStarPatternNameShapesContained,
                         ...nestedBinding.nestedContainedStarPatternNameShapesContained
                     ]);
-                this.nestedContainedStarPatternNameShapesContained.set(dependencies.name, currentLinkedShape.name);
+                const dependentShape = this.nestedContainedStarPatternNameShapesContained.get(dependencies.name);
+                if (dependentShape === undefined) {
+                    this.nestedContainedStarPatternNameShapesContained.set(dependencies.name, [currentLinkedShape.name]);
+                } else {
+                    dependentShape.push(currentLinkedShape.name);
+                }
             } else {
                 this.unboundTriple.push(triple);
             }
@@ -181,8 +206,6 @@ export class Bindings implements IBindings {
 
         return false
     }
-
-
 
     private handleShapeType(
         constraint: IContraint,
@@ -257,5 +280,24 @@ export class Bindings implements IBindings {
     }
     public getNestedContainedStarPatternName(): IDependentStarPattern[] {
         return this.nestedContainedStarPatternName;
+    }
+}
+
+export class OneOfBinding {
+    private readonly paths: OneOfPathIndexed[];
+
+    constructor(paths: OneOfPathIndexed[]) {
+        this.paths = paths;
+    }
+
+    public get(el: string): IPredicate[] | undefined {
+        const resp = [];
+        for (const path of this.paths) {
+            const predicate = path.get(el);
+            if (predicate !== undefined) {
+                resp.push(predicate);
+            }
+        }
+        return resp.length === 0 ? undefined : resp;
     }
 }

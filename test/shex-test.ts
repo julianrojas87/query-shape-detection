@@ -4,13 +4,15 @@ import * as N3 from 'n3';
 import { DataFactory } from 'rdf-data-factory';
 import streamifyArray from 'streamify-array';
 import { SHEX_SHAPE, TYPE_DEFINITION, SHEX_PREDICATE } from '../lib/constant';
-import { ContraintType, OneOf, type IShape } from '../lib/Shape';
+import { ContraintType, IContraint, OneOf, type IShape } from '../lib/Shape';
 import { shapeFromQuads } from '../lib/shex';
 
 const DF = new DataFactory<RDF.BaseQuad>();
 const n3Parser = new N3.Parser();
 
 const shapeIri = 'http:exemple.ca/foo';
+const LBDCVOC_PREFIX = "http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/";
+const XSD_PREFIX = "http://www.w3.org/2001/XMLSchema#";
 
 describe.each([
   [{ name: 'shapeFromQuads', populateFunction: populateArray }],
@@ -64,6 +66,88 @@ describe.each([
   const shapeWithOrStatementMultipleBranches = populateFunction('./test/shape/shex_shape_simple_or_statement_with_multiple_branches.ttl');
   const shapeWithOrStatementMultipleStatement = populateFunction('./test/shape/shex_shape_multiple_or_statement.ttl');
 
+  const shapeSolidBenchComment = populateFunction('./test/shape/solidbench_comment.ttl');
+
+  describe('SolidBench', () => {
+    it(`${name}: should handle Comment`, async () => {
+      const shape = await shapeFromQuads(shapeSolidBenchComment, "http://example.com#Comment");
+      const expectedPredicates: string[] = [
+        TYPE_DEFINITION.value,
+        `${LBDCVOC_PREFIX}id`,
+        `${LBDCVOC_PREFIX}creationDate`,
+        `${LBDCVOC_PREFIX}locationIP`,
+        `${LBDCVOC_PREFIX}browserUsed`,
+        `${LBDCVOC_PREFIX}content`,
+        `${LBDCVOC_PREFIX}lenght`,
+        `${LBDCVOC_PREFIX}hasTag`,
+        `${LBDCVOC_PREFIX}isLocatedIn`,
+        `${LBDCVOC_PREFIX}hasCreator`,
+      ];
+
+      const mapCardinality = new Map([
+        [TYPE_DEFINITION.value, { min: 0, max: 1 }],
+        [`${LBDCVOC_PREFIX}id`, { min: 1, max: 1 }],
+        [`${LBDCVOC_PREFIX}creationDate`, { min: 1, max: 1 }],
+        [`${LBDCVOC_PREFIX}locationIP`, { min: 1, max: 1 }],
+        [`${LBDCVOC_PREFIX}browserUsed`, { min: 1, max: 1 }],
+        [`${LBDCVOC_PREFIX}content`, { min: 0, max: 1 }],
+        [`${LBDCVOC_PREFIX}lenght`, { min: 1, max: 1 }],
+        [`${LBDCVOC_PREFIX}hasTag`, { min: 0, max: -1 }],
+        [`${LBDCVOC_PREFIX}isLocatedIn`, { min: 1, max: 1 }],
+        [`${LBDCVOC_PREFIX}hasCreator`, { min: 1, max: 1 }],
+      ]);
+
+      const mapConstraint = new Map<string, IContraint | undefined>([
+        [TYPE_DEFINITION.value, { type: ContraintType.TYPE, value: new Set([`${LBDCVOC_PREFIX}Comment`]) }],
+        [`${LBDCVOC_PREFIX}id`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}long`]) }],
+        [`${LBDCVOC_PREFIX}creationDate`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}dateTime`]) }],
+        [`${LBDCVOC_PREFIX}locationIP`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
+        [`${LBDCVOC_PREFIX}browserUsed`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
+        [`${LBDCVOC_PREFIX}content`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
+        [`${LBDCVOC_PREFIX}lenght`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}int`]) }],
+        [`${LBDCVOC_PREFIX}hasTag`, undefined],
+        [`${LBDCVOC_PREFIX}isLocatedIn`, undefined],
+        [`${LBDCVOC_PREFIX}hasCreator`, { type: ContraintType.SHAPE, value: new Set(["http://example.com#Profile"]) }],
+      ]);
+      const expectedOneOf: OneOf[] = [
+        [
+          [
+            {
+              name: `${LBDCVOC_PREFIX}replyOf`,
+              cardinality: { min: 0, max: -1 },
+              constraint: { type: ContraintType.SHAPE, value: new Set(["http://example.com#Post"]) }
+            },
+          ],
+          [
+            {
+              name: `${LBDCVOC_PREFIX}replyOf`,
+              cardinality: { min: 0, max: -1 },
+              constraint: { type: ContraintType.SHAPE, value: new Set(["http://example.com#Comment"]) }
+            }
+          ],
+        ]
+      ];
+
+
+      expect(shape).not.toBeInstanceOf(Error);
+      expect((shape as IShape).closed).toBe(true);
+      expect((shape as IShape).negativePredicates).toStrictEqual([]);
+      expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
+      expect((shape as IShape).name).toBe("http://example.com#Comment");
+      expect((shape as IShape).getLinkedShapeIri()).toStrictEqual(new Set(["http://example.com#Post", "http://example.com#Profile"]));
+
+      for (const predicate of (shape as IShape).positivePredicates) {
+        const expectedCardinality = mapCardinality.get(predicate);
+        const expectedConstraint = mapConstraint.get(predicate);
+
+        const resPredicate = (shape as IShape).get(predicate);
+        expect(resPredicate?.cardinality).toStrictEqual(expectedCardinality);
+        expect(resPredicate?.constraint).toStrictEqual(expectedConstraint);
+      }
+
+      expect((shape as IShape).oneOf).toStrictEqual(expectedOneOf);
+    });
+  });
   it(`${name}: should returns an error given an empty quad set`, async () => {
     expect(await shapeFromQuads(emptyQuad, shapeIri)).toBeInstanceOf(Error);
   });
@@ -321,7 +405,7 @@ describe.each([
     expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
     expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
     expect((shape as IShape).name).toBe(shapeIri);
-    expect((shape as IShape).getOneOfs()).toStrictEqual(expectedOneOf);
+    expect((shape as IShape).oneOf).toStrictEqual(expectedOneOf);
   });
 
   it(`${name}: should handle a shape with an or statement with one expression`, async () => {
@@ -356,7 +440,7 @@ describe.each([
     expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
     expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
     expect((shape as IShape).name).toBe(shapeIri);
-    expect((shape as IShape).getOneOfs()).toStrictEqual(expectedOneOf);
+    expect((shape as IShape).oneOf).toStrictEqual(expectedOneOf);
   });
 
   it(`${name}: should handle a shape with an or statement with multiple branches`, async () => {
@@ -420,7 +504,7 @@ describe.each([
     expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
     expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
     expect((shape as IShape).name).toBe(shapeIri);
-    expect((shape as IShape).getOneOfs()).toStrictEqual(expectedOneOf);
+    expect((shape as IShape).oneOf).toStrictEqual(expectedOneOf);
   });
 
   it(`${name}: should handle a shape with an or statement with multiple statement`, async () => {
@@ -506,7 +590,7 @@ describe.each([
     expect((shape as IShape).negativePredicates).toStrictEqual(negativePredicates);
     expect((shape as IShape).positivePredicates).toStrictEqual(expectedPredicates);
     expect((shape as IShape).name).toBe(shapeIri);
-    expect((shape as IShape).getOneOfs()).toStrictEqual(expectedOneOf);
+    expect((shape as IShape).oneOf).toStrictEqual(expectedOneOf);
   });
 
   if (name === 'shapeFromStream') {

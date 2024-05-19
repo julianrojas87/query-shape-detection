@@ -1,4 +1,4 @@
-import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType, OneOf } from '../lib/Shape';
+import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType, OneOf, OneOfIndexed } from '../lib/Shape';
 
 describe('Shape', () => {
   describe('constructor', () => {
@@ -173,7 +173,7 @@ describe('Shape', () => {
         name: 'b',
         cardinality: { min: 0, max: 33 },
         constraint: {
-          value: new Set(['foo']),
+          value: new Set(['foo1']),
           type: ContraintType.SHAPE,
         },
       },
@@ -191,7 +191,7 @@ describe('Shape', () => {
     const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
 
     it('should return the linked shape IRI', () => {
-      const expectedLinkedShapeIri = new Set(['foo', 'bar']);
+      const expectedLinkedShapeIri = new Set(['bar', 'foo1']);
       expect(shape.getLinkedShapeIri()).toStrictEqual(expectedLinkedShapeIri);
     });
 
@@ -212,9 +212,10 @@ describe('Shape', () => {
   describe('getOneOfs', () => {
     it('should return no one of(s)', () => {
       const shape = new Shape({ name: '', positivePredicates: [] });
-      expect(shape.getOneOfs()).toStrictEqual([]);
+      expect(shape.oneOf).toStrictEqual(undefined);
+      expect(shape.oneOfIndexed).toStrictEqual([]);
     });
-    
+
     it('should return one of(s)', () => {
       const oneOf: OneOf[] = [
         [
@@ -239,12 +240,47 @@ describe('Shape', () => {
                 type: ContraintType.SHAPE,
               }
             },
+
+          ],
+          [
             { name: "foo1" }
           ],
+          [
+            { name: "foo2" }
+          ]
         ]
       ];
+      const oneOfIndexed: OneOfIndexed[] = [
+        [
+          new Map([["foo", { name: "foo" }]]),
+          new Map([["foo1", { name: "foo1" }]])
+        ],
+        [
+          new Map([
+            ['b', {
+              name: 'b',
+              cardinality: { min: 0, max: 33 },
+              constraint: {
+                value: new Set('a'),
+                type: ContraintType.SHAPE,
+              }
+            }],
+            ['c', {
+              name: 'c',
+              cardinality: { min: 0, max: 33 },
+              constraint: {
+                value: new Set('a'),
+                type: ContraintType.SHAPE,
+              }
+            }],
+          ]),
+          new Map([["foo1", { name: "foo1" }]]),
+          new Map([["foo2", { name: "foo2" }]])
+        ]
+      ]
       const shape = new Shape({ name: '', positivePredicates: [], oneOf });
-      expect(shape.getOneOfs()).toStrictEqual(oneOf);
+      expect(shape.oneOf).toStrictEqual(oneOf);
+      expect(shape.oneOfIndexed).toStrictEqual(oneOfIndexed);
     });
   });
 });

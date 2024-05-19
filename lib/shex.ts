@@ -15,7 +15,7 @@ import {
   SHEX_EACH_OF,
   SHEX_ONE_OF,
 } from './constant';
-import type { IContraint, InconsistentPositiveAndNegativePredicateError, OneOf, OneOfPath } from './Shape';
+import type { IContraint, InconsistentPositiveAndNegativePredicateError, OneOf } from './Shape';
 import { type IShape, Shape, type IPredicate, ContraintType } from './Shape';
 
 /**
@@ -97,7 +97,7 @@ function concatShapeInfo(
   mapTripleShex: IMapTripleShex,
   shapeIri: string,
 ): IShape | ShapeError {
-  const positivePredicates: Map<string, IPredicate> = new Map();
+  const positivePredicates: IPredicate[] = [];
   const negativePredicates: string[] = [];
   const argsFunctionPredicate: IAppendPredicateArgs = {
     mapIdPredicate: mapTripleShex.mapIdPredicate,
@@ -150,16 +150,22 @@ function concatShapeInfo(
     isClosed = mapTripleShex.mapShapeExpressionClosedShape.get(shapeExpr);
   }
   try {
-    const oneOf: OneOf[] = [];
-    for (const [_, val] of argsFunctionPredicate.oneOf) {
-      oneOf.push(val);
+    let oneOfs: OneOf[] = [];
+    for (const currentOneOf of argsFunctionPredicate.oneOf.values()) {
+      const oneOf: OneOf = [];
+      for (const currentPath of currentOneOf) {
+        const deleteDuplicate = new Map(currentPath.map((predicate) => [predicate.name, predicate]));
+        oneOf.push(Array.from(deleteDuplicate.values()));
+      }
+      oneOfs.push(oneOf);
     }
+    oneOfs = deleteIdenticalBranch(oneOfs)
     return new Shape({
       name: shapeIri,
-      positivePredicates: Array.from(positivePredicates.values()),
+      positivePredicates: positivePredicates,
       negativePredicates,
       closed: isClosed,
-      oneOf: oneOf,
+      oneOf: oneOfs,
     });
   } catch (error: unknown) {
     return error as ShapeError;
@@ -217,7 +223,7 @@ function appendPredicates(
     } else {
       const constraintIri = args.mapIriConstraint.get(args.current);
       const constraint = interpretConstraint(constraintIri, args.mapIriDatatype);
-      args.positivePredicates.set(predicate, {
+      args.positivePredicates.push({
         name: predicate,
         cardinality: {
           min: min ?? 1,
@@ -237,7 +243,7 @@ function handleOneOf(
   mapTripleShex: IMapTripleShex,
   prevArgsFunctionPredicate: IAppendPredicateArgs,
   eachOf: boolean): undefined | ShapePoorlyFormatedError {
-  const positivePredicates: Map<string, IPredicate> = new Map();
+  const positivePredicates: IPredicate[] = [];
   const negativePredicates: string[] = [];
   const argsFunctionPredicate: IAppendPredicateArgs = {
     mapIdPredicate: mapTripleShex.mapIdPredicate,
@@ -278,7 +284,7 @@ function handleOneOf(
     current = mapTripleShex.mapPrevCurrentList.get(next);
     next = mapTripleShex.mapPrevNextList.get(next);
   }
-  let currentOneOf = prevArgsFunctionPredicate.oneOf.get(index);
+  const currentOneOf = prevArgsFunctionPredicate.oneOf.get(index);
   if (currentOneOf === undefined) {
     if (!eachOf) {
       prevArgsFunctionPredicate.oneOf.set(index, Array.from(argsFunctionPredicate.positivePredicates.values()).map((predicate) => [predicate]));
@@ -318,6 +324,32 @@ function handleEachOf(
     current = mapTripleShex.mapPrevCurrentList.get(next);
     next = mapTripleShex.mapPrevNextList.get(next);
   }
+}
+
+function deleteIdenticalBranch(oneOfs: OneOf[]): OneOf[] {
+
+  for (let i=0;i<oneOfs.length;++i) {
+    const identicalIndex = new Set<number>();
+    const indexed = new Set<string>();
+    const oneOf =oneOfs[i];
+    for (let j = 0; j < oneOf.length; ++j) {
+      const stringElement = JSON.stringify(oneOf[j],(key,value)=>{
+        if(key==="value"){
+          return Array.from(value);
+        }
+        return value
+      })
+      if (indexed.has(stringElement)) {
+        identicalIndex.add(j);
+      }
+      indexed.add(stringElement);
+    }
+    oneOfs[i] = oneOfs[i].filter((_, k) => {
+      return !identicalIndex.has(k);
+    });
+  }
+
+  return oneOfs;
 }
 
 /**
@@ -404,7 +436,7 @@ interface IAppendPredicateArgs {
   mapIriCardinalityMax: Map<string, number>;
   mapIriConstraint: Map<string, RDF.Term>;
   mapIriDatatype: Map<string, string>;
-  positivePredicates: Map<string, IPredicate>;
+  positivePredicates: IPredicate[];
   negativePredicates: string[];
   oneOf: Map<string, OneOf>;
   current?: string;
