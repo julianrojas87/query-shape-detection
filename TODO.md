@@ -3,3 +3,4 @@
 - Union
 - Nested queries
 - Handle IRI, BLANK NODE, LITTERAL constraint
+- Handle named node in query and analysis
