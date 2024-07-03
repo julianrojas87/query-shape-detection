@@ -22,7 +22,8 @@ describe('Bindings', () => {
             const linkedShape = new Map<string, IShape>();
             const starPattern: IStarPatternWithDependencies = {
                 starPattern: new Map(),
-                name: ""
+                name: "",
+                isVariable:true
             };
 
             const bindings = new Bindings(shape, starPattern, linkedShape);
@@ -54,7 +55,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, undefined]]);
@@ -91,7 +93,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -126,7 +129,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -161,7 +165,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, undefined]]);
@@ -220,7 +225,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -283,7 +289,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -346,7 +353,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -412,7 +420,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             const starPattern: IStarPatternWithDependencies = {
@@ -425,7 +434,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -482,7 +492,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             const starPattern: IStarPatternWithDependencies = {
@@ -495,7 +506,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -573,7 +585,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             const starPattern: IStarPatternWithDependencies = {
@@ -600,7 +613,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -661,7 +675,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -721,7 +736,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             const starPattern: IStarPatternWithDependencies = {
@@ -734,7 +750,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, undefined]]);
@@ -906,7 +923,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzzz"
+                name: "zzzzz",
+                isVariable:true
             };
 
             const dependentStarPattern4: IStarPatternWithDependencies = {
@@ -919,7 +937,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzz"
+                name: "zzzz",
+                isVariable:true
             };
 
             const dependentStarPattern3: IStarPatternWithDependencies = {
@@ -932,7 +951,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzz"
+                name: "zzz",
+                isVariable:true
             };
 
             const dependentStarPattern2: IStarPatternWithDependencies = {
@@ -952,7 +972,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zz"
+                name: "zz",
+                isVariable:true                
             };
 
 
@@ -966,7 +987,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
 
@@ -994,7 +1016,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -1180,7 +1203,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzzz"
+                name: "zzzzz",
+                isVariable:true
             };
 
             const dependentStarPattern4: IStarPatternWithDependencies = {
@@ -1193,7 +1217,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzz"
+                name: "zzzz",
+                isVariable:true
             };
 
             const dependentStarPattern3: IStarPatternWithDependencies = {
@@ -1206,7 +1231,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzz"
+                name: "zzz",
+                isVariable:true
             };
 
             const dependentStarPattern2: IStarPatternWithDependencies = {
@@ -1226,7 +1252,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zz"
+                name: "zz",
+                isVariable:true
             };
 
 
@@ -1240,7 +1267,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
 
@@ -1268,7 +1296,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -1434,7 +1463,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzzz"
+                name: "zzzzz",
+                isVariable:true
             };
 
             const dependentStarPattern4: IStarPatternWithDependencies = {
@@ -1447,7 +1477,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzz"
+                name: "zzzz",
+                isVariable:true
             };
 
             const dependentStarPattern3: IStarPatternWithDependencies = {
@@ -1460,7 +1491,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzz"
+                name: "zzz",
+                isVariable:true
             };
 
             const dependentStarPattern2: IStarPatternWithDependencies = {
@@ -1480,7 +1512,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zz"
+                name: "zz",
+                isVariable:true
             };
 
 
@@ -1494,7 +1527,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
 
@@ -1522,7 +1556,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -1573,7 +1608,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -1618,7 +1654,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -1663,7 +1700,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, undefined]]);
@@ -1746,7 +1784,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -1833,7 +1872,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -2006,7 +2046,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzzz"
+                name: "zzzzz",
+                isVariable:true
             };
 
             const dependentStarPattern4: IStarPatternWithDependencies = {
@@ -2019,7 +2060,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzz"
+                name: "zzzz",
+                isVariable:true
             };
 
             const dependentStarPattern3: IStarPatternWithDependencies = {
@@ -2032,7 +2074,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzz"
+                name: "zzz",
+                isVariable:true
             };
 
             const dependentStarPattern2: IStarPatternWithDependencies = {
@@ -2052,7 +2095,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zz"
+                name: "zz",
+                isVariable:true
             };
 
 
@@ -2066,7 +2110,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
 
@@ -2094,7 +2139,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -2286,7 +2332,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzzz"
+                name: "zzzzz",
+                isVariable:true
             };
 
             const dependentStarPattern4: IStarPatternWithDependencies = {
@@ -2299,7 +2346,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzzz"
+                name: "zzzz",
+                isVariable:true
             };
 
             const dependentStarPattern3: IStarPatternWithDependencies = {
@@ -2312,7 +2360,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zzz"
+                name: "zzz",
+                isVariable:true
             };
 
             const dependentStarPattern2: IStarPatternWithDependencies = {
@@ -2332,7 +2381,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "zz"
+                name: "zz",
+                isVariable:true
             };
 
 
@@ -2346,7 +2396,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
 
@@ -2374,7 +2425,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -2699,7 +2751,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -2744,7 +2797,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -2789,7 +2843,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -2859,7 +2914,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -2953,7 +3009,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             const starPattern: IStarPatternWithDependencies = {
@@ -2966,7 +3023,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, triple]]);
@@ -3074,7 +3132,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             const starPattern: IStarPatternWithDependencies = {
@@ -3101,7 +3160,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([
@@ -3206,7 +3266,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             const starPattern: IStarPatternWithDependencies = {
@@ -3219,7 +3280,8 @@ describe('Bindings', () => {
                         }
                     ],
                 ]),
-                name: "y"
+                name: "y",
+                isVariable:true
             };
 
             const expectedBindings = new Map([[triple.predicate, undefined]]);

@@ -500,7 +500,8 @@ describe('solveShapeQueryContainment', () => {
                         }
                     ],
                 ]),
-                name: "x"
+                name: "x",
+                isVariable:true
             };
 
             return starPattern;
@@ -524,7 +525,8 @@ describe('solveShapeQueryContainment', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             return starPattern;
@@ -548,7 +550,8 @@ describe('solveShapeQueryContainment', () => {
                         }
                     ],
                 ]),
-                name: "z"
+                name: "z",
+                isVariable:true
             };
 
             return starPattern;

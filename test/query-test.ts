@@ -47,7 +47,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "x"
+          name: "x",
+          isVariable:true
         }
       ];
       const yStarPattern: [string, IStarPatternWithDependencies] = ['y',
@@ -66,7 +67,8 @@ describe('query', () => {
               ]
             ]
           ),
-          name: "y"
+          name: "y",
+          isVariable:true
         }
       ];
       const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
@@ -107,7 +109,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "z"
+          name: "z",
+          isVariable:true
         }
       ];
 
@@ -126,7 +129,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "y"
+          name: "y",
+          isVariable:true
         }
       ];
 
@@ -156,7 +160,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "x"
+          name: "x",
+          isVariable:true
         }
       ];
 
@@ -214,7 +219,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "z"
+          name: "z",
+          isVariable:true
         }
       ];
 
@@ -233,7 +239,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "x"
+          name: "x",
+          isVariable:true
         }
       ];
 
@@ -249,7 +256,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "w"
+          name: "w",
+          isVariable:true
         }
       ];
       const sujetStarPattern: [string, IStarPatternWithDependencies] = [
@@ -267,7 +275,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "http://sujet.cm"
+          name: "http://sujet.cm",
+          isVariable:false
         }
       ];
       const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
@@ -436,7 +445,8 @@ describe('query', () => {
               }
             ],
           ]),
-          name: "x"
+          name: "x",
+          isVariable:true
         }
       ];
       const yStarPattern: [string, IStarPatternWithDependencies] = [
@@ -455,7 +465,8 @@ describe('query', () => {
               }
             ],
           ]),
-          name: "y"
+          name: "y",
+          isVariable:true
         }
       ];
 
@@ -513,7 +524,8 @@ describe('query', () => {
               }
             ],
           ]),
-          name: 'http://localhost:3000/pods/00000002199023256816/profile/card#me'
+          name: 'http://localhost:3000/pods/00000002199023256816/profile/card#me',
+          isVariable:false
         }
       ];
       const messageStarPattern: [string, IStarPatternWithDependencies] = [
@@ -543,7 +555,8 @@ describe('query', () => {
               }
             ],
           ]),
-          name: "message"
+          name: "message",
+          isVariable:true
         }
       ];
       const personStarPattern: [string, IStarPatternWithDependencies] = [
@@ -584,7 +597,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "person"
+          name: "person",
+          isVariable:true
         }
       ];
       const commentStarPattern: [string, IStarPatternWithDependencies] = [
@@ -658,7 +672,8 @@ describe('query', () => {
               }
             ]
           ]),
-          name: "comment"
+          name: "comment",
+          isVariable:true
         }
       ];
 

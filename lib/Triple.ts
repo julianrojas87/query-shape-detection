@@ -8,6 +8,7 @@ export interface IStarPatternWithDependencies {
   starPattern: Map<string, ITripleWithDependencies>;
   filterExpression?: string;
   name: string;
+  isVariable:boolean
 }
 
 export interface ITripleWithDependencies {

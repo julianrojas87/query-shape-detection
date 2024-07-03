@@ -19,7 +19,7 @@ export interface IQuery {
  * @todo add support for optional property path
  */
 export function generateQuery(algebraQuery: Algebra.Operation): IQuery {
-  const resp = new Map<string, ITripleArgs[]>();
+  const resp = new Map<string, { triples: ITripleArgs[], isVariable: boolean }>();
   // the binding value to the value
   const values = new Map<string, Term[]>();
 
@@ -35,9 +35,9 @@ export function generateQuery(algebraQuery: Algebra.Operation): IQuery {
         object,
       };
       if (subjectGroup === undefined) {
-        resp.set(subject.value, [propertyObject]);
+        resp.set(subject.value, { triples: [propertyObject], isVariable: subject.termType === "Variable" });
       } else {
-        subjectGroup.push(propertyObject);
+        subjectGroup.triples.push(propertyObject);
       }
     }
     return true;
@@ -73,12 +73,12 @@ export function generateQuery(algebraQuery: Algebra.Operation): IQuery {
   return joinTriplesWithProperties(resp, values);
 }
 
-function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, values: Map<string, Term[]>): IQuery {
+function joinTriplesWithProperties(tripleArgs: Map<string, { triples: ITripleArgs[], isVariable: boolean }>, values: Map<string, Term[]>): IQuery {
   const innerQuery = new Map<string, IStarPatternWithDependencies>();
   const resp: IQuery = { starPatterns: innerQuery, filterExpression: "" };
 
-  for (const [subjectGroupName, tripleArgArray] of tripleArgs) {
-    for (const tripleArg of tripleArgArray) {
+  for (const [subjectGroupName, { triples, isVariable }] of tripleArgs) {
+    for (const tripleArg of triples) {
       let triple = new Triple(tripleArg);
       if (!Array.isArray(tripleArg.object) && tripleArg.object?.termType === "Variable") {
         const value = values.get(tripleArg.object.value);
@@ -97,7 +97,8 @@ function joinTriplesWithProperties(tripleArgs: Map<string, ITripleArgs[]>, value
           starPattern: new Map([
             [triple.predicate, predicateWithDependencies]
           ]),
-          name: subjectGroupName
+          name: subjectGroupName,
+          isVariable: isVariable
         });
       } else {
         const predicateWithDependencies: ITripleWithDependencies = { triple: triple, dependencies: undefined };
