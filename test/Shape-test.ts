@@ -212,7 +212,7 @@ describe('Shape', () => {
   describe('getOneOfs', () => {
     it('should return no one of(s)', () => {
       const shape = new Shape({ name: '', positivePredicates: [] });
-      expect(shape.oneOf).toStrictEqual(undefined);
+      expect(shape.oneOf).toStrictEqual([]);
       expect(shape.oneOfIndexed).toStrictEqual([]);
     });
 

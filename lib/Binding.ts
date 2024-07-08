@@ -62,7 +62,7 @@ export class Bindings implements IBindings {
         for (const { triple } of starPattern.starPattern.values()) {
             this.bindings.set(triple.predicate, undefined);
         }
-        this.oneOfs = (shape.oneOfIndexed ?? []).map((oneOfs: OneOfPathIndexed[]) => new OneOfBinding(oneOfs));
+        this.oneOfs = shape.oneOfIndexed.map((oneOfs: OneOfPathIndexed[]) => new OneOfBinding(oneOfs));
         this.calculateBinding(shape, starPattern, linkedShape);
 
         // delete duplicate

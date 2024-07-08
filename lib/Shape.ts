@@ -23,6 +23,8 @@ export interface IShape extends IShapeObj {
    * @returns {Set<string>} - IRIs of the shape necessary for the constraint
    */
   getLinkedShapeIri: () => Set<string>;
+  oneOf: OneOf[];
+  oneOfIndexed: OneOfIndexed[];
 }
 
 /**
@@ -75,7 +77,8 @@ export interface IShapeObj {
 /**
  * The argument to generate a {Shape} instance
  */
-export interface IShapeArgs extends Omit<IShapeObj, 'positivePredicates' | 'negativePredicates' | 'closed'> {
+export interface IShapeArgs {
+  name: string;
   positivePredicates: (IPredicate | string)[];
   negativePredicates?: (IPredicate | string)[];
   linkedShapeIri?: string[]
@@ -100,8 +103,8 @@ export class Shape implements IShape {
   public readonly linkedShapeIri: Set<string>;
   // All the predicate with extra information
   private readonly predicates = new Map<string, IPredicate>();
-  public readonly oneOf?: OneOf[];
-  public readonly oneOfIndexed?: OneOfIndexed[] = [];
+  public readonly oneOf: OneOf[];
+  public readonly oneOfIndexed: OneOfIndexed[] = [];
 
   /**
    *
@@ -110,9 +113,9 @@ export class Shape implements IShape {
   public constructor({ name, positivePredicates, negativePredicates, closed, oneOf }: IShapeArgs) {
     this.name = name;
     this.closed = closed ?? false;
-    this.oneOf = (oneOf ?? []).length !== 0 ? oneOf : undefined;
+    this.oneOf = oneOf ? oneOf : [];
     const linkedShapeIri = new Set<string>();
-    for (const oneOf of this.oneOf ?? []) {
+    for (const oneOf of this.oneOf) {
       const currentOneOf: OneOfIndexed = [];
       for (const oneOfPath of oneOf) {
         const currentOneOfPath: OneOfPathIndexed = new Map(oneOfPath.map((predicate) => [predicate.name, predicate]));
@@ -156,8 +159,8 @@ export class Shape implements IShape {
           });
       }
     }
-    
-    for (const paths of this.oneOf ?? []) {
+
+    for (const paths of this.oneOf) {
       for (const path of paths) {
         for (const predicate of path) {
           if (predicate.constraint !== undefined && predicate?.constraint.type === ContraintType.SHAPE) {
