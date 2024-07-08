@@ -53,7 +53,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
     const currentShapeBindingResult = bindingResult.get(shapeName)!;
     for (const [starPatternName, bindingResult] of starPatternBinding) {
       const originOfDependency = nestedContainedStarPatterns.get(starPatternName);
-      // validate that there are no cycle if there are cycle we analyse the star pattern independently
+      // validate that there are no cycles if there are cycles we analyse the star pattern independently
       for (const [origin, dependencyInfo] of originOfDependency ?? []) {
         if (!nestedContainedStarPatterns.has(origin)) {
           currentShapeBindingResult.set(starPatternName, { ...bindingResult, dependent: dependencyInfo });

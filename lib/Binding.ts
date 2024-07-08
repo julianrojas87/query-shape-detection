@@ -125,7 +125,7 @@ export class Bindings implements IBindings {
             for (const starPattern of rejectedValues) {
                 result.delete(starPattern);
             }
-            let nestedContainedStarPatternName: string[] = []
+            let nestedContainedStarPatternName: string[] = [];
             for (const  nestedConstrainStarPattern of result.values()) {
                 nestedContainedStarPatternName = nestedContainedStarPatternName.concat(nestedConstrainStarPattern);
             }
