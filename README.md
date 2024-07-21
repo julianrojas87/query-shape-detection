@@ -96,7 +96,7 @@ const shapeQuadPromise = new Promise((resolve, reject) => {
         .on('data', async(quad: RDF.Quad) => {
           quads.push(quad);
         })
-        .on('error', /* istanbul ignore next */(error: any) => {
+        .on('error',(error: any) => {
           reject(error);
         })
         .on('end', async() => {
