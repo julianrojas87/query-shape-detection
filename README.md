@@ -96,10 +96,6 @@ const shapeQuadPromise = new Promise((resolve, reject) => {
         .on('data', async(quad: RDF.Quad) => {
           quads.push(quad);
         })
-        // We ignore this because it is difficult to provide a valid ShEx document that
-        // would not be parsable in RDF given it has been already parsed in ShExJ
-
-        // eslint-disable-next-line no-inline-comments
         .on('error', /* istanbul ignore next */(error: any) => {
           reject(error);
         })
