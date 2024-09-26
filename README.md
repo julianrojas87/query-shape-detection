@@ -1,4 +1,6 @@
 # Query Shape Detection
+[![npm version](https://badge.fury.io/js/query-shape-detection.svg)](https://www.npmjs.com/package/query-shape-detection)
+
 
 A nodejs library to calculate the containment between [SPARQL queries](https://www.w3.org/TR/sparql11-query/) and [RDF data shapes](https://www.w3.org/groups/wg/data-shapes/) at the star pattern level.
 
