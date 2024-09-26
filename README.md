@@ -2,6 +2,11 @@
 
 A nodejs library to calculate the containment between [SPARQL queries](https://www.w3.org/TR/sparql11-query/) and [RDF data shapes](https://www.w3.org/groups/wg/data-shapes/) at the star pattern level.
 
+## Installation
+```sh
+yarn add query-shape-detection
+```
+
 ## Dependencies
 Node v20 or higher
 
