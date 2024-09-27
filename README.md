@@ -169,6 +169,6 @@ export enum ContainmentResult {
 
 ## Current limitation
 - Support only ShEx
-- No support for [SPARQL property path](https://www.w3.org/TR/sparql11-query/#propertypaths)
-- No support for Union
+- Known bug for some complex property path
+- No support for MINUS statement
 - No support for filter expression
