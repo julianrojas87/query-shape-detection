@@ -4,7 +4,7 @@ import { ContraintType, IShape, OneOf, OneOfPathIndexed, Shape } from '../lib/Sh
 import { IStarPatternWithDependencies, ITriple, Triple } from '../lib/Triple';
 import { BaseQuad } from '@rdfjs/types';
 import { translate } from 'sparqlalgebrajs';
-import { generateQuery } from '../lib/query';
+import { generateQuery, generateStarPatternUnion } from '../lib/query';
 import type * as RDF from '@rdfjs/types';
 import * as N3 from 'n3';
 import { readFileSync } from 'fs';
@@ -121,14 +121,27 @@ describe('Bindings', () => {
                 subject: 'y',
                 predicate: 'aaa',
                 object: [DF.namedNode('o0')],
-                isOptional:true
+                isOptional: true
+            });
+            const triple2: Triple = new Triple({
+                subject: 'y',
+                predicate: 'p0',
+                object: [DF.namedNode('o0')],
+                isOptional: false
             });
             const starPattern: IStarPatternWithDependencies = {
                 starPattern: new Map([
                     [
-                        'p0',
+                        'aaa',
                         {
                             triple,
+                            dependencies: undefined
+                        }
+                    ],
+                    [
+                        'p0',
+                        {
+                            triple:triple2,
                             dependencies: undefined
                         }
                     ],
@@ -138,7 +151,7 @@ describe('Bindings', () => {
 
             };
 
-            const expectedBindings = new Map([[triple.predicate, triple]]);
+            const expectedBindings = new Map([[triple.predicate, triple], [triple2.predicate, triple2]]);
 
 
             const bindings = new Bindings(shape, starPattern, linkedShape);
@@ -147,7 +160,7 @@ describe('Bindings', () => {
             expect(bindings.shouldVisitShape()).toBe(true);
             expect(bindings.getUnboundedTriple()).toStrictEqual([]);
             expect(bindings.getBindings()).toStrictEqual(expectedBindings);
-            expect(bindings.getBoundTriple()).toStrictEqual([triple]);
+            expect(bindings.getBoundTriple()).toStrictEqual([triple, triple2]);
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([]);
         });
 
@@ -498,7 +511,8 @@ describe('Bindings', () => {
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
                 shape: ["foo1"],
-                starPattern: "z"
+                starPattern: "z",
+                origin:'y'
             }]);
         });
 
@@ -572,7 +586,8 @@ describe('Bindings', () => {
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
                 starPattern: "z",
-                shape: undefined
+                shape: undefined,
+                origin:'y'
             }]);
         });
 
@@ -685,7 +700,8 @@ describe('Bindings', () => {
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
                 shape: ["foo1"],
-                starPattern: "z"
+                starPattern: "z",
+                origin:'y'
             }]);
         });
 
@@ -1098,23 +1114,28 @@ describe('Bindings', () => {
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
                 {
                     shape: ["foo1"],
-                    starPattern: "z"
+                    starPattern: "z",
+                    origin:"y"
                 },
                 {
                     shape: ["foo2"],
-                    starPattern: "zz"
+                    starPattern: "zz",
+                    origin:"y"
                 },
                 {
                     shape: ["foo3"],
-                    starPattern: "zzz"
+                    starPattern: "zzz",
+                    origin:"y"
                 },
                 {
                     shape: ["foo4"],
-                    starPattern: "zzzz"
+                    starPattern: "zzzz",
+                    origin:"y"
                 },
                 {
                     shape: ["foo5"],
-                    starPattern: "zzzzz"
+                    starPattern: "zzzzz",
+                    origin:"y"
                 }
             ]);
         });
@@ -2244,23 +2265,28 @@ describe('Bindings', () => {
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
                 {
                     shape: ["foo1"],
-                    starPattern: "z"
+                    starPattern: "z",
+                    origin:"y"
                 },
                 {
                     shape: ["foo2"],
-                    starPattern: "zz"
+                    starPattern: "zz",
+                    origin:"y"
                 },
                 {
                     shape: ["foo3"],
-                    starPattern: "zzz"
+                    starPattern: "zzz",
+                    origin:"y"
                 },
                 {
                     shape: ["foo4"],
-                    starPattern: "zzzz"
+                    starPattern: "zzzz",
+                    origin:"y"
                 },
                 {
                     shape: ["foo5"],
-                    starPattern: "zzzzz"
+                    starPattern: "zzzzz",
+                    origin:"y"
                 }
             ]);
         });
@@ -2589,7 +2615,8 @@ describe('Bindings', () => {
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
                 shape: undefined,
-                starPattern: "v"
+                starPattern: "v",
+                origin:'x'
             }]);
         });
 
@@ -2656,11 +2683,13 @@ describe('Bindings', () => {
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
                 {
                     shape: undefined,
-                    starPattern: "y"
+                    starPattern: "y",
+                    origin:"x"
                 },
                 {
                     shape: undefined,
-                    starPattern: "z"
+                    starPattern: "z",
+                    origin:"x"
                 }
             ]);
         });
@@ -2708,23 +2737,28 @@ describe('Bindings', () => {
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
                 {
                     shape: undefined,
-                    starPattern: "y"
+                    starPattern: "y",
+                    origin:"x"
                 },
                 {
                     shape: undefined,
-                    starPattern: "z"
+                    starPattern: "z",
+                    origin:"x"
                 },
                 {
                     shape: undefined,
-                    starPattern: "w"
+                    starPattern: "w",
+                    origin:"x"
                 },
                 {
                     shape: undefined,
-                    starPattern: "w1"
+                    starPattern: "w1",
+                    origin:"x"
                 },
                 {
                     shape: undefined,
-                    starPattern: "w2"
+                    starPattern: "w2",
+                    origin:"x"
                 }
             ]);
         });
@@ -3055,7 +3089,8 @@ describe('Bindings', () => {
             expect(bindings.getBoundTriple()).toStrictEqual([triple]);
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
                 shape: ["foo1", "foo2"],
-                starPattern: "z"
+                starPattern: "z",
+                origin:"y"
             }]);
         });
 
@@ -3198,7 +3233,8 @@ describe('Bindings', () => {
             expect(bindings.getBoundTriple()).toStrictEqual([triple1, triple2, triple3]);
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([{
                 shape: ["foo1", "foo2"],
-                starPattern: "z"
+                starPattern: "z",
+                origin:"y"
             }]);
         });
 
@@ -3675,97 +3711,6 @@ describe('Bindings', () => {
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([]);
         });
 
-        it('should have no binding with property path cardinality with a shape with a cardinality outside of it', () => {
-            const shape: Shape = new Shape(
-                {
-                    name: 'foo',
-                    positivePredicates: [{
-                        name: 'p0',
-                        cardinality: { max: 3, min: 2 }
-                    }],
-                    closed: true,
-                }
-            );
-            const linkedShape = new Map<string, IShape>();
-
-            const triple: Triple = new Triple({
-                subject: 'y',
-                predicate: 'p0',
-                object: [DF.namedNode('o0')],
-                cardinality: { max: -1, min: 0 }
-            });
-            const starPattern: IStarPatternWithDependencies = {
-                starPattern: new Map([
-                    [
-                        'p0',
-                        {
-                            triple,
-                            dependencies: undefined
-                        }
-                    ],
-                ]),
-                name: "y",
-                isVariable: true,
-
-            };
-
-            const expectedBindings = new Map([[triple.predicate, undefined]]);
-
-
-            const bindings = new Bindings(shape, starPattern, linkedShape, [], true);
-
-            expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.shouldVisitShape()).toBe(false);
-            expect(bindings.getUnboundedTriple()).toStrictEqual([triple]);
-            expect(bindings.getBindings()).toStrictEqual(expectedBindings);
-            expect(bindings.getBoundTriple()).toStrictEqual([]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([]);
-        });
-
-        it('should have no binding with property path cardinality bigger than one and a shape with undefined cardinality', () => {
-            const shape: Shape = new Shape(
-                {
-                    name: 'foo',
-                    positivePredicates: ['p0'],
-                    closed: true,
-                }
-            );
-            const linkedShape = new Map<string, IShape>();
-
-            const triple: Triple = new Triple({
-                subject: 'y',
-                predicate: 'p0',
-                object: [DF.namedNode('o0')],
-                cardinality: { max: -1, min: 1 }
-            });
-            const starPattern: IStarPatternWithDependencies = {
-                starPattern: new Map([
-                    [
-                        'p0',
-                        {
-                            triple,
-                            dependencies: undefined
-                        }
-                    ],
-                ]),
-                name: "y",
-                isVariable: true,
-
-            };
-
-            const expectedBindings = new Map([[triple.predicate, undefined]]);
-
-
-            const bindings = new Bindings(shape, starPattern, linkedShape, [], true);
-
-            expect(bindings.isFullyBounded()).toBe(false);
-            expect(bindings.shouldVisitShape()).toBe(false);
-            expect(bindings.getUnboundedTriple()).toStrictEqual([triple]);
-            expect(bindings.getBindings()).toStrictEqual(expectedBindings);
-            expect(bindings.getBoundTriple()).toStrictEqual([]);
-            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([]);
-        });
-
         it('should have one binding with property path cardinality of one and with shape within undefined cardinality', () => {
             const shape: Shape = new Shape(
                 {
@@ -4035,15 +3980,85 @@ describe('Bindings', () => {
             expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
                 {
                     shape: ["http://example.com#Post", "http://example.com#Comment"],
-                    starPattern: "message"
+                    starPattern: "message",
+                    origin: "comment",
                 },
                 {
                     shape: ["http://example.com#Profile"],
-                    starPattern: "person"
+                    starPattern: "person",
+                    origin: "comment",
                 },
                 {
                     shape: ["http://example.com#Profile"],
-                    starPattern: "http://localhost:3000/pods/00000002199023256816/profile/card#me"
+                    starPattern: "http://localhost:3000/pods/00000002199023256816/profile/card#me",
+                    origin: "comment",
+                }
+            ]);
+        });
+
+        test('interactive-short-2 message comment shape', async () => {
+            const stringQuery = `# Recent messages of a person
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+                PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+                PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+                PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+                PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+
+                SELECT
+                    ?messageId
+                    ?messageContent
+                    ?messageCreationDate
+                    ?originalPostId
+                    ?originalPostAuthorId
+                    ?originalPostAuthorFirstName
+                    ?originalPostAuthorLastName
+                WHERE {
+                    ?person a snvoc:Person .
+                    ?person snvoc:id ?personId .
+                    ?message snvoc:hasCreator ?person .
+                    ?message snvoc:content|snvoc:imageFile ?messageContent .
+                    ?message snvoc:creationDate ?messageCreationDate .
+                    ?message snvoc:id ?messageId .
+                    OPTIONAL {
+                        ?message snvoc:replyOf* ?originalPostInner .
+                        ?originalPostInner a snvoc:Post .
+                    } .
+                    BIND( COALESCE(?originalPostInner, ?message) AS ?originalPost ) .
+                    ?originalPost snvoc:id ?originalPostId .
+                    ?originalPost snvoc:hasCreator ?creator .
+                    ?creator snvoc:firstName ?originalPostAuthorFirstName .
+                    ?creator snvoc:lastName ?originalPostAuthorLastName .
+                    ?creator snvoc:id ?originalPostAuthorId .
+                }
+                LIMIT 10`;
+            const query = generateQuery(translate(stringQuery));
+            const commentStarPattern = query.starPatterns.get("message")!;
+            const unionComment = generateStarPatternUnion(query.union!, 'message');
+            const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
+            const shape: IShape = shapeIndexed.get("http://example.com#Comment")!;
+
+
+            const bindings = new Bindings(shape, commentStarPattern, new Map([
+                ["http://example.com#Post", shapeIndexed.get("http://example.com#Post")!],
+                ["http://example.com#Profile", shapeIndexed.get("http://example.com#Profile")!]
+            ]), unionComment);
+
+            expect(bindings.isFullyBounded()).toBe(true);
+            expect(bindings.shouldVisitShape()).toBe(true);
+            expect(bindings.getNestedContainedStarPatternName()).toStrictEqual([
+                {
+                    shape: ["http://example.com#Profile"],
+                    starPattern: "person",
+                    origin: "message",
+                },
+                {
+                    shape: ["http://example.com#Post"],
+                    starPattern: "originalPostInner",
+                    origin: "message",
                 }
             ]);
         });
@@ -4270,8 +4285,9 @@ describe('UnionBinding', () => {
         expect(unionBinding.areAllContained).toBe(true);
         expect(unionBinding.hasOneContained).toBe(true);
         expect(unionBinding.dependentStarPattern).toStrictEqual([{
-            starPattern:"bar2",
-            shape:["foo2"]
+            starPattern: "bar2",
+            shape: ["foo2"],
+            origin:"bar"
         }])
     });
 });

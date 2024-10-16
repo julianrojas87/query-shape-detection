@@ -263,10 +263,26 @@ describe('solveShapeQueryContainment', () => {
             const expectedStarPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["x", { result: ContainmentResult.CONTAIN, target: [shape.name] }],
                 ["y", { result: ContainmentResult.DEPEND, target: ['foo1'] }],
-                ["z", { result: ContainmentResult.DEPEND, target: ['foo2'] }],
+                ["z", {
+                    result: ContainmentResult.DEPEND, target: [
+                        "foo",
+                        "foo2",
+                        "foo3",
+                        "foo4",
+                        "foo5",
+                    ]
+                }],
                 ["w", { result: ContainmentResult.DEPEND, target: ['foo3'] }],
                 ["w1", { result: ContainmentResult.DEPEND, target: ['foo4'] }],
-                ["w2", { result: ContainmentResult.DEPEND, target: ['foo5'] }],
+                ["w2", {
+                    result: ContainmentResult.DEPEND, target: [
+                        "foo",
+                        "foo2",
+                        "foo3",
+                        "foo4",
+                        "foo5",
+                    ]
+                }],
 
             ]);
             const expectedResult: IResult = {
@@ -502,7 +518,7 @@ describe('solveShapeQueryContainment', () => {
                 ]),
                 name: "x",
                 isVariable: true,
-                
+
             };
 
             return starPattern;
@@ -528,7 +544,7 @@ describe('solveShapeQueryContainment', () => {
                 ]),
                 name: "z",
                 isVariable: true,
-                
+
             };
 
             return starPattern;
@@ -554,7 +570,7 @@ describe('solveShapeQueryContainment', () => {
                 ]),
                 name: "z",
                 isVariable: true,
-                
+
             };
 
             return starPattern;
@@ -563,7 +579,7 @@ describe('solveShapeQueryContainment', () => {
     });
 
     describe('real use case', () => {
-        describe('short', ()=>{
+        describe('short', () => {
             test('interactive-short-1', async () => {
                 const queryString = `
                 # Profile of a person
@@ -602,12 +618,12 @@ describe('solveShapeQueryContainment', () => {
                 }`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -618,12 +634,79 @@ describe('solveShapeQueryContainment', () => {
                     ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
                     ["city", { result: ContainmentResult.DEPEND }]
                 ]);
-    
-    
+
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
 
-            test('interactive-short-4', async ()=>{
+            test('interactive-short-2', async () => {
+                const queryString = `
+                # Recent messages of a person
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+                PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+                PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+                PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+                PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+
+                SELECT
+                    ?messageId
+                    ?messageContent
+                    ?messageCreationDate
+                    ?originalPostId
+                    ?originalPostAuthorId
+                    ?originalPostAuthorFirstName
+                    ?originalPostAuthorLastName
+                WHERE {
+                    ?person a snvoc:Person .
+                    ?person snvoc:id ?personId .
+                    ?message snvoc:hasCreator ?person .
+                    ?message snvoc:content|snvoc:imageFile ?messageContent .
+                    ?message snvoc:creationDate ?messageCreationDate .
+                    ?message snvoc:id ?messageId .
+                    OPTIONAL {
+                        ?message snvoc:replyOf* ?originalPostInner .
+                        ?originalPostInner a snvoc:Post .
+                    } .
+                    BIND( COALESCE(?originalPostInner, ?message) AS ?originalPost ) .
+                    ?originalPost snvoc:id ?originalPostId .
+                    ?originalPost snvoc:hasCreator ?creator .
+                    ?creator snvoc:firstName ?originalPostAuthorFirstName .
+                    ?creator snvoc:lastName ?originalPostAuthorLastName .
+                    ?creator snvoc:id ?originalPostAuthorId .
+                }
+                LIMIT 10
+                `;
+                const querySparql = translate(queryString);
+                const query = generateQuery(querySparql);
+
+                const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
+                const shapes: IShape[] = Array.from(shapeIndexed.values());
+
+                const resp = solveShapeQueryContainment({ query, shapes });
+
+                const conditionalLink: IConditionalLink[] = [];
+                const visitShapeBoundedResource = new Map([
+                    ["http://example.com#Comment", true],
+                    ["http://example.com#Post", true],
+                    ["http://example.com#Profile", true]
+                ]);
+                const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
+                    ["person", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["originalPost", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["originalPostInner", { result: ContainmentResult.DEPEND, target: ["http://example.com#Post"] }],
+                    ["creator", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }],
+                ]);
+
+
+                expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
+            });
+
+            test('interactive-short-4', async () => {
                 const queryString = `
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -647,12 +730,12 @@ describe('solveShapeQueryContainment', () => {
 
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -662,8 +745,8 @@ describe('solveShapeQueryContainment', () => {
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ]);
-    
-    
+
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
 
@@ -678,12 +761,12 @@ describe('solveShapeQueryContainment', () => {
                 }`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -694,13 +777,13 @@ describe('solveShapeQueryContainment', () => {
                     ["http://localhost:3000/pods/00000000000000000150/comments/Mexico#68719564521", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                     ["creator", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }]
                 ]);
-    
-    
+
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
         });
-        
-        describe('discover', ()=>{
+
+        describe('discover', () => {
             test('interactive-discover-1', async () => {
                 const queryString = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
@@ -713,12 +796,12 @@ describe('solveShapeQueryContainment', () => {
                 }`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -728,12 +811,12 @@ describe('solveShapeQueryContainment', () => {
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Post"] }],
                 ]);
-    
-    
+
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
 
-            test('interactive-discover-2', async ()=>{
+            test('interactive-discover-2', async () => {
                 const queryString = `
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -760,12 +843,12 @@ describe('solveShapeQueryContainment', () => {
                 `;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -775,8 +858,8 @@ describe('solveShapeQueryContainment', () => {
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ]);
-    
-    
+
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
 
@@ -792,12 +875,12 @@ describe('solveShapeQueryContainment', () => {
                 ORDER BY DESC (?messages)`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -806,12 +889,12 @@ describe('solveShapeQueryContainment', () => {
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                    ["tag", { result: ContainmentResult.DEPEND }],
+                    ["tag", { result: ContainmentResult.DEPEND, target: [] }],
                 ]);
-    
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
-    
+
             test('interactive-discover-4', async () => {
                 const queryString = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
@@ -826,12 +909,12 @@ describe('solveShapeQueryContainment', () => {
                 ORDER BY DESC (?messages)`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -840,12 +923,12 @@ describe('solveShapeQueryContainment', () => {
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment"] }],
-                    ["location", { result: ContainmentResult.DEPEND }],
+                    ["location", { result: ContainmentResult.DEPEND, target: [] }],
                 ]);
-    
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
-    
+
             test('interactive-discover-5', async () => {
                 const queryString = `PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
                 SELECT DISTINCT ?locationIp WHERE {
@@ -854,12 +937,12 @@ describe('solveShapeQueryContainment', () => {
                 }`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -869,10 +952,10 @@ describe('solveShapeQueryContainment', () => {
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ]);
-    
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
-    
+
             it('interactive-discover-6', async () => {
                 const queryString = `PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
                 SELECT DISTINCT ?forumId ?forumTitle WHERE {
@@ -883,12 +966,12 @@ describe('solveShapeQueryContainment', () => {
                 }`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -905,10 +988,10 @@ describe('solveShapeQueryContainment', () => {
                         }
                     ],
                 ]);
-    
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
-    
+
             it('interactive-discover-7', async () => {
                 const queryString = `PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
                 SELECT DISTINCT ?firstName ?lastName WHERE {
@@ -920,12 +1003,12 @@ describe('solveShapeQueryContainment', () => {
                 }`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -937,11 +1020,11 @@ describe('solveShapeQueryContainment', () => {
                     ["forum", { result: ContainmentResult.REJECTED }],
                     ["moderator", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
                 ]);
-    
+
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
 
-            it('interactive-discover-8', async ()=>{
+            it('interactive-discover-8', async () => {
                 const queryString = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                                     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -965,12 +1048,12 @@ describe('solveShapeQueryContainment', () => {
                                     } LIMIT 10`;
                 const querySparql = translate(queryString);
                 const query = generateQuery(querySparql);
-    
+
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
                 const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
+
                 const resp = solveShapeQueryContainment({ query, shapes });
-    
+
                 const conditionalLink: IConditionalLink[] = [];
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
@@ -979,59 +1062,10 @@ describe('solveShapeQueryContainment', () => {
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"]}],
-                    ["otherMessage", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment" ,"http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["otherMessage", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ]);
-    
-                expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
-            });
-        });
 
-        describe('complex', ()=>{
-            it('interactive-complex-8', async () => {
-                const queryString = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-                SELECT ?personId ?personFirstName ?personLastName ?commentCreationDate ?commentId ?commentContent WHERE {
-                  VALUES ?type {
-                    snvoc:Comment
-                    snvoc:Post
-                  }
-                  <http://localhost:3000/pods/00000002199023256816/profile/card#me> rdf:type snvoc:Person.
-                  ?message snvoc:hasCreator <http://localhost:3000/pods/00000002199023256816/profile/card#me>;
-                    rdf:type ?type.
-                  ?comment rdf:type snvoc:Comment;
-                    snvoc:replyOf ?message;
-                    snvoc:creationDate ?commentCreationDate;
-                    snvoc:id ?commentId;
-                    snvoc:content ?commentContent;
-                    snvoc:hasCreator ?person.
-                  ?person snvoc:id ?personId;
-                    snvoc:firstName ?personFirstName;
-                    snvoc:lastName ?personLastName.
-                }
-                ORDER BY DESC (?commentCreationDate) (?commentId)
-                LIMIT 20`;
-                const querySparql = translate(queryString);
-                const query = generateQuery(querySparql);
-    
-                const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
-                const shapes: IShape[] = Array.from(shapeIndexed.values());
-    
-                const resp = solveShapeQueryContainment({ query, shapes });
-    
-                const conditionalLink: IConditionalLink[] = [];
-                const visitShapeBoundedResource = new Map([
-                    ["http://example.com#Comment", true],
-                    ["http://example.com#Post", true],
-                    ["http://example.com#Profile", true]
-                ]);
-                const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["http://localhost:3000/pods/00000002199023256816/profile/card#me", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }],
-                    ["message", { result: ContainmentResult.DEPEND, target: ["http://example.com#Post", "http://example.com#Comment"] }],
-                    ["comment", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment"] }],
-                    ["person", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }],
-                ]);
-    
                 expect(resp).toStrictEqual({ conditionalLink, visitShapeBoundedResource, starPatternsContainment });
             });
         });
@@ -1055,7 +1089,7 @@ describe('solveShapeQueryContainment', () => {
             ]);
         }
 
-        function populateStream(source: string | RDF.Quad[]):any {
+        function populateStream(source: string | RDF.Quad[]): any {
             let quads;
             if (Array.isArray(source)) {
                 quads = source;

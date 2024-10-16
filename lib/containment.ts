@@ -32,7 +32,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
     bindingResult.set(shape.name, new Map());
     const bindingResultofShape = bindingResult.get(shape.name)!;
     for (const [starPatternName, starPattern] of query.starPatterns) {
-      const starPatternUnion = generateStarPatternUnion(query.union??[],starPatternName);
+      const starPatternUnion = generateStarPatternUnion(query.union ?? [], starPatternName);
       const bindings = new Bindings(shape, starPattern, dependencies, starPatternUnion);
       const currentNestedStarPattern = bindings.getNestedContainedStarPatternName();
       for (const starPattern of currentNestedStarPattern) {
@@ -65,11 +65,34 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
   }
 
   for (const starPatternBinding of bindingResult.values()) {
-    for (const [starPatternName, bindingResult] of starPatternBinding) {
-      if (bindingResult.dependent === undefined) {
-        updateStarPatternContainment(starPatternsContainment, bindingResult.result, starPatternName, bindingResult.shape);
+    for (const [starPatternName, result] of starPatternBinding) {
+      if (result.dependent === undefined) {
+        updateStarPatternContainment(starPatternsContainment, result.result, starPatternName, result.shape);
       } else {
-        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target: bindingResult.dependent.shape !== undefined ? bindingResult.dependent.shape : undefined });
+        // check the shape contained related to the dependent star pattern
+        const dependendShapes = [];
+        for (const [shapeName, nestedBinding] of bindingResult) {
+          const nestedResult = nestedBinding.get(starPatternName);
+          if (nestedResult !== undefined) {
+            if (nestedResult.result.isFullyBounded()) {
+              dependendShapes.push(shapeName);
+            }
+          }
+        }
+
+        const constraintTarget = [];
+        for(const [shapeName, nestedBinding] of bindingResult){
+          const originBinding = nestedBinding.get(result.dependent.origin);
+          if(originBinding!==undefined){
+            constraintTarget.push(shapeName);
+          }
+        }
+        // we check if there is less shapes contained than the constraint of the dependency
+        const target = constraintTarget.length > dependendShapes.length
+          || constraintTarget.length === 0
+          ? dependendShapes : result.dependent.shape;
+
+        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target });
       }
     }
   }
@@ -95,7 +118,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
 
 }
 
-function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IContainmentResult>, bindings: IBindings, starPatternName: StarPatternName, shape: IShape):void {
+function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IContainmentResult>, bindings: IBindings, starPatternName: StarPatternName, shape: IShape): void {
   const prevContainmentResult = starPatternsContainment.get(starPatternName)!;
 
   if (bindings.shouldVisitShape() && bindings.getUnboundedTriple().length > 0 && prevContainmentResult.result !== ContainmentResult.CONTAIN) {

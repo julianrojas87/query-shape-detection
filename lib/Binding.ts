@@ -42,6 +42,13 @@ export interface IBindings {
 export interface IDependentStarPattern {
     starPattern: string;
     shape?: string[];
+    origin: string
+}
+
+export enum ConstraintResult {
+    INAPPLICABLE,
+    RESPECT,
+    NOT_RESPECT
 }
 
 /**
@@ -59,12 +66,14 @@ export class Bindings implements IBindings {
     private unionBindings: UnionBinding[] = [];
     private shapePredicateBind = new Map<string, boolean>();
     private strict: boolean;
+    private allOptional = true;
 
     public constructor(shape: IShape, starPattern: IStarPatternWithDependencies, linkedShape: Map<string, IShape>, unionStarPattern?: IStarPatternWithDependencies[][], strict?: boolean) {
         this.strict = strict ?? false;
         this.closedShape = shape.closed;
         for (const { triple } of starPattern.starPattern.values()) {
             this.bindings.set(triple.predicate, undefined);
+            this.allOptional = this.allOptional && triple.isOptional === true;
         }
         for (const predicate of shape.getAll()) {
             this.shapePredicateBind.set(predicate.name, false);
@@ -100,44 +109,20 @@ export class Bindings implements IBindings {
                     predicates = predicates.concat(predicatesOneOf);
                 }
             }
-            if (!this.strict && triple.isOptional === true) {
-                this.bindings.set(triple.predicate, triple);
-            } else if (singlePredicate === undefined && predicates.length === 0) {
+
+            if (singlePredicate === undefined &&
+                predicates.length === 0
+                && triple.isOptional !== true &&
+                !this.strict) {
                 this.unboundTriple.push(triple);
-                continue;
+            } else {
+                if (singlePredicate !== undefined) {
+                    predicates.push(singlePredicate);
+                }
+                this.evaluateConstraint(predicates, triple, linkedShape, shape, dependencies);
             }
-            
-            if (singlePredicate !== undefined) {
-                predicates.push(singlePredicate);
-            }
 
-            for (const predicate of predicates) {
-                const constraint = predicate.constraint;
 
-                if (this.strict && !Bindings.validateCardinality(triple, predicate)) {
-                    this.unboundTriple.push(triple);
-                    continue;
-                }
-
-                if (constraint === undefined) {
-                    this.bindings.set(triple.predicate, triple);
-                    this.shapePredicateBind.set(predicate.name, true);
-                    continue;
-                }
-
-                if (this.handleShapeConstraint(constraint, triple, linkedShape, shape, dependencies)) {
-                    continue;
-                }
-
-                if (this.handleShapeType(constraint, triple)) {
-                    continue;
-                }
-                // all the constraint are valid so we can skip the rest of the predicate with the same IRI but
-                // possible different constraints.
-                this.bindings.set(triple.predicate, triple);
-                this.shapePredicateBind.set(predicate.name, true);
-                break;
-            }
 
         }
         // negative triple in a strict containment mean that the we can take any values
@@ -185,10 +170,11 @@ export class Bindings implements IBindings {
             // delete duplicate
             nestedContainedStarPatternName = Array.from(new Set(nestedContainedStarPatternName));
             this.nestedContainedStarPatternName = nestedContainedStarPatternName
-                .map((starPattern) => {
+                .map((starPatternName) => {
                     return {
-                        shape: this.nestedContainedStarPatternNameShapesContained.get(starPattern),
-                        starPattern: starPattern
+                        shape: this.nestedContainedStarPatternNameShapesContained.get(starPatternName),
+                        starPattern: starPatternName,
+                        origin: starPattern.name
                     };
                 });
 
@@ -197,6 +183,56 @@ export class Bindings implements IBindings {
             }
             // delete duplicate
             this.nestedContainedStarPatternName = Array.from(new Set(this.nestedContainedStarPatternName));
+        }
+    }
+
+    private evaluateConstraint(predicates: IPredicate[],
+        triple: ITriple,
+        linkedShape: Map<string, IShape>,
+        shape: IShape,
+        dependencies: IStarPatternWithDependencies | undefined): void {
+        let validConstraint = false;
+        for (const predicate of predicates) {
+            const constraint = predicate.constraint;
+
+            if (constraint === undefined) {
+                validConstraint = validConstraint || true;
+                break;
+            }
+
+            const shapeContraintResult = this.handleShapeConstraint(constraint, triple, linkedShape, shape, dependencies);
+            if (shapeContraintResult === ConstraintResult.NOT_RESPECT) {
+                validConstraint = validConstraint || false;
+                continue;
+            }
+            if (shapeContraintResult === ConstraintResult.RESPECT) {
+                validConstraint = validConstraint || true;
+                continue;
+            }
+
+            const typeConstraintResult = Bindings.handleShapeType(constraint, triple);
+            if (typeConstraintResult === ConstraintResult.NOT_RESPECT) {
+                validConstraint = validConstraint || false;
+                continue;
+            }
+            if (typeConstraintResult === ConstraintResult.RESPECT) {
+                validConstraint = validConstraint || true;
+                continue;
+            }
+
+            // all the constraint are valid so we can skip the rest of the predicate with the same IRI but
+            // possible different constraints.
+            validConstraint = validConstraint || true;
+            break;
+        }
+
+        if (validConstraint) {
+            this.bindings.set(triple.predicate, triple);
+            this.shapePredicateBind.set(triple.predicate, true);
+        } else if (!this.strict && triple.isOptional === true && this.allOptional === false) {
+            this.bindings.set(triple.predicate, triple);
+        } else {
+            this.unboundTriple.push(triple);
         }
     }
 
@@ -232,16 +268,15 @@ export class Bindings implements IBindings {
         triple: ITriple,
         linkedShape: Map<string, IShape>,
         currentShape: IShape,
-        dependencies?: IStarPatternWithDependencies): boolean {
+        dependencies?: IStarPatternWithDependencies): ConstraintResult {
         if (constraint.type === ContraintType.SHAPE && dependencies !== undefined && constraint.value.size == 1) {
             const shapeName: string = constraint.value.values().next().value;
             const currentLinkedShape = currentShape.name === shapeName ? currentShape : linkedShape.get(shapeName);
             if (currentLinkedShape === undefined) {
-                this.bindings.set(triple.predicate, triple);
-                return true;
+                return ConstraintResult.RESPECT;
             }
 
-            const nestedBinding = new Bindings(currentLinkedShape, dependencies, linkedShape);
+            const nestedBinding = new Bindings(currentLinkedShape, dependencies, linkedShape, [], this.strict);
             if (nestedBinding.isFullyBounded()) {
                 this.bindings.set(triple.predicate, triple);
                 this.nestedContainedStarPatternNameShapesContained = new Map(
@@ -255,73 +290,51 @@ export class Bindings implements IBindings {
                 } else {
                     dependentShape.push(currentLinkedShape.name);
                 }
+                return ConstraintResult.RESPECT;
             } else {
-                this.unboundTriple.push(triple);
+                return ConstraintResult.NOT_RESPECT;
             }
-            return true;
         }
 
-        return false
+        return ConstraintResult.INAPPLICABLE;
     }
 
-    private handleShapeType(
+    private static handleShapeType(
         constraint: IContraint,
-        triple: ITriple): boolean {
+        triple: ITriple): ConstraintResult {
         if (constraint.type === ContraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "Literal"
             && constraint.value.has(triple.object.datatype.value)
         ) {
-            this.bindings.set(triple.predicate, triple);
-            return true;
+            return ConstraintResult.RESPECT;
         } else if (constraint.type === ContraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "NamedNode"
             && constraint.value.has(triple.object.value)) {
-            this.bindings.set(triple.predicate, triple);
-            return true;
+            return ConstraintResult.RESPECT;
 
         } else if (constraint.type === ContraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "Literal"
             && !constraint.value.has(triple.object.datatype.value)) {
-            this.unboundTriple.push(triple);
-            return true;
+            return ConstraintResult.NOT_RESPECT;
         }
         else if (constraint.type === ContraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "NamedNode"
             && !constraint.value.has(triple.object.value)) {
-            this.unboundTriple.push(triple);
-            return true;
+            return ConstraintResult.NOT_RESPECT;
         } else if (constraint.type === ContraintType.TYPE &&
             Array.isArray(triple.object)) {
             for (const object of triple.object) {
                 if (constraint.value.has(object.value) || (object.termType === "Literal" && constraint.value.has(object.datatype.value))) {
-                    this.bindings.set(triple.predicate, triple);
-                    break;
+                    return ConstraintResult.RESPECT;
                 }
             }
-            return true;
         }
 
-        return false
-    }
-
-    private static validateCardinality(triple: ITriple, predicate: IPredicate): boolean {
-        if (triple.cardinality !== undefined && predicate.cardinality === undefined) {
-            return triple.cardinality.max === 1 && triple.cardinality.min === 1;
-        }
-        const maxTripleCardinality = triple.cardinality?.max ?? 1;
-        const minTripleCardinality = triple.cardinality?.min ?? 1;
-
-        const maxPredicateCardinality = predicate.cardinality?.max ?? 1;
-        const minPredicateCardinality = predicate.cardinality?.min ?? 1;
-
-        const withinMax: boolean = maxTripleCardinality === -1 ? maxPredicateCardinality === -1 : maxTripleCardinality <= maxPredicateCardinality;
-        const withinMin: boolean = minTripleCardinality >= minPredicateCardinality;
-
-        return withinMax && withinMin;
+        return ConstraintResult.INAPPLICABLE;
     }
 
     public isFullyBounded(): boolean {
