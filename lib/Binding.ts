@@ -5,6 +5,7 @@ import { IStarPatternWithDependencies, type ITriple, Triple } from "./Triple";
  * A binding from a query to a shape
  */
 export interface IBindings {
+    getNestedContainedStarPatternNameShapesContained: () => Map<string, string[]>;
     /**
      * Indicate if a star pattern is contained in a shape
      * @returns {boolean} indicate if the query is contained in a shape
@@ -365,6 +366,10 @@ export class Bindings implements IBindings {
 
     public getNestedContainedStarPatternName(): IDependentStarPattern[] {
         return this.nestedContainedStarPatternName;
+    }
+
+    public getNestedContainedStarPatternNameShapesContained(): Map<string, string[]> {
+        return new Map(this.nestedContainedStarPatternNameShapesContained);
     }
 }
 

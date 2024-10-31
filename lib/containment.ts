@@ -81,14 +81,17 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
         }
 
         const constraintTarget = [];
-        for(const [shapeName, nestedBinding] of bindingResult){
+        for (const nestedBinding of bindingResult.values()) {
           const originBinding = nestedBinding.get(result.dependent.origin);
-          if(originBinding!==undefined){
-            constraintTarget.push(shapeName);
+          if (originBinding !== undefined) {
+            const constraintShape = originBinding.result.getNestedContainedStarPatternNameShapesContained().get(starPatternName);
+            if (constraintShape !== undefined) {
+              constraintTarget.push(constraintShape);
+            }
           }
         }
         // we check if there is less shapes contained than the constraint of the dependency
-        const target = constraintTarget.length > dependendShapes.length
+        const target = constraintTarget.length >= dependendShapes.length
           || constraintTarget.length === 0
           ? dependendShapes : result.dependent.shape;
 

@@ -265,21 +265,13 @@ describe('solveShapeQueryContainment', () => {
                 ["y", { result: ContainmentResult.DEPEND, target: ['foo1'] }],
                 ["z", {
                     result: ContainmentResult.DEPEND, target: [
-                        "foo",
                         "foo2",
-                        "foo3",
-                        "foo4",
-                        "foo5",
                     ]
                 }],
                 ["w", { result: ContainmentResult.DEPEND, target: ['foo3'] }],
                 ["w1", { result: ContainmentResult.DEPEND, target: ['foo4'] }],
                 ["w2", {
                     result: ContainmentResult.DEPEND, target: [
-                        "foo",
-                        "foo2",
-                        "foo3",
-                        "foo4",
                         "foo5",
                     ]
                 }],
@@ -632,7 +624,7 @@ describe('solveShapeQueryContainment', () => {
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
-                    ["city", { result: ContainmentResult.DEPEND }]
+                    ["city", { result: ContainmentResult.DEPEND, target: [ "http://example.com#Comment","http://example.com#Post", "http://example.com#Profile"] }]
                 ]);
 
 
