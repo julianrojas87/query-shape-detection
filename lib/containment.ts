@@ -95,26 +95,12 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
           || constraintTarget.length === 0
           ? dependendShapes : result.dependent.shape;
 
-        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target });
-      }
-    }
-  }
-
-
-  const conditionalLink: IConditionalLink[] = [];
-  for (const triple of queryStarPattern.values()) {
-    if (triple !== undefined) {
-      if (!Array.isArray(triple.object) && triple.object?.termType === "NamedNode") {
-        conditionalLink.push({
-          link: triple.object.value,
-          starPatternName: triple.subject
-        });
+        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target: target?.length === 0 ? undefined : target });
       }
     }
   }
 
   return {
-    conditionalLink: shapes.length === 0 ? [] : conditionalLink,
     starPatternsContainment,
     visitShapeBoundedResource: generateVisitStatus(bindingResult, shapes)
   };
@@ -213,8 +199,6 @@ export type ShapeName = string;
  * The result of the alignment
  */
 export interface IResult {
-  // URL from the object of triples that are not bound by a shape
-  conditionalLink: IConditionalLink[];
   // The documents associated with a shape that can be followed
   visitShapeBoundedResource: Map<ShapeName, boolean>;
   // The type of containment of each star patterns with there associated shapes
