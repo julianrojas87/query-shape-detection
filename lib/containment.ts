@@ -1,8 +1,8 @@
-import { Bindings, IBindings, IDependentStarPattern } from './Binding'
+import { Bindings, ContainmentType, IBindings, IDependentStarPattern } from './Binding'
 import { TYPE_DEFINITION } from './constant';
 import { generateStarPatternUnion, type IQuery } from './query';
 import { IShape } from './Shape';
-import type { ITriple } from './Triple';
+import type { IStarPatternWithDependencies, ITriple } from './Triple';
 
 /**
  * Determine if a query is contained inside a shape.
@@ -67,7 +67,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
   for (const starPatternBinding of bindingResult.values()) {
     for (const [starPatternName, result] of starPatternBinding) {
       if (result.dependent === undefined) {
-        updateStarPatternContainment(starPatternsContainment, result.result, starPatternName, result.shape);
+        updateStarPatternContainment(starPatternsContainment, result.result, starPatternName, result.shape, groupedShapes);
       } else {
         // check the shape contained related to the dependent star pattern
         const dependendShapes = [];
@@ -107,10 +107,10 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
 
 }
 
-function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IContainmentResult>, bindings: IBindings, starPatternName: StarPatternName, shape: IShape): void {
+function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IContainmentResult>, bindings: IBindings, starPatternName: StarPatternName, shape: IShape, groupedShapes: IShapeWithDependencies[]): void {
   const prevContainmentResult = starPatternsContainment.get(starPatternName)!;
 
-  if (bindings.shouldVisitShape() && bindings.getUnboundedTriple().length > 0 && prevContainmentResult.result !== ContainmentResult.CONTAIN) {
+  if (bindings.shouldVisitShape() && bindings.getUnboundedTriple().length > 0 && prevContainmentResult.result !== ContainmentResult.CONTAIN && prevContainmentResult.result !== ContainmentResult.PARTIALY_CONTAIN) {
     const classBinding = bindings.getBindings().get(TYPE_DEFINITION.value);
 
     starPatternsContainment.set(starPatternName, {
@@ -122,13 +122,50 @@ function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IC
 
   }
   if (bindings.shouldVisitShape() && bindings.isFullyBounded()) {
-    starPatternsContainment.set(starPatternName, {
-      result: ContainmentResult.CONTAIN,
-      target: prevContainmentResult.result === ContainmentResult.ALIGNED ? [shape.name] :
-        (prevContainmentResult.target ?? []).concat(shape.name)
-    });
+    if (bindings.containmentType().result === ContainmentType.FULL) {
+      starPatternsContainment.set(starPatternName, {
+        result: ContainmentResult.CONTAIN,
+        target: prevContainmentResult.result === ContainmentResult.ALIGNED ? [shape.name] :
+          (prevContainmentResult.target ?? []).concat(shape.name)
+      });
+    }
+    if (bindings.containmentType().result === ContainmentType.PARTIAL) {
+      const unContaineStarPattern = bindings.containmentType().unContaineStarPattern!;
+      const hasDisjuncContainment = findDisjuncContainment(unContaineStarPattern, groupedShapes, shape);
+      if (hasDisjuncContainment) {
+        starPatternsContainment.set(starPatternName, {
+          result: ContainmentResult.CONTAIN,
+          target: prevContainmentResult.result === ContainmentResult.ALIGNED ? [shape.name] :
+            (prevContainmentResult.target ?? []).concat(shape.name)
+        });
+      } else {
+        starPatternsContainment.set(starPatternName, {
+          result: ContainmentResult.PARTIALY_CONTAIN,
+          target: prevContainmentResult.result === ContainmentResult.ALIGNED ? [shape.name] :
+            (prevContainmentResult.target ?? []).concat(shape.name)
+        });
+      }
+    }
   }
-
+}
+/**
+ * Check if there is a disjunction. IMPORTANT!! Do not consider nested disjunction.
+ * @param {IStarPatternWithDependencies[]} starPatterns 
+ * @param {IShapeWithDependencies[]} groupedShapes 
+ * @param {IShape} shapeExcluded
+ * @returns Whether the disjunction is contained into a shape
+ */
+function findDisjuncContainment(starPatterns: IStarPatternWithDependencies[], groupedShapes: IShapeWithDependencies[], shapeExcluded: IShape): boolean {
+  let haveContainment = false;
+  for (const starPattern of starPatterns) {
+    for (const { shape, dependencies } of groupedShapes) {
+      if (shape.name !== shapeExcluded.name) {
+        const bindings = new Bindings(shape, starPattern, dependencies);
+        haveContainment = haveContainment || bindings.isFullyBounded();
+      }
+    }
+  }
+  return haveContainment;
 }
 
 function groupShapeBydependencies(shapes: IShape[], dependentShapes?: IShape[]): IShapeWithDependencies[] {
@@ -229,6 +266,8 @@ export type IContainmentResult = Readonly<{
 export enum ContainmentResult {
   // Is contained
   CONTAIN,
+  // One union statement is contain
+  PARTIALY_CONTAIN,
   // Has at least one binding
   ALIGNED,
   // Is a dependency of a contained star pattern

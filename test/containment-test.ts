@@ -135,7 +135,7 @@ describe('solveShapeQueryContainment', () => {
             };
             const shapes: IShape[] = [];
             const expectedResult: IResult = {
-                
+
                 starPatternsContainment: new Map(),
                 visitShapeBoundedResource: new Map()
             };
@@ -149,7 +149,7 @@ describe('solveShapeQueryContainment', () => {
             };
             const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5];
             const expectedResult: IResult = {
-                
+
                 starPatternsContainment: new Map(),
                 visitShapeBoundedResource: new Map(shapes.map((shape) => [shape.name, false]))
             };
@@ -166,7 +166,7 @@ describe('solveShapeQueryContainment', () => {
             };
             const shapes: IShape[] = [];
             const expectedResult: IResult = {
-                
+
                 starPatternsContainment: new Map([["x", { result: ContainmentResult.REJECTED }]]),
                 visitShapeBoundedResource: new Map()
             };
@@ -184,7 +184,7 @@ describe('solveShapeQueryContainment', () => {
             const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5];
 
             const expectedResult: IResult = {
-                
+
                 starPatternsContainment: new Map([["x", { result: ContainmentResult.CONTAIN, target: [shape.name] }]]),
                 visitShapeBoundedResource: new Map([
                     [shape.name, true],
@@ -269,7 +269,7 @@ describe('solveShapeQueryContainment', () => {
 
             ]);
             const expectedResult: IResult = {
-                
+
                 starPatternsContainment: expectedStarPatternsContainment,
                 visitShapeBoundedResource: new Map([
                     [shape.name, true],
@@ -297,7 +297,7 @@ describe('solveShapeQueryContainment', () => {
                 ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name], bindingByRdfClass: [] }],
             ]);
             const expectedResult: IResult = {
-                
+
                 starPatternsContainment: expectedStarPatternsContainment,
                 visitShapeBoundedResource: new Map([
                     [shape.name, true],
@@ -366,7 +366,7 @@ describe('solveShapeQueryContainment', () => {
                 ["z", { result: ContainmentResult.CONTAIN, target: [shape.name] }],
             ]);
             const expectedResult: IResult = {
-                
+
                 starPatternsContainment: expectedStarPatternsContainment,
                 visitShapeBoundedResource: new Map([
                     [shape.name, true],
@@ -597,7 +597,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -605,11 +605,11 @@ describe('solveShapeQueryContainment', () => {
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                     ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
-                    ["city", { result: ContainmentResult.DEPEND, target: [ "http://example.com#Comment","http://example.com#Post", "http://example.com#Profile"] }]
+                    ["city", { result: ContainmentResult.DEPEND, target: ["http://example.com#Comment", "http://example.com#Post", "http://example.com#Profile"] }]
                 ]);
 
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             test('interactive-short-2', async () => {
@@ -661,7 +661,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -676,7 +676,7 @@ describe('solveShapeQueryContainment', () => {
                 ]);
 
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             test('interactive-short-4', async () => {
@@ -709,7 +709,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -720,7 +720,7 @@ describe('solveShapeQueryContainment', () => {
                 ]);
 
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             test('interactive-short-5', async () => {
@@ -740,7 +740,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -752,7 +752,7 @@ describe('solveShapeQueryContainment', () => {
                 ]);
 
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
         });
 
@@ -775,7 +775,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -786,10 +786,58 @@ describe('solveShapeQueryContainment', () => {
                 ]);
 
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             test('interactive-discover-2', async () => {
+                const queryString = `
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+                PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+                PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+                PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+                PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+                
+
+                SELECT
+                    ?messageId
+                    ?messageCreationDate
+                    ?messageContent
+                WHERE
+                {
+                    ?message snvoc:hasCreator ?person;
+                        snvoc:content ?messageContent;
+                        snvoc:creationDate ?messageCreationDate;
+                        snvoc:id ?messageId.
+                    { ?message rdf:type snvoc:Post } UNION { ?message rdf:type snvoc:Comment }
+                }
+                `;
+                const querySparql = translate(queryString);
+                const query = generateQuery(querySparql);
+
+                const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
+                const shapes: IShape[] = Array.from(shapeIndexed.values());
+
+                const resp = solveShapeQueryContainment({ query, shapes });
+
+
+                const visitShapeBoundedResource = new Map([
+                    ["http://example.com#Comment", true],
+                    ["http://example.com#Post", true],
+                    ["http://example.com#Profile", true]
+                ]);
+                const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                ]);
+
+
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
+            });
+
+            test('interactive-discover-2 comment missing', async () => {
                 const queryString = `
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -818,22 +866,26 @@ describe('solveShapeQueryContainment', () => {
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
-                const shapes: IShape[] = Array.from(shapeIndexed.values());
+                const shapes: IShape[] = [];
+                for (const [shapeName, shape] of shapeIndexed) {
+                    if (shapeName !== "http://example.com#Comment") {
+                        shapes.push(shape);
+                    }
+                }
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
-                    ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.PARTIALY_CONTAIN, target: [ "http://example.com#Post"] }],
                 ]);
 
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             test('interactive-discover-3', async () => {
@@ -854,7 +906,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -865,7 +917,7 @@ describe('solveShapeQueryContainment', () => {
                     ["tag", { result: ContainmentResult.DEPEND, target: undefined }],
                 ]);
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             test('interactive-discover-4', async () => {
@@ -888,7 +940,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -899,7 +951,7 @@ describe('solveShapeQueryContainment', () => {
                     ["location", { result: ContainmentResult.DEPEND, target: undefined }],
                 ]);
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             test('interactive-discover-5', async () => {
@@ -916,7 +968,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -926,7 +978,7 @@ describe('solveShapeQueryContainment', () => {
                     ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ]);
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             it('interactive-discover-6', async () => {
@@ -945,7 +997,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -962,7 +1014,7 @@ describe('solveShapeQueryContainment', () => {
                     ],
                 ]);
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             it('interactive-discover-7', async () => {
@@ -982,7 +1034,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -994,7 +1046,7 @@ describe('solveShapeQueryContainment', () => {
                     ["moderator", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
                 ]);
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
 
             it('interactive-discover-8', async () => {
@@ -1027,7 +1079,7 @@ describe('solveShapeQueryContainment', () => {
 
                 const resp = solveShapeQueryContainment({ query, shapes });
 
-                
+
                 const visitShapeBoundedResource = new Map([
                     ["http://example.com#Comment", true],
                     ["http://example.com#Post", true],
@@ -1039,7 +1091,7 @@ describe('solveShapeQueryContainment', () => {
                     ["otherMessage", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
                 ]);
 
-                expect(resp).toStrictEqual({  visitShapeBoundedResource, starPatternsContainment });
+                expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
             });
         });
 
