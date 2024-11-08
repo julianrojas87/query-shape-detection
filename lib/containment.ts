@@ -11,7 +11,7 @@ import type { IStarPatternWithDependencies, ITriple } from './Triple';
  * @param param {IContainementArg} - the shape and the query to evaluate
  * @returns {IResult} result relative to the containement of the query inside of the shape
  */
-export function solveShapeQueryContainment({ query, shapes }: IContainementArg): IResult {
+export function solveShapeQueryContainment({ query, shapes, decidingShapes }: IContainementArg): IResult {
   const bindingResult = new Map<ShapeName, Map<StarPatternName, IBindingStatus>>();
   const starPatternsContainment = new Map<StarPatternName, IContainmentResult>();
   const queryStarPattern: QueryStarPattern = new Map();
@@ -67,7 +67,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
   for (const starPatternBinding of bindingResult.values()) {
     for (const [starPatternName, result] of starPatternBinding) {
       if (result.dependent === undefined) {
-        updateStarPatternContainment(starPatternsContainment, result.result, starPatternName, result.shape, groupedShapes);
+        updateStarPatternContainment(starPatternsContainment, result.result, starPatternName, result.shape, groupedShapes, decidingShapes);
       } else {
         // check the shape contained related to the dependent star pattern
         const dependendShapes = [];
@@ -107,7 +107,7 @@ export function solveShapeQueryContainment({ query, shapes }: IContainementArg):
 
 }
 
-function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IContainmentResult>, bindings: IBindings, starPatternName: StarPatternName, shape: IShape, groupedShapes: IShapeWithDependencies[]): void {
+function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IContainmentResult>, bindings: IBindings, starPatternName: StarPatternName, shape: IShape, groupedShapes: IShapeWithDependencies[], decidingShapes?: Set<string>): void {
   const prevContainmentResult = starPatternsContainment.get(starPatternName)!;
 
   if (bindings.shouldVisitShape() && bindings.getUnboundedTriple().length > 0 && prevContainmentResult.result !== ContainmentResult.CONTAIN && prevContainmentResult.result !== ContainmentResult.PARTIALY_CONTAIN) {
@@ -131,7 +131,7 @@ function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IC
     }
     if (bindings.containmentType().result === ContainmentType.PARTIAL) {
       const unContaineStarPattern = bindings.containmentType().unContaineStarPattern!;
-      const hasDisjuncContainment = findDisjuncContainment(unContaineStarPattern, groupedShapes, shape);
+      const hasDisjuncContainment = findDisjuncContainment(unContaineStarPattern, groupedShapes, shape, decidingShapes);
       if (hasDisjuncContainment) {
         starPatternsContainment.set(starPatternName, {
           result: ContainmentResult.CONTAIN,
@@ -155,11 +155,11 @@ function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IC
  * @param {IShape} shapeExcluded
  * @returns Whether the disjunction is contained into a shape
  */
-function findDisjuncContainment(starPatterns: IStarPatternWithDependencies[], groupedShapes: IShapeWithDependencies[], shapeExcluded: IShape): boolean {
+function findDisjuncContainment(starPatterns: IStarPatternWithDependencies[], groupedShapes: IShapeWithDependencies[], shapeExcluded: IShape, decidingShapes?: Set<string>): boolean {
   let haveContainment = false;
   for (const starPattern of starPatterns) {
     for (const { shape, dependencies } of groupedShapes) {
-      if (shape.name !== shapeExcluded.name) {
+      if (shape.name !== shapeExcluded.name && (decidingShapes === undefined || decidingShapes?.has(shape.name))) {
         const bindings = new Bindings(shape, starPattern, dependencies);
         haveContainment = haveContainment || bindings.isFullyBounded();
       }
@@ -225,8 +225,9 @@ type QueryStarPattern = Map<string, ITriple | undefined>;
 export interface IContainementArg {
   query: IQuery;
   shapes: IShape[];
-  // additional shapes to not be calculated
   dependentShapes?: IShape[];
+  // shapes to consider when making a decision
+  decidingShapes?: Set<string>;
 }
 
 

@@ -873,7 +873,7 @@ describe('solveShapeQueryContainment', () => {
                     }
                 }
 
-                const resp = solveShapeQueryContainment({ query, shapes });
+                const resp = solveShapeQueryContainment({ query, shapes, decidingShapes: new Set(["http://example.com#Post", "http://example.com#Profile"]) });
 
 
                 const visitShapeBoundedResource = new Map([
@@ -881,7 +881,7 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.PARTIALY_CONTAIN, target: [ "http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.PARTIALY_CONTAIN, target: ["http://example.com#Post"] }],
                 ]);
 
 
