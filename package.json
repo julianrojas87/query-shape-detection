@@ -1,11 +1,13 @@
 {
   "name": "query-shape-detection",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "license":"MIT",
   "files": [
-    "build/"
+    "build/",
+    "LICENSE",
+    "README.md"
   ],
   "jest": {
     "transform": {

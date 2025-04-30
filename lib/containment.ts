@@ -276,13 +276,3 @@ export enum ContainmentResult {
   // Has no binding
   REJECTED,
 }
-
-/**
- * A conditional link
- */
-export interface IConditionalLink {
-  // The URL of the link
-  link: string,
-  // The star pattern associated with it
-  starPatternName: string
-}

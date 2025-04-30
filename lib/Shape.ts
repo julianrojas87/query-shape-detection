@@ -8,6 +8,10 @@ export interface IShape extends IShapeObj {
    */
   toObject: () => IShapeObj;
   /**
+   * convert to a string JSON
+   */
+  toJson: () => string;
+  /**
    * Get the information about a predicate
    * @param {string} predicate - the predicate
    * @returns {IPredicate | undefined} - the information about the predicate or undefined if it is not in the shape
@@ -37,6 +41,18 @@ export interface IPredicate {
   negative?: boolean;
   optional?: boolean;
 }
+
+function toJsonPredicate(predicate: IPredicate): IPredicateJson {
+  return {
+    ...predicate,
+    constraint: predicate.constraint !== undefined ? toJsonConstraint(predicate.constraint) : undefined
+  }
+}
+
+export type IPredicateJson = Omit<IPredicate, "constraint"> & {
+  constraint?: IContraintJson;
+}
+
 /**
  * A constraint
  */
@@ -44,6 +60,24 @@ export interface IContraint {
   value: Set<string>;
   type: ContraintType;
 }
+
+function toJsonConstraint(constraint: IContraint): IContraintJson {
+  return {
+    ...constraint,
+    value: Array.from(constraint.value)
+  }
+}
+
+function toConstraint(constraint: IContraintJson): IContraint {
+  return {
+    ...constraint,
+    value: new Set(constraint.value)
+  }
+}
+export type IContraintJson = Omit<IContraint, "value"> & {
+  value: string[]
+};
+
 /**
  * A cardinality
  */
@@ -53,6 +87,12 @@ export interface ICardinality {
   max: number;
 }
 
+export type IShapeJson = Omit<IShapeObj, "positivePredicates" | "negativePredicates" | "oneOf" | "oneOfIndexed"> & {
+  positivePredicates: IPredicateJson[];
+  negativePredicates: IPredicateJson[];
+  oneOf: OneOfJson[];
+  oneOfIndexed: OneOfIndexedJson[]
+}
 /**
  * A constraint type
  */
@@ -87,10 +127,14 @@ export interface IShapeArgs {
 }
 
 export type OneOf = OneOfPath[];
+export type OneOfJson = OneOfPathJson[];
 export type OneOfPath = IPredicate[];
+export type OneOfPathJson = IPredicateJson[];
 
+export type OneOfPathIndexedJson = Record<string, IPredicateJson>;
 export type OneOfPathIndexed = Map<string, IPredicate>;
 export type OneOfIndexed = OneOfPathIndexed[];
+export type OneOfIndexedJson = OneOfPathIndexedJson[];
 
 /**
  * A shape
@@ -215,7 +259,43 @@ export class Shape implements IShape {
       closed: this.closed,
       positivePredicates: this.positivePredicates,
       negativePredicates: this.negativePredicates,
+      oneOfIndexed: this.oneOfIndexed,
+      oneOf: this.oneOf
     };
+  }
+
+  public toJson(): string {
+    const obj = this.toObject();
+    const positivePredicates:  IPredicateJson[] = [];
+    const negativePredicates: IPredicateJson[] = [];
+
+    for(const predicate of this.positivePredicates){
+      const detailedPredicate = this.predicates.get(predicate);
+      if(detailedPredicate!==undefined){
+        const jsonDetailPredicate = toJsonPredicate(detailedPredicate)
+        positivePredicates.push(jsonDetailPredicate);
+      }
+    }
+
+    for(const predicate of this.negativePredicates){
+      const detailedPredicate = this.predicates.get(predicate);
+      if(detailedPredicate!==undefined){
+        const jsonDetailPredicate = toJsonPredicate(detailedPredicate)
+        negativePredicates.push(jsonDetailPredicate);
+      }
+    }
+    const oneOf: OneOfJson[] = [];
+    for(const oneOf of this.oneOf){
+      
+    }
+
+    const jsonObj: IShapeJson = {
+      ...obj,
+      positivePredicates,
+      negativePredicates,
+
+    };
+    return JSON.stringify(jsonObj);
   }
 
   public get(predicate: string): IPredicate | undefined {
