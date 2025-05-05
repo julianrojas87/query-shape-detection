@@ -8,9 +8,9 @@ export interface IShape extends IShapeObj {
    */
   toObject: () => IShapeObj;
   /**
-   * convert to a string JSON
+   * convert to a JSON object
    */
-  toJson: () => string;
+  toJson: () => IShapeJson;
   /**
    * Get the information about a predicate
    * @param {string} predicate - the predicate
@@ -68,12 +68,6 @@ function toJsonConstraint(constraint: IContraint): IContraintJson {
   }
 }
 
-function toConstraint(constraint: IContraintJson): IContraint {
-  return {
-    ...constraint,
-    value: new Set(constraint.value)
-  }
-}
 export type IContraintJson = Omit<IContraint, "value"> & {
   value: string[]
 };
@@ -91,7 +85,6 @@ export type IShapeJson = Omit<IShapeObj, "positivePredicates" | "negativePredica
   positivePredicates: IPredicateJson[];
   negativePredicates: IPredicateJson[];
   oneOf: OneOfJson[];
-  oneOfIndexed: OneOfIndexedJson[]
 }
 /**
  * A constraint type
@@ -111,7 +104,6 @@ export interface IShapeObj {
   positivePredicates: string[];
   negativePredicates?: string[];
   oneOf?: OneOf[];
-  oneOfIndexed?: OneOfIndexed[];
 }
 
 /**
@@ -135,6 +127,18 @@ export type OneOfPathIndexedJson = Record<string, IPredicateJson>;
 export type OneOfPathIndexed = Map<string, IPredicate>;
 export type OneOfIndexed = OneOfPathIndexed[];
 export type OneOfIndexedJson = OneOfPathIndexedJson[];
+
+function toOneOfJson(oneOf: OneOf): OneOfJson {
+  const oneOfJson: OneOfJson = [];
+  for (const oneOfPath of oneOf) {
+    const oneofPathJson: OneOfPathJson = [];
+    for (const predicate of oneOfPath) {
+      oneofPathJson.push(toJsonPredicate(predicate))
+    }
+    oneOfJson.push(oneofPathJson);
+  }
+  return oneOfJson;
+}
 
 /**
  * A shape
@@ -259,43 +263,43 @@ export class Shape implements IShape {
       closed: this.closed,
       positivePredicates: this.positivePredicates,
       negativePredicates: this.negativePredicates,
-      oneOfIndexed: this.oneOfIndexed,
       oneOf: this.oneOf
     };
   }
 
-  public toJson(): string {
+  public toJson():  IShapeJson{
     const obj = this.toObject();
-    const positivePredicates:  IPredicateJson[] = [];
+    const positivePredicates: IPredicateJson[] = [];
     const negativePredicates: IPredicateJson[] = [];
 
-    for(const predicate of this.positivePredicates){
+    for (const predicate of this.positivePredicates) {
       const detailedPredicate = this.predicates.get(predicate);
-      if(detailedPredicate!==undefined){
+      if (detailedPredicate !== undefined) {
         const jsonDetailPredicate = toJsonPredicate(detailedPredicate)
         positivePredicates.push(jsonDetailPredicate);
       }
     }
 
-    for(const predicate of this.negativePredicates){
+    for (const predicate of this.negativePredicates) {
       const detailedPredicate = this.predicates.get(predicate);
-      if(detailedPredicate!==undefined){
+      if (detailedPredicate !== undefined) {
         const jsonDetailPredicate = toJsonPredicate(detailedPredicate)
         negativePredicates.push(jsonDetailPredicate);
       }
     }
-    const oneOf: OneOfJson[] = [];
-    for(const oneOf of this.oneOf){
-      
+
+    const oneOfs: OneOfJson[] = [];
+    for (const oneOfobj of this.oneOf) {
+      oneOfs.push(toOneOfJson(oneOfobj))
     }
 
     const jsonObj: IShapeJson = {
       ...obj,
       positivePredicates,
       negativePredicates,
-
+      oneOf: oneOfs,
     };
-    return JSON.stringify(jsonObj);
+    return jsonObj;
   }
 
   public get(predicate: string): IPredicate | undefined {

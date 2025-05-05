@@ -265,13 +265,13 @@ export type IContainmentResult = Readonly<{
  * The result of a containement
  */
 export enum ContainmentResult {
-  // Is contained
+  // Is subsum
   CONTAIN,
-  // One union statement is contain
+  // One union statement is subsum
   PARTIALY_CONTAIN,
   // Has at least one binding
   ALIGNED,
-  // Is a dependency of a contained star pattern
+  // Is a dependency of a subsuming star pattern
   DEPEND,
   // Has no binding
   REJECTED,

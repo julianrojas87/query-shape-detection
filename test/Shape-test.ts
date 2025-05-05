@@ -1,4 +1,4 @@
-import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType, OneOf, OneOfIndexed } from '../lib/Shape';
+import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType, OneOf, OneOfIndexed, IShapeJson } from '../lib/Shape';
 
 describe('Shape', () => {
   describe('constructor', () => {
@@ -16,6 +16,7 @@ describe('Shape', () => {
         name: '',
         positivePredicates: [],
         negativePredicates: [],
+        oneOf: [],
         closed: false,
       };
 
@@ -29,6 +30,7 @@ describe('Shape', () => {
         name: 'foo',
         positivePredicates: predicates,
         negativePredicates: [],
+        oneOf: [],
         closed: true,
       };
 
@@ -42,6 +44,7 @@ describe('Shape', () => {
         name: 'foo',
         positivePredicates: [],
         negativePredicates: predicates,
+        oneOf: [],
         closed: true,
       };
 
@@ -57,6 +60,23 @@ describe('Shape', () => {
         name: 'foo',
         positivePredicates,
         negativePredicates,
+        oneOf: [],
+        closed: false,
+      };
+
+      expect(shape.toObject()).toStrictEqual(expectedShape);
+    });
+
+    it('should return a shape with oneOf', () => {
+      const positivePredicates = ['a', 'b', 'c'];
+      const negativePredicates = ['d', 'e', 'f'];
+      const oneOf: OneOf[] = [[[{ name: "foo" }],]]
+      const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
+      const expectedShape = {
+        name: 'foo',
+        positivePredicates,
+        negativePredicates,
+        oneOf,
         closed: false,
       };
 
@@ -69,6 +89,110 @@ describe('Shape', () => {
 
       expect(() => new Shape({ name: 'foo', positivePredicates, negativePredicates }))
         .toThrow('the predicate a is defined in the positive and the negative property');
+    });
+  });
+
+  describe('toJson', () => {
+    it('should return a shape with no predicate', () => {
+      const shape = new Shape({ name: '', positivePredicates: [] });
+      const expectedShape: IShapeJson = {
+        name: '',
+        positivePredicates: [],
+        negativePredicates: [],
+        oneOf: [],
+        closed: false,
+      };
+
+      expect(shape.toJson()).toStrictEqual(expectedShape);
+    });
+
+    it('should return a shape with predicates', () => {
+      const predicates = [
+        'a',
+        { name: 'b' },
+        {
+          name: 'c',
+          constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
+          cardinality: { min: 1, max: 5 },
+          negative: false,
+          optional: true
+        }
+      ];
+
+      const negativePredicates = [{
+        name: 'd',
+        constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
+        cardinality: { min: 1, max: 5 },
+        negative: false,
+        optional: true
+      }]
+      const shape = new Shape({ name: 'foo', positivePredicates: predicates, negativePredicates, closed: true });
+      const expectedShape = {
+        name: 'foo',
+        positivePredicates: [{ name: 'a' }, { name: 'b' }, {
+          name: 'c',
+          constraint: { value: ["1", "2"], type: ContraintType.TYPE },
+          cardinality: { min: 1, max: 5 },
+          negative: false,
+          optional: true
+        }],
+        negativePredicates: [{
+          name: 'd',
+          constraint: { value: ["1", "2"], type: ContraintType.TYPE },
+          cardinality: { min: 1, max: 5 },
+          negative: false,
+          optional: true
+        }],
+        oneOf: [],
+        closed: true,
+      };
+
+      expect(shape.toObject()).toStrictEqual(expectedShape);
+    });
+
+
+    it('should return a shape with oneOf', () => {
+      const predicates = [
+        'a',
+        { name: 'b' },
+        {
+          name: 'c',
+          constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
+          cardinality: { min: 1, max: 5 },
+          negative: false,
+          optional: true
+        }
+      ];
+      const oneOf: OneOf[] = [
+        [
+          [
+            { name: "foo",  constraint: { value: new Set(["a"]), type: ContraintType.SHAPE }}
+          ]
+        ]
+      ]
+
+      const shape = new Shape({ name: 'foo', positivePredicates: predicates, oneOf, closed: true });
+      const expectedShape = {
+        name: 'foo',
+        positivePredicates: [{ name: 'a' }, { name: 'b' }, {
+          name: 'c',
+          constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
+          cardinality: { min: 1, max: 5 },
+          negative: false,
+          optional: true
+        }],
+        negativePredicates: [],
+        oneOf: [
+          [
+            [
+              { name: "foo",  constraint: { value: ["a"], type: ContraintType.SHAPE }}
+            ]
+          ]
+        ],
+        closed: true,
+      };
+
+      expect(shape.toObject()).toStrictEqual(expectedShape);
     });
   });
 
