@@ -85,12 +85,14 @@ export class Bindings implements IBindings {
     private strict: boolean;
     private allOptional = true;
     private typeOfContainment: IContainmentType = { result: ContainmentType.NONE, unContaineStarPattern: [] };
+    private alreadyTraversed: Map<string, boolean>;
     public readonly starPattern: IStarPatternWithDependencies;
 
-    public constructor(shape: IShape, starPattern: IStarPatternWithDependencies, linkedShape: Map<string, IShape>, unionStarPattern?: IStarPatternWithDependencies[][], strict?: boolean) {
+    public constructor(shape: IShape, starPattern: IStarPatternWithDependencies, linkedShape: Map<string, IShape>, unionStarPattern?: IStarPatternWithDependencies[][], strict?: boolean, alreadyTraversed?: Map<string, boolean>) {
         this.starPattern = starPattern;
         this.strict = strict ?? false;
         this.closedShape = shape.closed;
+        this.alreadyTraversed = alreadyTraversed ?? new Map();
         for (const { triple } of starPattern.starPattern.values()) {
             this.bindings.set(triple.predicate, undefined);
             this.allOptional = this.allOptional && triple.isOptional === true;
@@ -219,7 +221,7 @@ export class Bindings implements IBindings {
         } else if (this.fullyBounded && boundedUnionFull) {
             this.typeOfContainment = { result: ContainmentType.FULL };
         } else {
-            this.typeOfContainment = { result: ContainmentType.PARTIAL,unContaineStarPattern:uncontainedUnionStarPatterns };
+            this.typeOfContainment = { result: ContainmentType.PARTIAL, unContaineStarPattern: uncontainedUnionStarPatterns };
         }
     }
 
@@ -312,7 +314,6 @@ export class Bindings implements IBindings {
             if (currentLinkedShape === undefined) {
                 return ConstraintResult.RESPECT;
             }
-
             const nestedBinding = new Bindings(currentLinkedShape, dependencies, linkedShape, [], this.strict);
             if (nestedBinding.isFullyBounded()) {
                 this.bindings.set(triple.predicate, triple);
