@@ -71,7 +71,7 @@ describe('Shape', () => {
       const positivePredicates = ['a', 'b', 'c'];
       const negativePredicates = ['d', 'e', 'f'];
       const oneOf: OneOf[] = [[[{ name: "foo" }],]]
-      const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates });
+      const shape = new Shape({ name: 'foo', positivePredicates, negativePredicates, oneOf });
       const expectedShape = {
         name: 'foo',
         positivePredicates,
@@ -115,7 +115,7 @@ describe('Shape', () => {
           constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
           cardinality: { min: 1, max: 5 },
           negative: false,
-          optional: true
+          optional: false
         }
       ];
 
@@ -123,31 +123,35 @@ describe('Shape', () => {
         name: 'd',
         constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
         cardinality: { min: 1, max: 5 },
-        negative: false,
-        optional: true
+        negative: true,
+        optional: false
       }]
       const shape = new Shape({ name: 'foo', positivePredicates: predicates, negativePredicates, closed: true });
       const expectedShape = {
         name: 'foo',
-        positivePredicates: [{ name: 'a' }, { name: 'b' }, {
-          name: 'c',
-          constraint: { value: ["1", "2"], type: ContraintType.TYPE },
-          cardinality: { min: 1, max: 5 },
-          negative: false,
-          optional: true
-        }],
+        positivePredicates: [
+          { name: 'a', constraint: undefined },
+          { name: 'b', optional: false, constraint: undefined },
+          {
+            name: 'c',
+            constraint: { value: ["1", "2"], type: ContraintType.TYPE },
+            cardinality: { min: 1, max: 5 },
+            negative: false,
+            optional: false
+          }
+        ],
         negativePredicates: [{
           name: 'd',
           constraint: { value: ["1", "2"], type: ContraintType.TYPE },
           cardinality: { min: 1, max: 5 },
-          negative: false,
-          optional: true
+          negative: true,
+          optional: false
         }],
         oneOf: [],
         closed: true,
       };
 
-      expect(shape.toObject()).toStrictEqual(expectedShape);
+      expect(shape.toJson()).toStrictEqual(expectedShape);
     });
 
 
@@ -158,7 +162,7 @@ describe('Shape', () => {
         {
           name: 'c',
           constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
-          cardinality: { min: 1, max: 5 },
+          cardinality: { min: 0, max: 5 },
           negative: false,
           optional: true
         }
@@ -166,7 +170,7 @@ describe('Shape', () => {
       const oneOf: OneOf[] = [
         [
           [
-            { name: "foo",  constraint: { value: new Set(["a"]), type: ContraintType.SHAPE }}
+            { name: "foo", constraint: { value: new Set(["a"]), type: ContraintType.SHAPE } }
           ]
         ]
       ]
@@ -174,25 +178,29 @@ describe('Shape', () => {
       const shape = new Shape({ name: 'foo', positivePredicates: predicates, oneOf, closed: true });
       const expectedShape = {
         name: 'foo',
-        positivePredicates: [{ name: 'a' }, { name: 'b' }, {
-          name: 'c',
-          constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
-          cardinality: { min: 1, max: 5 },
-          negative: false,
-          optional: true
-        }],
+        positivePredicates: [
+          { name: 'a', constraint: undefined },
+          { name: 'b', constraint: undefined, optional: false },
+          {
+            name: 'c',
+            constraint: { value: ["1", "2"], type: ContraintType.TYPE },
+            cardinality: { min: 0, max: 5 },
+            negative: false,
+            optional: true
+          }
+        ],
         negativePredicates: [],
         oneOf: [
           [
             [
-              { name: "foo",  constraint: { value: ["a"], type: ContraintType.SHAPE }}
+              { name: "foo", constraint: { value: ["a"], type: ContraintType.SHAPE } }
             ]
           ]
         ],
         closed: true,
       };
 
-      expect(shape.toObject()).toStrictEqual(expectedShape);
+      expect(shape.toJson()).toStrictEqual(expectedShape);
     });
   });
 
