@@ -167,7 +167,7 @@ describe('solveShapeQueryContainment', () => {
             const shapes: IShape[] = [];
             const expectedResult: IResult = {
 
-                starPatternsContainment: new Map([["x", { result: ContainmentResult.REJECTED }]]),
+                starPatternsContainment: new Map([["x", { result: ContainmentResult.REJECTED, bindings:new Map() }]]),
                 visitShapeBoundedResource: new Map()
             };
 
@@ -185,7 +185,7 @@ describe('solveShapeQueryContainment', () => {
 
             const expectedResult: IResult = {
 
-                starPatternsContainment: new Map([["x", { result: ContainmentResult.CONTAIN, target: [shape.name] }]]),
+                starPatternsContainment: new Map([["x", { result: ContainmentResult.CONTAIN, target: [shape.name], bindings:expect.any(Map) }]]),
                 visitShapeBoundedResource: new Map([
                     [shape.name, true],
                     [shapeP1.name, false],
@@ -209,7 +209,7 @@ describe('solveShapeQueryContainment', () => {
             const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5];
 
             const expectedResult: IResult = {
-                starPatternsContainment: new Map([["z", { result: ContainmentResult.REJECTED }]]),
+                starPatternsContainment: new Map([["z", { result: ContainmentResult.REJECTED, bindings: new Map() }]]),
                 visitShapeBoundedResource: new Map([
                     [shape.name, false],
                     [shapeP1.name, false],
@@ -233,7 +233,7 @@ describe('solveShapeQueryContainment', () => {
             const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5];
 
             const expectedResult: IResult = {
-                starPatternsContainment: new Map([["z", { result: ContainmentResult.REJECTED }]]),
+                starPatternsContainment: new Map([["z", { result: ContainmentResult.REJECTED, bindings: new Map() }]]),
                 visitShapeBoundedResource: new Map([
                     [shape.name, false],
                     [shapeP1.name, false],
@@ -252,19 +252,21 @@ describe('solveShapeQueryContainment', () => {
             const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5];
 
             const expectedStarPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                ["x", { result: ContainmentResult.CONTAIN, target: [shape.name] }],
-                ["y", { result: ContainmentResult.DEPEND, target: ['foo1'] }],
+                ["x", { result: ContainmentResult.CONTAIN, target: [shape.name], bindings:expect.any(Map) }],
+                ["y", { result: ContainmentResult.DEPEND, target: ['foo1'], bindings:expect.any(Map) }],
                 ["z", {
                     result: ContainmentResult.DEPEND, target: [
                         "foo2",
-                    ]
+                    ],
+                    bindings:expect.any(Map)
                 }],
-                ["w", { result: ContainmentResult.DEPEND, target: ['foo3'] }],
-                ["w1", { result: ContainmentResult.DEPEND, target: ['foo4'] }],
+                ["w", { result: ContainmentResult.DEPEND, target: ['foo3'], bindings:expect.any(Map) }],
+                ["w1", { result: ContainmentResult.DEPEND, target: ['foo4'], bindings:expect.any(Map) }],
                 ["w2", {
                     result: ContainmentResult.DEPEND, target: [
                         "foo5",
-                    ]
+                    ],
+                    bindings:expect.any(Map)
                 }],
 
             ]);
@@ -291,10 +293,10 @@ describe('solveShapeQueryContainment', () => {
             const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5, shapeP6];
 
             const expectedStarPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                ["x", { result: ContainmentResult.REJECTED }],
-                ["y", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP1.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
-                ["z", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name] }],
-                ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name], bindingByRdfClass: [] }],
+                ["x", { result: ContainmentResult.REJECTED, bindings:expect.any(Map) }],
+                ["y", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP1.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name], bindings:expect.any(Map) }],
+                ["z", { result: ContainmentResult.CONTAIN, target: [shape.name, shapeP2.name, shapeP3.name, shapeP4.name, shapeP5.name], bindings:expect.any(Map) }],
+                ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name], bindings:expect.any(Map) }],
             ]);
             const expectedResult: IResult = {
 
@@ -320,19 +322,19 @@ describe('solveShapeQueryContainment', () => {
             const shapes: IShape[] = [shape, shapeP1, shapeP2, shapeP3, shapeP4, shapeP5, shapeP7, shapeP8];
 
             const expectedStarPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                ["x", { result: ContainmentResult.REJECTED }],
-                ["y", { result: ContainmentResult.CONTAIN, target: [shapeP7.name, shapeP8.name] }],
+                ["x", { result: ContainmentResult.REJECTED, bindings:expect.any(Map) }],
+                ["y", { result: ContainmentResult.CONTAIN, target: [shapeP7.name, shapeP8.name], bindings:expect.any(Map) }],
                 ["z", {
                     result: ContainmentResult.ALIGNED,
                     target: [shapeP7.name, shapeP8.name],
-                    bindingByRdfClass: [shapeP7.name, shapeP8.name]
+                    bindings:expect.any(Map)
                 }],
                 ["zz", {
                     result: ContainmentResult.ALIGNED,
                     target: [shapeP7.name, shapeP8.name],
-                    bindingByRdfClass: [shapeP7.name, shapeP8.name]
+                    bindings:expect.any(Map)
                 }],
-                ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name], bindingByRdfClass: [] }],
+                ["w", { result: ContainmentResult.ALIGNED, target: [shapeP3.name, shapeP4.name], bindings:expect.any(Map) }],
             ]);
             const expectedResult: IResult = {
                 starPatternsContainment: expectedStarPatternsContainment,
@@ -359,11 +361,11 @@ describe('solveShapeQueryContainment', () => {
             const expectedStarPatternsContainment = new Map<StarPatternName, IContainmentResult>([
                 ["x", {
                     result: ContainmentResult.ALIGNED,
-                    bindingByRdfClass: [],
+                    bindings:expect.any(Map),
                     target: [shape.name, shapeP1.name, shapeP2.name, shapeP4.name, shapeP5.name]
                 }],
-                ["y", { result: ContainmentResult.CONTAIN, target: [shapeP1.name, shapeP2.name, shapeP5.name] }],
-                ["z", { result: ContainmentResult.CONTAIN, target: [shape.name] }],
+                ["y", { result: ContainmentResult.CONTAIN, bindings:expect.any(Map), target: [shapeP1.name, shapeP2.name, shapeP5.name] }],
+                ["z", { result: ContainmentResult.CONTAIN, bindings:expect.any(Map), target: [shape.name] }],
             ]);
             const expectedResult: IResult = {
 
@@ -604,8 +606,8 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
-                    ["city", { result: ContainmentResult.DEPEND, target: ["http://example.com#Comment", "http://example.com#Post", "http://example.com#Profile"] }]
+                    ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"], bindings:expect.any(Map), }],
+                    ["city", { result: ContainmentResult.DEPEND, target: ["http://example.com#Comment", "http://example.com#Post", "http://example.com#Profile"], bindings:expect.any(Map), }]
                 ]);
 
 
@@ -668,11 +670,11 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["person", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }],
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                    ["originalPost", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                    ["originalPostInner", { result: ContainmentResult.DEPEND, target: ["http://example.com#Post"] }],
-                    ["creator", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }],
+                    ["person", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"], bindings:expect.any(Map), }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
+                    ["originalPost", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
+                    ["originalPostInner", { result: ContainmentResult.DEPEND, target: ["http://example.com#Post"], bindings:expect.any(Map), }],
+                    ["creator", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"], bindings:expect.any(Map), }],
                 ]);
 
 
@@ -716,7 +718,7 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
                 ]);
 
 
@@ -747,8 +749,8 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["http://localhost:3000/pods/00000000000000000150/comments/Mexico#68719564521", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                    ["creator", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"] }]
+                    ["http://localhost:3000/pods/00000000000000000150/comments/Mexico#68719564521", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
+                    ["creator", { result: ContainmentResult.DEPEND, target: ["http://example.com#Profile"], bindings:expect.any(Map), }]
                 ]);
 
 
@@ -782,7 +784,7 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Post"], bindings:expect.any(Map), }],
                 ]);
 
 
@@ -830,7 +832,7 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
                 ]);
 
 
@@ -881,7 +883,7 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.PARTIALY_CONTAIN, target: ["http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.PARTIALY_CONTAIN, target: ["http://example.com#Post"], bindings:expect.any(Map), }],
                 ]);
 
 
@@ -913,8 +915,8 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", false]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                    ["tag", { result: ContainmentResult.DEPEND, target: undefined }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
+                    ["tag", { result: ContainmentResult.DEPEND, target: undefined, bindings:expect.any(Map), }],
                 ]);
 
                 expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
@@ -947,8 +949,8 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment"] }],
-                    ["location", { result: ContainmentResult.DEPEND, target: undefined }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment"], bindings:expect.any(Map), }],
+                    ["location", { result: ContainmentResult.DEPEND, target: undefined, bindings:expect.any(Map), }],
                 ]);
 
                 expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
@@ -975,7 +977,7 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
                 ]);
 
                 expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
@@ -1004,12 +1006,12 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
                     ["forum",
                         {
                             result: ContainmentResult.ALIGNED,
                             target: ["http://example.com#Comment", "http://example.com#Post", "http://example.com#Profile"],
-                            bindingByRdfClass: [],
+                            bindings:expect.any(Map),
                         }
                     ],
                 ]);
@@ -1041,9 +1043,9 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                    ["forum", { result: ContainmentResult.REJECTED }],
-                    ["moderator", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
+                    ["forum", { result: ContainmentResult.REJECTED, bindings:expect.any(Map), }],
+                    ["moderator", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"], bindings:expect.any(Map), }],
                 ]);
 
                 expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });
@@ -1086,9 +1088,9 @@ describe('solveShapeQueryContainment', () => {
                     ["http://example.com#Profile", true]
                 ]);
                 const starPatternsContainment = new Map<StarPatternName, IContainmentResult>([
-                    ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"] }],
-                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
-                    ["otherMessage", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"] }],
+                    ["person", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Profile"], bindings:expect.any(Map), }],
+                    ["message", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
+                    ["otherMessage", { result: ContainmentResult.CONTAIN, target: ["http://example.com#Comment", "http://example.com#Post"], bindings:expect.any(Map), }],
                 ]);
 
                 expect(resp).toStrictEqual({ visitShapeBoundedResource, starPatternsContainment });

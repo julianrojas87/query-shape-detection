@@ -22,7 +22,7 @@ export function solveShapeQueryContainment({ query, shapes, decidingShapes }: IC
     for (const { triple } of starPatternWithDependencies.starPattern.values()) {
       queryStarPattern.set(triple.toString(), triple);
     }
-    starPatternsContainment.set(starPatternsName, { result: ContainmentResult.REJECTED });
+    starPatternsContainment.set(starPatternsName, { result: ContainmentResult.REJECTED, bindings: new Map() });
   }
 
   // dependent, origin 
@@ -95,7 +95,7 @@ export function solveShapeQueryContainment({ query, shapes, decidingShapes }: IC
           || constraintTarget.length === 0
           ? dependendShapes : result.dependent.shape;
 
-        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target: target?.length === 0 ? undefined : target });
+        starPatternsContainment.set(starPatternName, { result: ContainmentResult.DEPEND, target: target?.length === 0 ? undefined : target, bindings: new Map() });
       }
     }
   }
@@ -111,13 +111,10 @@ function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IC
   const prevContainmentResult = starPatternsContainment.get(starPatternName)!;
 
   if (bindings.shouldVisitShape() && bindings.getUnboundedTriple().length > 0 && prevContainmentResult.result !== ContainmentResult.CONTAIN && prevContainmentResult.result !== ContainmentResult.PARTIALY_CONTAIN) {
-    const classBinding = bindings.getBindings().get(TYPE_DEFINITION.value);
-
     starPatternsContainment.set(starPatternName, {
       result: ContainmentResult.ALIGNED,
       target: (prevContainmentResult.target ?? []).concat(shape.name),
-      bindingByRdfClass: (prevContainmentResult.bindingByRdfClass ?? [])
-        .concat(classBinding !== undefined ? shape.name : [])
+      bindings: prevContainmentResult.bindings.set(shape.name, bindings)
     });
 
   }
@@ -126,23 +123,26 @@ function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IC
       starPatternsContainment.set(starPatternName, {
         result: ContainmentResult.CONTAIN,
         target: prevContainmentResult.result === ContainmentResult.ALIGNED ? [shape.name] :
-          (prevContainmentResult.target ?? []).concat(shape.name)
+          (prevContainmentResult.target ?? []).concat(shape.name),
+          bindings: prevContainmentResult.bindings.set(shape.name, bindings)
       });
     }
     if (bindings.containmentType().result === ContainmentType.PARTIAL) {
       const unContaineStarPattern = bindings.containmentType().unContaineStarPattern!;
-      const hasDisjuncContainment = findDisjuncContainment(unContaineStarPattern, groupedShapes, shape, decidingShapes);
+      const hasDisjuncContainment = findDisjunctContainment(unContaineStarPattern, groupedShapes, shape, decidingShapes);
       if (hasDisjuncContainment) {
         starPatternsContainment.set(starPatternName, {
           result: ContainmentResult.CONTAIN,
           target: prevContainmentResult.result === ContainmentResult.ALIGNED ? [shape.name] :
-            (prevContainmentResult.target ?? []).concat(shape.name)
+            (prevContainmentResult.target ?? []).concat(shape.name),
+          bindings: prevContainmentResult.bindings.set(shape.name, bindings)
         });
       } else {
         starPatternsContainment.set(starPatternName, {
           result: ContainmentResult.PARTIALY_CONTAIN,
           target: prevContainmentResult.result === ContainmentResult.ALIGNED ? [shape.name] :
-            (prevContainmentResult.target ?? []).concat(shape.name)
+            (prevContainmentResult.target ?? []).concat(shape.name),
+          bindings: prevContainmentResult.bindings.set(shape.name, bindings)
         });
       }
     }
@@ -155,7 +155,7 @@ function updateStarPatternContainment(starPatternsContainment: Map<ShapeName, IC
  * @param {IShape} shapeExcluded
  * @returns Whether the disjunction is contained into a shape
  */
-function findDisjuncContainment(starPatterns: IStarPatternWithDependencies[], groupedShapes: IShapeWithDependencies[], shapeExcluded: IShape, decidingShapes?: Set<string>): boolean {
+function findDisjunctContainment(starPatterns: IStarPatternWithDependencies[], groupedShapes: IShapeWithDependencies[], shapeExcluded: IShape, decidingShapes?: Set<string>): boolean {
   let haveContainment = false;
   for (const starPattern of starPatterns) {
     for (const { shape, dependencies } of groupedShapes) {
@@ -255,10 +255,9 @@ export type IContainmentResult = Readonly<{
    */
   target?: string[];
   /**
-   * If the result is an alignment then we record the shape
-   * that have a binding with RDF class
+   * Bindings of the containment
    */
-  bindingByRdfClass?: string[];
+  bindings: Map<string, IBindings>;
 }>;
 
 /**
