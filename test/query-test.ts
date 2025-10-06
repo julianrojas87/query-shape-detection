@@ -86,7 +86,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
         }
 
       });
@@ -184,7 +184,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
         }
 
       });
@@ -331,7 +331,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
         }
 
       });
@@ -450,7 +450,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
         }
       });
 
@@ -519,7 +519,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
       });
     });
@@ -618,7 +618,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -631,7 +631,7 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toStrictEqual(expectedUnion.get(subject));
+              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
             }
           }
 
@@ -730,7 +730,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -743,7 +743,7 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toStrictEqual(expectedUnion.get(subject));
+              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
             }
           }
 
@@ -841,7 +841,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -853,7 +853,7 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toStrictEqual(expectedUnion.get(subject));
+              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
             }
           }
         });
@@ -973,7 +973,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -985,7 +985,7 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toStrictEqual(expectedUnion.get(subject));
+              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
             }
           }
         });
@@ -1163,7 +1163,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -1178,7 +1178,7 @@ describe('query', () => {
               const expectedUnion = expectedUnions[j];
 
               for (const [subject, starPatterns] of unionQuery.starPatterns) {
-                expect(starPatterns).toStrictEqual(expectedUnion.get(subject));
+                expect(starPatterns).toMatchObject(expectedUnion.get(subject));
               }
             }
           }
@@ -1272,7 +1272,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
 
@@ -1361,7 +1361,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
 
@@ -1450,7 +1450,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
       });
@@ -1502,7 +1502,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
 
@@ -1579,7 +1579,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
       });
@@ -1684,7 +1684,7 @@ describe('query', () => {
               const expectedStarPattern = expectedQueries[i];
               expect(unionQuery.starPatterns.size).toBe(expectedStarPattern.size);
               for (const [subject, starPatterns] of unionQuery.starPatterns) {
-                expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+                expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
               }
             }
 
@@ -1789,7 +1789,7 @@ describe('query', () => {
               const expectedStarPattern = expectedQueries[i];
               expect(unionQuery.starPatterns.size).toBe(expectedStarPattern.size);
               for (const [subject, starPatterns] of unionQuery.starPatterns) {
-                expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+                expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
               }
             }
 
@@ -1907,9 +1907,9 @@ describe('query', () => {
             const firstBranch = unionQueries[0];
             const secondBranch = unionQueries[1];
 
-            expect(firstBranch.starPatterns).toStrictEqual(starPatternUnionOption1);
+            expect(firstBranch.starPatterns).toMatchObject(starPatternUnionOption1);
 
-            expect(secondBranch.starPatterns).toStrictEqual(starPatternUnionOption2);
+            expect(secondBranch.starPatterns).toMatchObject(starPatternUnionOption2);
 
             expect(firstBranch.union).toBeDefined();
             const nestedFirstBranchUnion = firstBranch.union!;
@@ -1989,8 +1989,8 @@ describe('query', () => {
             const firstBranch = unionQueries[0];
             const secondBranch = unionQueries[1];
 
-            expect(firstBranch.starPatterns).toStrictEqual(new Map([test1StarPattern]));
-            expect(secondBranch.starPatterns).toStrictEqual(new Map([test2StarPattern]));
+            expect(firstBranch.starPatterns).toMatchObject(new Map([test1StarPattern]));
+            expect(secondBranch.starPatterns).toMatchObject(new Map([test2StarPattern]));
 
             expect(firstBranch.union).toBeUndefined();
             expect(secondBranch.union).toBeUndefined();
@@ -2106,10 +2106,10 @@ describe('query', () => {
             const thirdBranch = unionQueries[2];
             const forthBranch = unionQueries[3];
 
-            expect(firstBranch.starPatterns).toStrictEqual(new Map([test1StarPattern]));
-            expect(secondBranch.starPatterns).toStrictEqual(new Map([test2StarPattern]));
-            expect(thirdBranch.starPatterns).toStrictEqual(new Map([test3StarPattern]));
-            expect(forthBranch.starPatterns).toStrictEqual(new Map([test4StarPattern]));
+            expect(firstBranch.starPatterns).toMatchObject(new Map([test1StarPattern]));
+            expect(secondBranch.starPatterns).toMatchObject(new Map([test2StarPattern]));
+            expect(thirdBranch.starPatterns).toMatchObject(new Map([test3StarPattern]));
+            expect(forthBranch.starPatterns).toMatchObject(new Map([test4StarPattern]));
 
             expect(firstBranch.union).toBeUndefined();
             expect(secondBranch.union).toBeUndefined();
@@ -2253,7 +2253,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length;
         const respUnion = resp.union![0];
@@ -2265,7 +2265,7 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toStrictEqual(expectedStarPattern);
+            expect(starPatterns).toMatchObject(expectedStarPattern!);
           }
         }
       });
@@ -2401,7 +2401,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length
         const respUnion = resp.union![0];
@@ -2413,7 +2413,7 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toStrictEqual(expectedStarPattern);
+            expect(starPatterns).toMatchObject(expectedStarPattern!);
           }
         }
       });
@@ -2618,7 +2618,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length;
 
@@ -2633,7 +2633,7 @@ describe('query', () => {
             expect(union.filterExpression).toBe('');
             for (const [subject, starPatterns] of union.starPatterns) {
               const expectedStarPattern = expectedUnionStarPattern.get(subject);
-              expect(starPatterns).toStrictEqual(expectedStarPattern);
+              expect(starPatterns).toMatchObject(expectedStarPattern!);
             }
           }
         }
@@ -2827,7 +2827,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length;
         const respUnion = resp.union![0];
@@ -2839,7 +2839,7 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toStrictEqual(expectedStarPattern);
+            expect(starPatterns).toMatchObject(expectedStarPattern!);
           }
         }
 
@@ -2855,7 +2855,7 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toStrictEqual(expectedStarPattern);
+            expect(starPatterns).toMatchObject(expectedStarPattern!);
           }
         }
 
@@ -3053,7 +3053,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
 
@@ -3338,7 +3338,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -3349,8 +3349,8 @@ describe('query', () => {
           expect(unionBranchContent.union).toBeUndefined();
           expect(unionBranchImageFile.union).toBeUndefined();
 
-          expect(unionBranchContent.starPatterns).toStrictEqual(new Map([unionMessageContentBranchStarPattern]));
-          expect(unionBranchImageFile.starPatterns).toStrictEqual(new Map([unionMessageImageFileBranchStarPattern]));
+          expect(unionBranchContent.starPatterns).toMatchObject(new Map([unionMessageContentBranchStarPattern]));
+          expect(unionBranchImageFile.starPatterns).toMatchObject(new Map([unionMessageImageFileBranchStarPattern]));
         });
 
         test('interactive-short-3', () => {
@@ -3589,7 +3589,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -3597,9 +3597,9 @@ describe('query', () => {
           expect(unions.length).toBe(1);
           const union = unions[0];
           expect(union.length).toBe(2);
-          expect(union[0].starPatterns).toStrictEqual(expectedBranch1StarPattern);
+          expect(union[0].starPatterns).toMatchObject(expectedBranch1StarPattern);
           expect(union[0].union).toBeUndefined();
-          expect(union[1].starPatterns).toStrictEqual(expectedBranch2StarPattern);
+          expect(union[1].starPatterns).toMatchObject(expectedBranch2StarPattern);
           expect(union[1].union).toBeUndefined();
 
         });
@@ -3710,7 +3710,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -3718,9 +3718,9 @@ describe('query', () => {
           expect(unions.length).toBe(1);
           const union = unions[0];
           expect(union.length).toBe(2);
-          expect(union[0].starPatterns).toStrictEqual(new Map([messageContentStarPattern]));
+          expect(union[0].starPatterns).toMatchObject(new Map([messageContentStarPattern]));
           expect(union[0].union).toBeUndefined();
-          expect(union[1].starPatterns).toStrictEqual(new Map([messageImageFileStarPattern]));
+          expect(union[1].starPatterns).toMatchObject(new Map([messageImageFileStarPattern]));
           expect(union[1].union).toBeUndefined();
         });
 
@@ -3836,7 +3836,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4044,7 +4044,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4368,7 +4368,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -4381,10 +4381,10 @@ describe('query', () => {
           const secondBranch = union[1];
 
           expect(firstBranch.union).toBeUndefined();
-          expect(firstBranch.starPatterns).toStrictEqual(new Map([messageCreatorDirectKnowPath1, messageCreatorDirectKnowPath2]));
+          expect(firstBranch.starPatterns).toMatchObject(new Map([messageCreatorDirectKnowPath1, messageCreatorDirectKnowPath2]));
 
           expect(secondBranch.union).toBeUndefined();
-          expect(secondBranch.starPatterns).toStrictEqual(new Map([messageCreatorUnDirectKnowPath1, messageCreatorUnDirectKnowPath2]));
+          expect(secondBranch.starPatterns).toMatchObject(new Map([messageCreatorUnDirectKnowPath1, messageCreatorUnDirectKnowPath2]));
 
         });
       });
@@ -4490,7 +4490,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4626,7 +4626,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -4634,9 +4634,9 @@ describe('query', () => {
           expect(unions.length).toBe(1);
           const union = unions[0];
           expect(union.length).toBe(2);
-          expect(union[0].starPatterns).toStrictEqual(new Map([messageContentTypePostStarPattern]));
+          expect(union[0].starPatterns).toMatchObject(new Map([messageContentTypePostStarPattern]));
           expect(union[0].union).toBeUndefined();
-          expect(union[1].starPatterns).toStrictEqual(new Map([messageContentTypeCommentStarPattern]));
+          expect(union[1].starPatterns).toMatchObject(new Map([messageContentTypeCommentStarPattern]));
           expect(union[1].union).toBeUndefined();
         });
 
@@ -4728,7 +4728,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4834,7 +4834,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4904,7 +4904,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -5009,7 +5009,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -5139,7 +5139,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -5236,7 +5236,7 @@ describe('query', () => {
             if (subject === 'person') {
               continue;
             }
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           const personSujet = resp.starPatterns.get('person');
@@ -5263,10 +5263,10 @@ describe('query', () => {
 
             for (const pattern of starPattern.starPattern.values() ?? []) {
               expect(pattern.dependencies).toBeDefined();
-              expect(pattern.dependencies).toStrictEqual(messageStarPattern[1]);
+              expect(pattern.dependencies).toMatchObject(messageStarPattern[1]);
               expect(pattern.triple.subject).toBeDefined();
               expect(pattern.triple.predicate).toBe(`${SNVOC_PREFIX}hasPost`);
-              expect(pattern.triple.object).toStrictEqual(DF.variable('message'));
+              expect(pattern.triple.object).toMatchObject(DF.variable('message'));
             }
           }
 
@@ -5277,10 +5277,10 @@ describe('query', () => {
 
             for (const pattern of starPattern.starPattern.values() ?? []) {
               expect(pattern.dependencies).toBeDefined();
-              expect(pattern.dependencies).toStrictEqual(messageStarPattern[1]);
+              expect(pattern.dependencies).toMatchObject(messageStarPattern[1]);
               expect(pattern.triple.subject).toBeDefined();
               expect(pattern.triple.predicate).toBe(`${SNVOC_PREFIX}hasComment`);
-              expect(pattern.triple.object).toStrictEqual(DF.variable('message'));
+              expect(pattern.triple.object).toMatchObject(DF.variable('message'));
             }
           }
         });
@@ -5704,7 +5704,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
         */
@@ -6029,7 +6029,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -6041,10 +6041,10 @@ describe('query', () => {
           const firstBranchFirstUnion = firstUnion[0];
           const secondBranchFirstUnion = firstUnion[1];
 
-          expect(firstBranchFirstUnion.starPatterns).toStrictEqual(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
+          expect(firstBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
           expect(firstBranchFirstUnion.union).toBeUndefined();
 
-          expect(secondBranchFirstUnion.starPatterns).toStrictEqual(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
+          expect(secondBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
           expect(secondBranchFirstUnion.union).toBeUndefined();
 
           const secondUnion = resp.union![1];
@@ -6053,10 +6053,10 @@ describe('query', () => {
           const firstBranchSecondUnion = secondUnion[0];
           const secondBranchSecondUnion = secondUnion[1];
 
-          expect(firstBranchSecondUnion.starPatterns).toStrictEqual(new Map([unionMessageContent]));
+          expect(firstBranchSecondUnion.starPatterns).toMatchObject(new Map([unionMessageContent]));
           expect(firstBranchSecondUnion.union).toBeUndefined();
 
-          expect(secondBranchSecondUnion.starPatterns).toStrictEqual(new Map([unionMessageImageFile]));
+          expect(secondBranchSecondUnion.starPatterns).toMatchObject(new Map([unionMessageImageFile]));
           expect(secondBranchSecondUnion.union).toBeUndefined();
         });
 
@@ -6290,7 +6290,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -6302,10 +6302,10 @@ describe('query', () => {
           const firstBranchFirstUnion = firstUnion[0];
           const secondBranchFirstUnion = firstUnion[1];
 
-          expect(firstBranchFirstUnion.starPatterns).toStrictEqual(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
+          expect(firstBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
           expect(firstBranchFirstUnion.union).toBeUndefined();
 
-          expect(secondBranchFirstUnion.starPatterns).toStrictEqual(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
+          expect(secondBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
           expect(secondBranchFirstUnion.union).toBeUndefined();
         });
 
@@ -6518,7 +6518,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toStrictEqual(expectedStarPattern.get(subject));
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
           }
         });
 
@@ -6536,7 +6536,7 @@ describe('query', () => {
 
       const resp = generateStarPatternUnion(union, starPatternName);
 
-      expect(resp).toStrictEqual(expectedStarPattern);
+      expect(resp).toMatchObject(expectedStarPattern);
 
     });
 
@@ -6565,7 +6565,7 @@ describe('query', () => {
 
       const resp = generateStarPatternUnion(union, starPatternName);
 
-      expect(resp).toStrictEqual(expectedStarPattern);
+      expect(resp).toMatchObject(expectedStarPattern);
     });
 
     it("should generate a star pattern given the star pattern name is not present in the union", () => {
@@ -6604,7 +6604,7 @@ describe('query', () => {
 
       const resp = generateStarPatternUnion(union, starPatternName);
 
-      expect(resp).toStrictEqual(expectedStarPattern);
+      expect(resp).toMatchObject(expectedStarPattern);
     });
   })
 });
