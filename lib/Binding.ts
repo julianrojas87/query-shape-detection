@@ -309,8 +309,9 @@ export class Bindings implements IBindings {
         currentShape: IShape,
         dependencies?: IStarPatternWithDependencies): ConstraintResult {
         if (constraint.type === ContraintType.SHAPE && dependencies !== undefined && constraint.value.size == 1) {
-            const shapeName: string = constraint.value.values().next().value;
-            const currentLinkedShape = currentShape.name === shapeName ? currentShape : linkedShape.get(shapeName);
+            const shapeName = constraint.value.values().next().value;
+            const currentLinkedShape = currentShape.name === shapeName ? currentShape 
+                : shapeName !== undefined ? linkedShape.get(shapeName) : undefined;
             if (currentLinkedShape === undefined) {
                 return ConstraintResult.RESPECT;
             }
