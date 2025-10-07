@@ -1,4 +1,5 @@
-import { translate } from 'sparqlalgebrajs';
+import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
+import { toAlgebra } from '@traqula/algebra-sparql-1-1';
 import { ContraintType, IShape, Shape } from '../lib/Shape';
 import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 import { ContainmentResult, IContainmentResult, IResult, StarPatternName, solveShapeQueryContainment } from '../lib/containment';
@@ -9,11 +10,12 @@ import { TYPE_DEFINITION } from '../lib/constant';
 import type * as RDF from '@rdfjs/types';
 import * as N3 from 'n3';
 import { readFileSync } from 'fs';
-import streamifyArray from 'streamify-array';
+import { streamifyArray } from 'streamify-array';
 import { shapeFromQuads } from '../lib/shex';
 
 const DF = new DataFactory<BaseQuad>();
 const n3Parser = new N3.Parser();
+const sparqlParser = new SPARQLParser();
 
 describe('solveShapeQueryContainment', () => {
 
@@ -185,7 +187,9 @@ describe('solveShapeQueryContainment', () => {
 
             const expectedResult: IResult = {
 
-                starPatternsContainment: new Map([["x", { result: ContainmentResult.CONTAIN, target: [shape.name], bindings:expect.any(Map) }]]),
+                starPatternsContainment: new Map([
+                    ["x", { result: ContainmentResult.CONTAIN, target: [shape.name], bindings:expect.any(Map) }]
+                ]),
                 visitShapeBoundedResource: new Map([
                     [shape.name, true],
                     [shapeP1.name, false],
@@ -402,7 +406,7 @@ describe('solveShapeQueryContainment', () => {
                 ?w2 <https://www.example.ca/p1> "bar"
               }
             `;
-            const querySparql = translate(queryString);
+            const querySparql = toAlgebra(sparqlParser.parse(queryString))
 
 
             return generateQuery(querySparql);
@@ -421,7 +425,7 @@ describe('solveShapeQueryContainment', () => {
 
               }
             `;
-            const querySparql = translate(queryString);
+            const querySparql = toAlgebra(sparqlParser.parse(queryString))
 
 
             return generateQuery(querySparql);
@@ -442,7 +446,7 @@ describe('solveShapeQueryContainment', () => {
                 ?w <https://www.example.ca/p10> ?w1 .
               }
             `;
-            const querySparql = translate(queryString);
+            const querySparql = toAlgebra(sparqlParser.parse(queryString))
 
 
             return generateQuery(querySparql);
@@ -467,7 +471,7 @@ describe('solveShapeQueryContainment', () => {
                 ?zz <https://www.example.ca/p0972> <https://www.example.ca/IDK> .
               }
             `;
-            const querySparql = translate(queryString);
+            const querySparql = toAlgebra(sparqlParser.parse(queryString))
 
 
             return generateQuery(querySparql);
@@ -591,7 +595,7 @@ describe('solveShapeQueryContainment', () => {
                     ?city snvoc:id ?cityId .
                     ?person snvoc:browserUsed ?browserUsed .
                 }`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -655,7 +659,7 @@ describe('solveShapeQueryContainment', () => {
                 }
                 LIMIT 10
                 `;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -703,7 +707,7 @@ describe('solveShapeQueryContainment', () => {
                     ?message snvoc:content|snvoc:imageFile ?messageContent .
                 }`;
 
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -734,7 +738,7 @@ describe('solveShapeQueryContainment', () => {
                     snvoc:firstName ?firstName;
                     snvoc:lastName ?lastName.
                 }`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -769,7 +773,7 @@ describe('solveShapeQueryContainment', () => {
                     snvoc:creationDate ?messageCreationDate;
                     snvoc:id ?messageId.
                 }`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -817,7 +821,7 @@ describe('solveShapeQueryContainment', () => {
                     { ?message rdf:type snvoc:Post } UNION { ?message rdf:type snvoc:Comment }
                 }
                 `;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -864,7 +868,7 @@ describe('solveShapeQueryContainment', () => {
                     { ?message rdf:type snvoc:Post } UNION { ?message rdf:type snvoc:Comment }
                 }
                 `;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -900,7 +904,7 @@ describe('solveShapeQueryContainment', () => {
                 }
                 GROUP BY ?tagName
                 ORDER BY DESC (?messages)`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -934,7 +938,7 @@ describe('solveShapeQueryContainment', () => {
                 }
                 GROUP BY ?locationName
                 ORDER BY DESC (?messages)`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -962,7 +966,7 @@ describe('solveShapeQueryContainment', () => {
                   ?message snvoc:hasCreator <http://localhost:3000/pods/00000000000000000933/profile/card#me>;
                     snvoc:locationIP ?locationIp.
                 }`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -991,7 +995,7 @@ describe('solveShapeQueryContainment', () => {
                     snvoc:id ?forumId;
                     snvoc:title ?forumTitle.
                 }`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -1028,7 +1032,7 @@ describe('solveShapeQueryContainment', () => {
                   ?moderator snvoc:firstName ?firstName;
                     snvoc:lastName ?lastName.
                 }`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
@@ -1073,7 +1077,7 @@ describe('solveShapeQueryContainment', () => {
                                         ?otherMessage snvoc:hasCreator ?creator;
                                             snvoc:content ?messageContent.
                                     } LIMIT 10`;
-                const querySparql = translate(queryString);
+                const querySparql = toAlgebra(sparqlParser.parse(queryString))
                 const query = generateQuery(querySparql);
 
                 const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();

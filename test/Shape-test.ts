@@ -1,4 +1,11 @@
-import { Shape, InconsistentPositiveAndNegativePredicateError, ContraintType, OneOf, OneOfIndexed, IShapeJson } from '../lib/Shape';
+import { 
+  Shape, 
+  InconsistentPositiveAndNegativePredicateError, 
+  ContraintType, 
+  OneOf, 
+  OneOfIndexed, 
+  IShapeJson 
+} from '../lib/Shape';
 
 describe('Shape', () => {
   describe('constructor', () => {

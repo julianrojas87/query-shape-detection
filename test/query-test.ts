@@ -1,11 +1,13 @@
 import type { BaseQuad, Term } from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
-import { translate } from 'sparqlalgebrajs';
+import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
+import { toAlgebra } from '@traqula/algebra-sparql-1-1';
 import { TYPE_DEFINITION } from '../lib/constant';
 import { generateQuery, generateStarPatternUnion, IQuery } from '../lib/query';
 import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 
 const DF = new DataFactory<BaseQuad>();
+const sparqlParser = new SPARQLParser();
 
 const RDF_STRING = DF.namedNode('http://www.w3.org/2001/XMLSchema#string');
 const SNVOC_PREFIX = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/';
@@ -18,7 +20,7 @@ describe('query', () => {
     describe("simple queries", () => {
       it('should return the triple given a query with one triple', () => {
         const query = 'SELECT * WHERE { ?x <http://exemple.ca> ?z }';
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
         expect(resp.starPatterns.size).toBe(1);
         const x = resp.starPatterns.get('x')!.starPattern;
         expect(x).toBeDefined();
@@ -81,12 +83,12 @@ describe('query', () => {
           yStarPattern,
         ]);
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
 
       });
@@ -179,12 +181,12 @@ describe('query', () => {
           zStarPattern,
         ]);
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
 
       });
@@ -218,7 +220,6 @@ describe('query', () => {
             ]),
             name: "z",
             isVariable: true,
-
           }
         ];
 
@@ -326,19 +327,19 @@ describe('query', () => {
           yStarPatternO
         ]);
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
 
       });
 
       it('should return no triple given a query with a bgp with only variable', () => {
         const query = 'SELECT * WHERE { ?x ?o ?z }';
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
         expect(resp.starPatterns.size).toBe(0);
       });
 
@@ -445,12 +446,12 @@ describe('query', () => {
           sujetStarPattern
         ]);
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!!);
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
         }
       });
 
@@ -514,12 +515,12 @@ describe('query', () => {
           yStarPattern
         ]);
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
         }
       });
     });
@@ -613,12 +614,12 @@ describe('query', () => {
             messageStarPattern,
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -725,12 +726,12 @@ describe('query', () => {
             messageStarPattern,
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -836,12 +837,12 @@ describe('query', () => {
             ]),
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -858,7 +859,7 @@ describe('query', () => {
           }
         });
 
-        it("should handle a an AlternativePath", () => {
+        it("should handle an AlternativePath", () => {
           const query = `
             PREFIX snvoc: <http://exemple.be#>
             SELECT
@@ -968,12 +969,12 @@ describe('query', () => {
             ]),
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -1158,12 +1159,12 @@ describe('query', () => {
             expectedUnions2
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -1267,12 +1268,12 @@ describe('query', () => {
             originalPostInnerPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
         });
 
@@ -1356,12 +1357,12 @@ describe('query', () => {
             originalPostInnerPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
         });
 
@@ -1445,12 +1446,12 @@ describe('query', () => {
             originalPostInnerPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
         });
       });
@@ -1497,12 +1498,12 @@ describe('query', () => {
             messageStarPattern,
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
         });
 
@@ -1574,12 +1575,12 @@ describe('query', () => {
             originalPostInnerPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
         });
       });
@@ -1596,7 +1597,7 @@ describe('query', () => {
                   ?message (snvoc:test1/snvoc:test2)|snvoc:test3 ?foo .
             }`;
 
-            const resp = generateQuery(translate(query));
+            const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
             const test1seq1 = DF.blankNode("http://exemple.be#test1_message");
             const test1Seq1StarPattern: [string, IStarPatternWithDependencies] = [
@@ -1699,7 +1700,7 @@ describe('query', () => {
                   ?message (snvoc:test1/!snvoc:test2)|snvoc:test3? ?foo .
             }`;
 
-            const resp = generateQuery(translate(query));
+            const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
             const test1seq1 = DF.blankNode("http://exemple.be#test1_message");
             const test1Seq1StarPattern: [string, IStarPatternWithDependencies] = [
@@ -1804,7 +1805,7 @@ describe('query', () => {
                   ?message (snvoc:test1/(snvoc:test2|snvoc:test4*))|snvoc:test3 ?foo .
             }`;
 
-            const resp = generateQuery(translate(query));
+            const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
             const test1seq1 = DF.blankNode("http://exemple.be#test1_message");
             const test1Seq1StarPattern: [string, IStarPatternWithDependencies] = [
@@ -1934,7 +1935,7 @@ describe('query', () => {
                 ?message snvoc:test1|^snvoc:test2+ ?fr .
           }`;
 
-            const resp = generateQuery(translate(query));
+            const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
             const test1StarPattern: [string, IStarPatternWithDependencies] = [
               'message',
@@ -2006,7 +2007,7 @@ describe('query', () => {
                 ?message (snvoc:test1|^(snvoc:test2|snvoc:test3+|snvoc:test4*)) ?fr .
           }`;
 
-            const resp = generateQuery(translate(query));
+            const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
             const test1StarPattern: [string, IStarPatternWithDependencies] = [
               'message',
@@ -2246,7 +2247,7 @@ describe('query', () => {
           ])
         ];
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.union?.length).toBe(1);
 
@@ -2394,7 +2395,7 @@ describe('query', () => {
           ])
         ];
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.union?.length).toBe(1);
 
@@ -2611,7 +2612,7 @@ describe('query', () => {
           everyExpectedStarPatternUnion2
         ]
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.union?.length).toBe(2);
 
@@ -2820,7 +2821,7 @@ describe('query', () => {
           ])
         ];
 
-        const resp = generateQuery(translate(query));
+        const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
         expect(resp.union?.length).toBe(1);
 
@@ -3048,7 +3049,7 @@ describe('query', () => {
             cityStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -3333,7 +3334,7 @@ describe('query', () => {
             }
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -3584,7 +3585,7 @@ describe('query', () => {
             knowUnion2BranchStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -3705,7 +3706,7 @@ describe('query', () => {
             messageStarPattern,
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -3831,7 +3832,7 @@ describe('query', () => {
             creatorStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -4039,7 +4040,7 @@ describe('query', () => {
             forumStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -4363,7 +4364,7 @@ describe('query', () => {
             }
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -4485,7 +4486,7 @@ describe('query', () => {
             messageStarPattern,
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -4580,7 +4581,7 @@ describe('query', () => {
             messageStarPattern,
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           const messageContentTypePostStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -4723,7 +4724,7 @@ describe('query', () => {
             tagStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -4829,7 +4830,7 @@ describe('query', () => {
             locationStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -4899,7 +4900,7 @@ describe('query', () => {
             messageStarPattern,
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -5004,7 +5005,7 @@ describe('query', () => {
             forumStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -5134,7 +5135,7 @@ describe('query', () => {
             moderatorStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -5228,7 +5229,7 @@ describe('query', () => {
             otherMessageStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size + 1);
           expect(resp.filterExpression).toBe('');
@@ -5699,12 +5700,12 @@ describe('query', () => {
             }
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
           }
         });
         */
@@ -6024,7 +6025,7 @@ describe('query', () => {
             }
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -6285,7 +6286,7 @@ describe('query', () => {
             },
           ];
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
@@ -6513,7 +6514,7 @@ describe('query', () => {
             personStarPattern
           ]);
 
-          const resp = generateQuery(translate(query));
+          const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
