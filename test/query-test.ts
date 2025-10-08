@@ -1,10 +1,10 @@
-import type { BaseQuad, Term } from '@rdfjs/types';
+import type { BaseQuad, Term, Variable } from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
 import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
 import { toAlgebra } from '@traqula/algebra-sparql-1-1';
 import { TYPE_DEFINITION } from '../lib/constant';
 import { generateQuery, generateStarPatternUnion, IQuery } from '../lib/query';
-import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
+import { type IStarPatternWithDependencies, Triple } from '../lib/Triple';
 
 const DF = new DataFactory<BaseQuad>();
 const sparqlParser = new SPARQLParser();
@@ -54,7 +54,6 @@ describe('query', () => {
             ]),
             name: "x",
             isVariable: true,
-
           }
         ];
         const yStarPattern: [string, IStarPatternWithDependencies] = ['y',
@@ -75,7 +74,6 @@ describe('query', () => {
             ),
             name: "y",
             isVariable: true,
-
           }
         ];
         const expectedStarPattern = new Map<string, IStarPatternWithDependencies>([
@@ -88,7 +86,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
 
       });
@@ -186,7 +184,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
 
       });
@@ -332,7 +330,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
 
       });
@@ -451,7 +449,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
       });
 
@@ -520,7 +518,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
         }
       });
     });
@@ -529,13 +527,13 @@ describe('query', () => {
       describe('AlternativePaths', () => {
         it("should handle a simple AlternativePath", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:content|snvoc:imageFile ?messageContent .
-                ?message snvoc:creationDate ?messageCreationDate .
-            } LIMIT 10`;
+              PREFIX snvoc: <http://exemple.be#>
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:content|snvoc:imageFile ?messageContent .
+                  ?message snvoc:creationDate ?messageCreationDate .
+              } LIMIT 10`;
 
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
@@ -619,7 +617,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -632,7 +630,7 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
+              expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedUnion.get(subject));
             }
           }
 
@@ -640,13 +638,13 @@ describe('query', () => {
 
         it("should handle an AlternativePath with a negative predicate", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:content|!snvoc:imageFile ?messageContent .
-                ?message snvoc:creationDate ?messageCreationDate .
-            } LIMIT 10`;
+              PREFIX snvoc: <http://exemple.be#>
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:content|!snvoc:imageFile ?messageContent .
+                  ?message snvoc:creationDate ?messageCreationDate .
+              } LIMIT 10`;
 
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
@@ -731,7 +729,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -744,7 +742,7 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
+              expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedUnion.get(subject));
             }
           }
 
@@ -752,13 +750,13 @@ describe('query', () => {
 
         it("should handle a star pattern with only a AlternativePath", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:content|snvoc:imageFile ?messageContent .
-                ?messageContent snvoc:content  snvoc:content.
-            } LIMIT 10`;
+              PREFIX snvoc: <http://exemple.be#>
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:content|snvoc:imageFile ?messageContent .
+                  ?messageContent snvoc:content  snvoc:content.
+              } LIMIT 10`;
 
           const messageContentStarPattern: [string, IStarPatternWithDependencies] = [
             'messageContent',
@@ -842,7 +840,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -854,20 +852,20 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
+              expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedUnion.get(subject));
             }
           }
         });
 
         it("should handle an AlternativePath", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:content|snvoc:imageFile|snvoc:bar ?messageContent .
-                ?message snvoc:creationDate ?messageCreationDate .
-            } LIMIT 10`;
+              PREFIX snvoc: <http://exemple.be#>
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:content|snvoc:imageFile|snvoc:bar ?messageContent .
+                  ?message snvoc:creationDate ?messageCreationDate .
+              } LIMIT 10`;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -974,7 +972,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -986,21 +984,21 @@ describe('query', () => {
             const expectedUnion = expectedUnions[i];
 
             for (const [subject, starPatterns] of unionQuery.starPatterns) {
-              expect(starPatterns).toMatchObject(expectedUnion.get(subject));
+              expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedUnion.get(subject));
             }
           }
         });
 
         it("should handle a multiple AlternativePaths", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:content+|snvoc:imageFile|snvoc:bar ?messageContent .
-                ?message snvoc:creationDate ?messageCreationDate .
-                ?message snvoc:content|snvoc:imageFile ?somethingElse .
-            } LIMIT 10`;
+              PREFIX snvoc: <http://exemple.be#>
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:content+|snvoc:imageFile|snvoc:bar ?messageContent .
+                  ?message snvoc:creationDate ?messageCreationDate .
+                  ?message snvoc:content|snvoc:imageFile ?somethingElse .
+              } LIMIT 10`;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -1164,7 +1162,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
 
           expect(resp.union).toBeDefined();
@@ -1179,7 +1177,7 @@ describe('query', () => {
               const expectedUnion = expectedUnions[j];
 
               for (const [subject, starPatterns] of unionQuery.starPatterns) {
-                expect(starPatterns).toMatchObject(expectedUnion.get(subject));
+                expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedUnion.get(subject));
               }
             }
           }
@@ -1190,18 +1188,18 @@ describe('query', () => {
       describe("cardinality property path", () => {
         it("should handle a simple ZeroOrMorePath cardinality", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
+              PREFIX snvoc: <http://exemple.be#>
 
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:id ?id .
-                OPTIONAL {
-                    ?message snvoc:replyOf* ?originalPostInner .
-                    ?originalPostInner a snvoc:Post .
-                } .
-            }
-            LIMIT 10`;
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:id ?id .
+                  OPTIONAL {
+                      ?message snvoc:replyOf* ?originalPostInner .
+                      ?originalPostInner a snvoc:Post .
+                  } .
+              }
+              LIMIT 10`;
 
           const originalPostInnerPattern: [string, IStarPatternWithDependencies] = [
             'originalPostInner',
@@ -1273,24 +1271,24 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
         });
 
         it("should handle a simple OneOrMorePath cardinality", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
+              PREFIX snvoc: <http://exemple.be#>
 
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:id ?id .
-                OPTIONAL {
-                    ?message snvoc:replyOf+ ?originalPostInner .
-                    ?originalPostInner a snvoc:Post .
-                } .
-            }
-            LIMIT 10`;
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:id ?id .
+                  OPTIONAL {
+                      ?message snvoc:replyOf+ ?originalPostInner .
+                      ?originalPostInner a snvoc:Post .
+                  } .
+              }
+              LIMIT 10`;
 
           const originalPostInnerPattern: [string, IStarPatternWithDependencies] = [
             'originalPostInner',
@@ -1362,24 +1360,24 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
         });
 
         it("should handle a simple ZeroOrOnePath cardinality", () => {
           const query = `
-            PREFIX snvoc: <http://exemple.be#>
+              PREFIX snvoc: <http://exemple.be#>
 
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:id ?id .
-                OPTIONAL {
-                    ?message snvoc:replyOf? ?originalPostInner .
-                    ?originalPostInner a snvoc:Post .
-                } .
-            }
-            LIMIT 10`;
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:id ?id .
+                  OPTIONAL {
+                      ?message snvoc:replyOf? ?originalPostInner .
+                      ?originalPostInner a snvoc:Post .
+                  } .
+              }
+              LIMIT 10`;
 
           const originalPostInnerPattern: [string, IStarPatternWithDependencies] = [
             'originalPostInner',
@@ -1451,7 +1449,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
         });
       });
@@ -1459,16 +1457,16 @@ describe('query', () => {
       describe("negated property path", () => {
         it("should handle a single negation", () => {
           const query = `
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            PREFIX snvoc: <http://exemple.be#>
+              PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+              PREFIX snvoc: <http://exemple.be#>
 
 
-            SELECT
-                *
-            WHERE
-            {
-                ?message !snvoc:replyOf ?person;
-            }`;
+              SELECT
+                  *
+              WHERE
+              {
+                  ?message !snvoc:replyOf ?person;
+              }`;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -1503,23 +1501,23 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
         });
 
         it("should handle a group negation", () => {
           const query = `
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            PREFIX snvoc: <http://exemple.be#>
+              PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+              PREFIX snvoc: <http://exemple.be#>
 
 
-            SELECT
-                *
-            WHERE
-            {
-                ?message !(snvoc:foo|snvoc:bar|snvoc:boo) ?originalPostInner.
-                ?originalPostInner a snvoc:Post .
-            }`;
+              SELECT
+                  *
+              WHERE
+              {
+                  ?message !(snvoc:foo|snvoc:bar|snvoc:boo) ?originalPostInner.
+                  ?originalPostInner a snvoc:Post .
+              }`;
 
           const originalPostInnerPattern: [string, IStarPatternWithDependencies] = [
             'originalPostInner',
@@ -1580,7 +1578,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
         });
       });
@@ -1590,12 +1588,12 @@ describe('query', () => {
         describe("sequence", () => {
           test('alternative with sequence', () => {
             const query = `PREFIX snvoc: <http://exemple.be#>
-  
-              SELECT
-                  *
-              WHERE {
-                  ?message (snvoc:test1/snvoc:test2)|snvoc:test3 ?foo .
-            }`;
+
+                SELECT
+                    *
+                WHERE {
+                    ?message (snvoc:test1/snvoc:test2)|snvoc:test3 ?foo .
+              }`;
 
             const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
@@ -1685,7 +1683,7 @@ describe('query', () => {
               const expectedStarPattern = expectedQueries[i];
               expect(unionQuery.starPatterns.size).toBe(expectedStarPattern.size);
               for (const [subject, starPatterns] of unionQuery.starPatterns) {
-                expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+                expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
               }
             }
 
@@ -1693,12 +1691,12 @@ describe('query', () => {
 
           test('alternative with sequence containing negated predicates', () => {
             const query = `PREFIX snvoc: <http://exemple.be#>
-  
-              SELECT
-                  *
-              WHERE {
-                  ?message (snvoc:test1/!snvoc:test2)|snvoc:test3? ?foo .
-            }`;
+
+                SELECT
+                    *
+                WHERE {
+                    ?message (snvoc:test1/!snvoc:test2)|snvoc:test3? ?foo .
+              }`;
 
             const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
@@ -1790,7 +1788,7 @@ describe('query', () => {
               const expectedStarPattern = expectedQueries[i];
               expect(unionQuery.starPatterns.size).toBe(expectedStarPattern.size);
               for (const [subject, starPatterns] of unionQuery.starPatterns) {
-                expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+                expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
               }
             }
 
@@ -1798,12 +1796,12 @@ describe('query', () => {
 
           test('alternative with sequence containing alternative', () => {
             const query = `PREFIX snvoc: <http://exemple.be#>
-  
-              SELECT
-                  *
-              WHERE {
-                  ?message (snvoc:test1/(snvoc:test2|snvoc:test4*))|snvoc:test3 ?foo .
-            }`;
+
+                SELECT
+                    *
+                WHERE {
+                    ?message (snvoc:test1/(snvoc:test2|snvoc:test4*))|snvoc:test3 ?foo .
+              }`;
 
             const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
@@ -1908,9 +1906,9 @@ describe('query', () => {
             const firstBranch = unionQueries[0];
             const secondBranch = unionQueries[1];
 
-            expect(firstBranch.starPatterns).toMatchObject(starPatternUnionOption1);
+            expect(firstBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(starPatternUnionOption1);
 
-            expect(secondBranch.starPatterns).toMatchObject(starPatternUnionOption2);
+            expect(secondBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(starPatternUnionOption2);
 
             expect(firstBranch.union).toBeDefined();
             const nestedFirstBranchUnion = firstBranch.union!;
@@ -1927,13 +1925,13 @@ describe('query', () => {
         describe("inverse", () => {
           test("alternate with a single inverse path", () => {
             const query = `
-            PREFIX snvoc: <http://exemple.be#>
+              PREFIX snvoc: <http://exemple.be#>
 
-            SELECT
-                *
-            WHERE {
-                ?message snvoc:test1|^snvoc:test2+ ?fr .
-          }`;
+              SELECT
+                  *
+              WHERE {
+                  ?message snvoc:test1|^snvoc:test2+ ?fr .
+            }`;
 
             const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
@@ -1990,8 +1988,8 @@ describe('query', () => {
             const firstBranch = unionQueries[0];
             const secondBranch = unionQueries[1];
 
-            expect(firstBranch.starPatterns).toMatchObject(new Map([test1StarPattern]));
-            expect(secondBranch.starPatterns).toMatchObject(new Map([test2StarPattern]));
+            expect(firstBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([test1StarPattern]));
+            expect(secondBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([test2StarPattern]));
 
             expect(firstBranch.union).toBeUndefined();
             expect(secondBranch.union).toBeUndefined();
@@ -1999,13 +1997,13 @@ describe('query', () => {
 
           test("alternate with multiple inverse paths", () => {
             const query = `
-            PREFIX snvoc: <http://exemple.be#>
+              PREFIX snvoc: <http://exemple.be#>
 
-            SELECT
-                *
-            WHERE {
-                ?message (snvoc:test1|^(snvoc:test2|snvoc:test3+|snvoc:test4*)) ?fr .
-          }`;
+              SELECT
+                  *
+              WHERE {
+                  ?message (snvoc:test1|^(snvoc:test2|snvoc:test3+|snvoc:test4*)) ?fr .
+            }`;
 
             const resp = generateQuery(toAlgebra(sparqlParser.parse(query)));
 
@@ -2107,10 +2105,10 @@ describe('query', () => {
             const thirdBranch = unionQueries[2];
             const forthBranch = unionQueries[3];
 
-            expect(firstBranch.starPatterns).toMatchObject(new Map([test1StarPattern]));
-            expect(secondBranch.starPatterns).toMatchObject(new Map([test2StarPattern]));
-            expect(thirdBranch.starPatterns).toMatchObject(new Map([test3StarPattern]));
-            expect(forthBranch.starPatterns).toMatchObject(new Map([test4StarPattern]));
+            expect(firstBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([test1StarPattern]));
+            expect(secondBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([test2StarPattern]));
+            expect(thirdBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([test3StarPattern]));
+            expect(forthBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([test4StarPattern]));
 
             expect(firstBranch.union).toBeUndefined();
             expect(secondBranch.union).toBeUndefined();
@@ -2125,15 +2123,15 @@ describe('query', () => {
     describe('union', () => {
       it("should handle a simple union", () => {
         const query = `SELECT * WHERE { 
-          ?x <http://exemple.ca> ?z .
-          {
-            ?x <http://exemple.ca#1> ?z .
-            ?x <http://exemple.ca#2> ?z .
-          }UNION{
-            ?x <http://exemple.ca#1> ?z .
-            ?y <http://exemple.be> ?z .
-          }
-        }`;
+            ?x <http://exemple.ca> ?z .
+            {
+              ?x <http://exemple.ca#1> ?z .
+              ?x <http://exemple.ca#2> ?z .
+            }UNION{
+              ?x <http://exemple.ca#1> ?z .
+              ?y <http://exemple.be> ?z .
+            }
+          }`;
 
         const xStarPattern: [string, IStarPatternWithDependencies] = ['x',
           {
@@ -2254,7 +2252,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length;
         const respUnion = resp.union![0];
@@ -2266,22 +2264,22 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toMatchObject(expectedStarPattern!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern!);
           }
         }
       });
 
       it("should handle a union with dependencies", () => {
         const query = `SELECT * WHERE { 
-          ?x <http://exemple.ca> ?z .
-          {
-            ?x <http://exemple.ca#1> ?z .
-            ?x <http://exemple.ca#2> ?z .
-          }UNION{
-            ?x <http://exemple.ca#1> ?z .
-            ?y <http://exemple.be> ?x .
-          }
-        }`;
+            ?x <http://exemple.ca> ?z .
+            {
+              ?x <http://exemple.ca#1> ?z .
+              ?x <http://exemple.ca#2> ?z .
+            }UNION{
+              ?x <http://exemple.ca#1> ?z .
+              ?y <http://exemple.be> ?x .
+            }
+          }`;
 
         const xStarPattern: [string, IStarPatternWithDependencies] = ['x',
           {
@@ -2402,7 +2400,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length
         const respUnion = resp.union![0];
@@ -2414,29 +2412,29 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toMatchObject(expectedStarPattern!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern!);
           }
         }
       });
 
       it("should handle a multiple unions", () => {
         const query = `SELECT * WHERE { 
-          ?x <http://exemple.ca> ?z .
-          {
-            ?x <http://exemple.ca#1> ?z .
-            ?x <http://exemple.ca#2> ?z .
-          }UNION{
-            ?x <http://exemple.ca#1> ?z .
-            ?y <http://exemple.be> ?z .
-          }
+            ?x <http://exemple.ca> ?z .
+            {
+              ?x <http://exemple.ca#1> ?z .
+              ?x <http://exemple.ca#2> ?z .
+            }UNION{
+              ?x <http://exemple.ca#1> ?z .
+              ?y <http://exemple.be> ?z .
+            }
 
-          {
-            ?x <http://exemple.ca#1> ?z .
-          }UNION{
-            ?x <http://exemple.ca#1> ?z .
-            ?y <http://exemple.be> ?x .
-          }
-        }`;
+            {
+              ?x <http://exemple.ca#1> ?z .
+            }UNION{
+              ?x <http://exemple.ca#1> ?z .
+              ?y <http://exemple.be> ?x .
+            }
+          }`;
 
         const xStarPattern: [string, IStarPatternWithDependencies] = ['x',
           {
@@ -2619,7 +2617,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length;
 
@@ -2634,7 +2632,7 @@ describe('query', () => {
             expect(union.filterExpression).toBe('');
             for (const [subject, starPatterns] of union.starPatterns) {
               const expectedStarPattern = expectedUnionStarPattern.get(subject);
-              expect(starPatterns).toMatchObject(expectedStarPattern!);
+              expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern!);
             }
           }
         }
@@ -2643,20 +2641,20 @@ describe('query', () => {
 
       it("should handle nested union", () => {
         const query = `SELECT * WHERE { 
-          ?x <http://exemple.ca> ?z .
-          {
-            ?x <http://exemple.ca#1> ?z .
-            ?x <http://exemple.ca#2> ?z .
-          }UNION{
-            ?x <http://exemple.ca#1> ?z .
-            ?y <http://exemple.be> ?z .
+            ?x <http://exemple.ca> ?z .
             {
-            ?x <http://exemple.ca> ?y .
+              ?x <http://exemple.ca#1> ?z .
+              ?x <http://exemple.ca#2> ?z .
             }UNION{
-              ?x <http://exemple.ca> ?w .
+              ?x <http://exemple.ca#1> ?z .
+              ?y <http://exemple.be> ?z .
+              {
+              ?x <http://exemple.ca> ?y .
+              }UNION{
+                ?x <http://exemple.ca> ?w .
+              }
             }
-          }
-        }`;
+          }`;
 
         const xStarPattern: [string, IStarPatternWithDependencies] = ['x',
           {
@@ -2828,7 +2826,7 @@ describe('query', () => {
         expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
         expect(resp.filterExpression).toBe('');
         for (const [subject, starPatterns] of resp.starPatterns) {
-          expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+          expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
         }
         const n = (resp.union ?? []).length;
         const respUnion = resp.union![0];
@@ -2840,7 +2838,7 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toMatchObject(expectedStarPattern!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern!);
           }
         }
 
@@ -2856,7 +2854,7 @@ describe('query', () => {
           expect(union.filterExpression).toBe('');
           for (const [subject, starPatterns] of union.starPatterns) {
             const expectedStarPattern = expectedUnionStarPattern.get(subject);
-            expect(starPatterns).toMatchObject(expectedStarPattern!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern!);
           }
         }
 
@@ -2869,40 +2867,40 @@ describe('query', () => {
 
         test('interactive-short-1', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?firstName
-              ?lastName
-              ?birthday
-              ?locationIP
-              ?browserUsed
-              ?cityId
-              ?gender
-              ?creationDate
-          WHERE
-          {
-              ?person a snvoc:Person .
-              ?person snvoc:id ?personId .
-              ?person snvoc:firstName ?firstName .
-              ?person snvoc:lastName ?lastName .
-              ?person snvoc:gender ?gender .
-              ?person snvoc:birthday ?birthday .
-              ?person snvoc:creationDate ?creationDate .
-              ?person snvoc:locationIP ?locationIP .
-              ?person snvoc:isLocatedIn ?city .
-              ?city snvoc:id ?cityId .
-              ?person snvoc:browserUsed ?browserUsed .
-          }
-          `;
+            SELECT
+                ?firstName
+                ?lastName
+                ?birthday
+                ?locationIP
+                ?browserUsed
+                ?cityId
+                ?gender
+                ?creationDate
+            WHERE
+            {
+                ?person a snvoc:Person .
+                ?person snvoc:id ?personId .
+                ?person snvoc:firstName ?firstName .
+                ?person snvoc:lastName ?lastName .
+                ?person snvoc:gender ?gender .
+                ?person snvoc:birthday ?birthday .
+                ?person snvoc:creationDate ?creationDate .
+                ?person snvoc:locationIP ?locationIP .
+                ?person snvoc:isLocatedIn ?city .
+                ?city snvoc:id ?cityId .
+                ?person snvoc:browserUsed ?browserUsed .
+            }
+            `;
 
           const cityStarPattern: [string, IStarPatternWithDependencies] = [
             'city',
@@ -3054,50 +3052,50 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
         });
 
         test('interactive-short-2', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?messageId
-              ?messageContent
-              ?messageCreationDate
-              ?originalPostId
-              ?originalPostAuthorId
-              ?originalPostAuthorFirstName
-              ?originalPostAuthorLastName
-          WHERE {
-              ?person a snvoc:Person .
-              ?person snvoc:id ?personId .
-              ?message snvoc:hasCreator ?person .
-              ?message snvoc:content|snvoc:imageFile ?messageContent .
-              ?message snvoc:creationDate ?messageCreationDate .
-              ?message snvoc:id ?messageId .
-              OPTIONAL {
-                  ?message snvoc:replyOf* ?originalPostInner .
-                  ?originalPostInner a snvoc:Post .
-              } .
-              BIND( COALESCE(?originalPostInner, ?message) AS ?originalPost ) .
-              ?originalPost snvoc:id ?originalPostId .
-              ?originalPost snvoc:hasCreator ?creator .
-              ?creator snvoc:firstName ?originalPostAuthorFirstName .
-              ?creator snvoc:lastName ?originalPostAuthorLastName .
-              ?creator snvoc:id ?originalPostAuthorId .
-          }
-          LIMIT 10
-          `;
+            SELECT
+                ?messageId
+                ?messageContent
+                ?messageCreationDate
+                ?originalPostId
+                ?originalPostAuthorId
+                ?originalPostAuthorFirstName
+                ?originalPostAuthorLastName
+            WHERE {
+                ?person a snvoc:Person .
+                ?person snvoc:id ?personId .
+                ?message snvoc:hasCreator ?person .
+                ?message snvoc:content|snvoc:imageFile ?messageContent .
+                ?message snvoc:creationDate ?messageCreationDate .
+                ?message snvoc:id ?messageId .
+                OPTIONAL {
+                    ?message snvoc:replyOf* ?originalPostInner .
+                    ?originalPostInner a snvoc:Post .
+                } .
+                BIND( COALESCE(?originalPostInner, ?message) AS ?originalPost ) .
+                ?originalPost snvoc:id ?originalPostId .
+                ?originalPost snvoc:hasCreator ?creator .
+                ?creator snvoc:firstName ?originalPostAuthorFirstName .
+                ?creator snvoc:lastName ?originalPostAuthorLastName .
+                ?creator snvoc:id ?originalPostAuthorId .
+            }
+            LIMIT 10
+            `;
 
           const personStarPattern: [string, IStarPatternWithDependencies] = [
             'person',
@@ -3339,7 +3337,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -3350,60 +3348,49 @@ describe('query', () => {
           expect(unionBranchContent.union).toBeUndefined();
           expect(unionBranchImageFile.union).toBeUndefined();
 
-          expect(unionBranchContent.starPatterns).toMatchObject(new Map([unionMessageContentBranchStarPattern]));
-          expect(unionBranchImageFile.starPatterns).toMatchObject(new Map([unionMessageImageFileBranchStarPattern]));
+          expect(unionBranchContent.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([unionMessageContentBranchStarPattern]));
+          expect(unionBranchImageFile.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([unionMessageImageFileBranchStarPattern]));
         });
 
         test('interactive-short-3', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?personId
-              ?firstName
-              ?lastName
-              ?friendshipCreationDate
-          WHERE
-          {
-              ?rootPerson a snvoc:Person .
-              ?rootPerson snvoc:id ?rootId .
-              {
-                  ?rootPerson snvoc:knows ?knows .
-                  ?knows snvoc:hasPerson ?person .
-              } UNION {
-                  ?person snvoc:knows ?knows .
-                  ?knows snvoc:hasPerson ?rootPerson .
-              }
-              ?knows snvoc:creationDate ?friendshipCreationDate .
-              ?person snvoc:firstName ?firstName .
-              ?person snvoc:lastName ?lastName .
-              ?person snvoc:id ?personId .
-          }
-          `;
+            SELECT
+                ?personId
+                ?firstName
+                ?lastName
+                ?friendshipCreationDate
+            WHERE
+            {
+                ?rootPerson a snvoc:Person .
+                ?rootPerson snvoc:id ?rootId .
+                {
+                    ?rootPerson snvoc:knows ?knows .
+                    ?knows snvoc:hasPerson ?person .
+                } UNION {
+                    ?person snvoc:knows ?knows .
+                    ?knows snvoc:hasPerson ?rootPerson .
+                }
+                ?knows snvoc:creationDate ?friendshipCreationDate .
+                ?person snvoc:firstName ?firstName .
+                ?person snvoc:lastName ?lastName .
+                ?person snvoc:id ?personId .
+            }
+            `;
 
           const personStarPattern: [string, IStarPatternWithDependencies] = [
             'person',
             {
               starPattern: new Map([
-                [
-                  `${SNVOC_PREFIX}id`,
-                  {
-                    triple: new Triple({
-                      subject: 'person',
-                      predicate: `${SNVOC_PREFIX}id`,
-                      object: DF.variable('personId')
-                    }),
-                    dependencies: undefined
-                  }
-                ],
                 [
                   `${SNVOC_PREFIX}firstName`,
                   {
@@ -3422,6 +3409,17 @@ describe('query', () => {
                       subject: 'person',
                       predicate: `${SNVOC_PREFIX}lastName`,
                       object: DF.variable('lastName')
+                    }),
+                    dependencies: undefined
+                  }
+                ],
+                [
+                  `${SNVOC_PREFIX}id`,
+                  {
+                    triple: new Triple({
+                      subject: 'person',
+                      predicate: `${SNVOC_PREFIX}id`,
+                      object: DF.variable('personId')
                     }),
                     dependencies: undefined
                   }
@@ -3590,7 +3588,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -3598,35 +3596,35 @@ describe('query', () => {
           expect(unions.length).toBe(1);
           const union = unions[0];
           expect(union.length).toBe(2);
-          expect(union[0].starPatterns).toMatchObject(expectedBranch1StarPattern);
+          expect(union[0].starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(expectedBranch1StarPattern);
           expect(union[0].union).toBeUndefined();
-          expect(union[1].starPatterns).toMatchObject(expectedBranch2StarPattern);
+          expect(union[1].starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(expectedBranch2StarPattern);
           expect(union[1].union).toBeUndefined();
 
         });
 
         test('interactive-short-4', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?messageCreationDate
-              ?messageContent
-          WHERE
-          {
-              ?message snvoc:id ?messageId .
-              ?message snvoc:creationDate ?messageCreationDate .
-              ?message snvoc:content|snvoc:imageFile ?messageContent .
-          }
-          `;
+            SELECT
+                ?messageCreationDate
+                ?messageContent
+            WHERE
+            {
+                ?message snvoc:id ?messageId .
+                ?message snvoc:creationDate ?messageCreationDate .
+                ?message snvoc:content|snvoc:imageFile ?messageContent .
+            }
+            `;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -3711,7 +3709,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -3719,37 +3717,37 @@ describe('query', () => {
           expect(unions.length).toBe(1);
           const union = unions[0];
           expect(union.length).toBe(2);
-          expect(union[0].starPatterns).toMatchObject(new Map([messageContentStarPattern]));
+          expect(union[0].starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([messageContentStarPattern]));
           expect(union[0].union).toBeUndefined();
-          expect(union[1].starPatterns).toMatchObject(new Map([messageImageFileStarPattern]));
+          expect(union[1].starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([messageImageFileStarPattern]));
           expect(union[1].union).toBeUndefined();
         });
 
         test('interactive-short-5', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?personId
-              ?firstName
-              ?lastName
-          WHERE
-          {
-              ?message snvoc:id ?messageId .
-              ?message snvoc:hasCreator ?creator .
-              ?creator snvoc:id ?personId .
-              ?creator snvoc:firstName ?firstName .
-              ?creator snvoc:lastName ?lastName .
-          }
-          `;
+            SELECT
+                ?personId
+                ?firstName
+                ?lastName
+            WHERE
+            {
+                ?message snvoc:id ?messageId .
+                ?message snvoc:hasCreator ?creator .
+                ?creator snvoc:id ?personId .
+                ?creator snvoc:firstName ?firstName .
+                ?creator snvoc:lastName ?lastName .
+            }
+            `;
 
           const creatorStarPattern: [string, IStarPatternWithDependencies] = [
             'creator',
@@ -3837,7 +3835,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -3846,38 +3844,38 @@ describe('query', () => {
 
         test('interactive-short-6', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?forumId
-              ?forumTitle
-              ?moderatorId
-              ?moderatorFirstName
-              ?moderatorLastName
-          WHERE {
-              ?message snvoc:id ?messageId .
-              OPTIONAL {
-                  ?message snvoc:replyOf* ?originalPostInner .
-                  ?originalPostInner a snvoc:Post .
-              } .
-              BIND( COALESCE(?originalPostInner, ?message) AS ?originalPost ) .
-              ?forum snvoc:containerOf ?originalPost .
-              ?forum snvoc:id ?forumId .
-              ?forum snvoc:title ?forumTitle .
-              ?forum snvoc:hasModerator ?moderator .
-              ?moderator snvoc:id ?moderatorId .
-              ?moderator snvoc:firstName ?moderatorFirstName .
-              ?moderator snvoc:lastName ?moderatorLastName .
-          }
-          `;
+            SELECT
+                ?forumId
+                ?forumTitle
+                ?moderatorId
+                ?moderatorFirstName
+                ?moderatorLastName
+            WHERE {
+                ?message snvoc:id ?messageId .
+                OPTIONAL {
+                    ?message snvoc:replyOf* ?originalPostInner .
+                    ?originalPostInner a snvoc:Post .
+                } .
+                BIND( COALESCE(?originalPostInner, ?message) AS ?originalPost ) .
+                ?forum snvoc:containerOf ?originalPost .
+                ?forum snvoc:id ?forumId .
+                ?forum snvoc:title ?forumTitle .
+                ?forum snvoc:hasModerator ?moderator .
+                ?moderator snvoc:id ?moderatorId .
+                ?moderator snvoc:firstName ?moderatorFirstName .
+                ?moderator snvoc:lastName ?moderatorLastName .
+            }
+            `;
 
           const originalPostInnerStarPattern: [string, IStarPatternWithDependencies] = [
             'originalPostInner',
@@ -4045,7 +4043,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4054,45 +4052,45 @@ describe('query', () => {
 
         test('interactive-short-7', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?commentId
-              ?commentContent
-              ?commentCreationDate
-              ?replyAuthorId
-              ?replyAuthorFirstName
-              ?replyAuthorLastName
-              ?replyAuthorKnowsOriginalMessageAuthor
-          WHERE
-          {
-              ?message snvoc:id ?messageId .
-              ?message snvoc:hasCreator ?messageCreator .
-              ?messageCreator snvoc:id ?messageCreatorId .
-              ?comment snvoc:replyOf ?message .
-              ?comment a snvoc:Comment .
-              ?comment snvoc:id ?commentId .
-              ?comment snvoc:content ?commentContent .
-              ?comment snvoc:creationDate ?commentCreationDate .
-              ?comment snvoc:hasCreator ?replyAuthor .
-              ?replyAuthor snvoc:id ?replyAuthorId .
-              ?replyAuthor snvoc:firstName ?replyAuthorFirstName .
-              ?replyAuthor snvoc:lastName ?replyAuthorLastName .
-              OPTIONAL {
-                  ?messageCreator ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?replyAuthor .
-                  BIND( "true"^^xsd:boolean AS ?replyAuthorKnowsOriginalMessageAuthorInner ) .
-              }
-              BIND( COALESCE(?replyAuthorKnowsOriginalMessageAuthorInner, "false"^^xsd:boolean) AS ?replyAuthorKnowsOriginalMessageAuthor ) .
-          }
-          `;
+            SELECT
+                ?commentId
+                ?commentContent
+                ?commentCreationDate
+                ?replyAuthorId
+                ?replyAuthorFirstName
+                ?replyAuthorLastName
+                ?replyAuthorKnowsOriginalMessageAuthor
+            WHERE
+            {
+                ?message snvoc:id ?messageId .
+                ?message snvoc:hasCreator ?messageCreator .
+                ?messageCreator snvoc:id ?messageCreatorId .
+                ?comment snvoc:replyOf ?message .
+                ?comment a snvoc:Comment .
+                ?comment snvoc:id ?commentId .
+                ?comment snvoc:content ?commentContent .
+                ?comment snvoc:creationDate ?commentCreationDate .
+                ?comment snvoc:hasCreator ?replyAuthor .
+                ?replyAuthor snvoc:id ?replyAuthorId .
+                ?replyAuthor snvoc:firstName ?replyAuthorFirstName .
+                ?replyAuthor snvoc:lastName ?replyAuthorLastName .
+                OPTIONAL {
+                    ?messageCreator ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?replyAuthor .
+                    BIND( "true"^^xsd:boolean AS ?replyAuthorKnowsOriginalMessageAuthorInner ) .
+                }
+                BIND( COALESCE(?replyAuthorKnowsOriginalMessageAuthorInner, "false"^^xsd:boolean) AS ?replyAuthorKnowsOriginalMessageAuthor ) .
+            }
+            `;
 
           const messageCreatorStarPattern: [string, IStarPatternWithDependencies] = [
             'messageCreator',
@@ -4369,7 +4367,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -4382,10 +4380,10 @@ describe('query', () => {
           const secondBranch = union[1];
 
           expect(firstBranch.union).toBeUndefined();
-          expect(firstBranch.starPatterns).toMatchObject(new Map([messageCreatorDirectKnowPath1, messageCreatorDirectKnowPath2]));
+          expect(firstBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([messageCreatorDirectKnowPath1, messageCreatorDirectKnowPath2]));
 
           expect(secondBranch.union).toBeUndefined();
-          expect(secondBranch.starPatterns).toMatchObject(new Map([messageCreatorUnDirectKnowPath1, messageCreatorUnDirectKnowPath2]));
+          expect(secondBranch.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([messageCreatorUnDirectKnowPath1, messageCreatorUnDirectKnowPath2]));
 
         });
       });
@@ -4393,29 +4391,29 @@ describe('query', () => {
       describe("discovery", () => {
         test('interactive-discovery-1', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?messageId
-              ?messageCreationDate
-              ?messageContent
-          WHERE
-          {
-              ?message snvoc:hasCreator ?person;
-                  rdf:type snvoc:Post;
-                  snvoc:content ?messageContent;
-                  snvoc:creationDate ?messageCreationDate;
-                  snvoc:id ?messageId.
-          }
-          `;
+            SELECT
+                ?messageId
+                ?messageCreationDate
+                ?messageContent
+            WHERE
+            {
+                ?message snvoc:hasCreator ?person;
+                    rdf:type snvoc:Post;
+                    snvoc:content ?messageContent;
+                    snvoc:creationDate ?messageCreationDate;
+                    snvoc:id ?messageId.
+            }
+            `;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -4491,7 +4489,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4499,29 +4497,29 @@ describe('query', () => {
 
         test('interactive-discovery-2', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?messageId
-              ?messageCreationDate
-              ?messageContent
-          WHERE
-          {
-              ?message snvoc:hasCreator ?person;
-                  snvoc:content ?messageContent;
-                  snvoc:creationDate ?messageCreationDate;
-                  snvoc:id ?messageId.
-              { ?message rdf:type snvoc:Post } UNION { ?message rdf:type snvoc:Comment }
-          }
-          `;
+            SELECT
+                ?messageId
+                ?messageCreationDate
+                ?messageContent
+            WHERE
+            {
+                ?message snvoc:hasCreator ?person;
+                    snvoc:content ?messageContent;
+                    snvoc:creationDate ?messageCreationDate;
+                    snvoc:id ?messageId.
+                { ?message rdf:type snvoc:Post } UNION { ?message rdf:type snvoc:Comment }
+            }
+            `;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -4627,7 +4625,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -4635,36 +4633,36 @@ describe('query', () => {
           expect(unions.length).toBe(1);
           const union = unions[0];
           expect(union.length).toBe(2);
-          expect(union[0].starPatterns).toMatchObject(new Map([messageContentTypePostStarPattern]));
+          expect(union[0].starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([messageContentTypePostStarPattern]));
           expect(union[0].union).toBeUndefined();
-          expect(union[1].starPatterns).toMatchObject(new Map([messageContentTypeCommentStarPattern]));
+          expect(union[1].starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([messageContentTypeCommentStarPattern]));
           expect(union[1].union).toBeUndefined();
         });
 
         test('interactive-discovery-3', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?tagName
-              (COUNT(?message) as ?messages)
-          WHERE
-          {
-              ?message snvoc:hasCreator ?person;
-                  snvoc:hasTag ?tag.
-              ?tag foaf:name ?tagName.
-          }
-          GROUP BY ?tagName
-          ORDER BY DESC(?messages)
-          `;
+            SELECT
+                ?tagName
+                (COUNT(?message) as ?messages)
+            WHERE
+            {
+                ?message snvoc:hasCreator ?person;
+                    snvoc:hasTag ?tag.
+                ?tag foaf:name ?tagName.
+            }
+            GROUP BY ?tagName
+            ORDER BY DESC(?messages)
+            `;
 
           const tagStarPattern: [string, IStarPatternWithDependencies] = [
             'tag',
@@ -4729,7 +4727,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4737,29 +4735,29 @@ describe('query', () => {
 
         test('interactive-discovery-4', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?locationName
-              (COUNT(?message) as ?messages)
-          WHERE
-          {
-              ?message snvoc:hasCreator ?person;
-                  rdf:type snvoc:Comment;
-                  snvoc:isLocatedIn ?location.
-              ?location foaf:name ?locationName.
-          }
-          GROUP BY ?locationName
-          ORDER BY DESC(?messages)
-          `;
+            SELECT
+                ?locationName
+                (COUNT(?message) as ?messages)
+            WHERE
+            {
+                ?message snvoc:hasCreator ?person;
+                    rdf:type snvoc:Comment;
+                    snvoc:isLocatedIn ?location.
+                ?location foaf:name ?locationName.
+            }
+            GROUP BY ?locationName
+            ORDER BY DESC(?messages)
+            `;
 
           const locationStarPattern: [string, IStarPatternWithDependencies] = [
             'location',
@@ -4835,7 +4833,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4843,25 +4841,25 @@ describe('query', () => {
 
         test('interactive-discovery-5', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-          DISTINCT
-              ?locationIp
-          WHERE
-          {
-              ?message snvoc:hasCreator ?person;
-                  snvoc:locationIP ?locationIp.
-          }
-          `;
+            SELECT
+            DISTINCT
+                ?locationIp
+            WHERE
+            {
+                ?message snvoc:hasCreator ?person;
+                    snvoc:locationIP ?locationIp.
+            }
+            `;
 
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
@@ -4905,7 +4903,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -4913,28 +4911,28 @@ describe('query', () => {
 
         test('interactive-discovery-6', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-          DISTINCT
-              ?forumId
-              ?forumTitle
-          WHERE
-          {
-              ?message snvoc:hasCreator ?person.
-              ?forum snvoc:containerOf ?message;
-                      snvoc:id ?forumId;
-                      snvoc:title ?forumTitle.
-          }
-          `;
+            SELECT
+            DISTINCT
+                ?forumId
+                ?forumTitle
+            WHERE
+            {
+                ?message snvoc:hasCreator ?person.
+                ?forum snvoc:containerOf ?message;
+                        snvoc:id ?forumId;
+                        snvoc:title ?forumTitle.
+            }
+            `;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -5010,7 +5008,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -5018,29 +5016,29 @@ describe('query', () => {
 
         test('interactive-discovery-7', () => {
           const query = `
-              PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-              PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-              PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-              PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-              PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-              PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-              PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-              PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-              PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+                PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+                PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+                PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+                PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-              SELECT
-              DISTINCT
-                  ?firstName
-                  ?lastName
-              WHERE
-              {
-                  ?message snvoc:hasCreator ?person.
-                  ?forum snvoc:containerOf ?message;
-                      snvoc:hasModerator ?moderator.
-                  ?moderator snvoc:firstName ?firstName .
-                  ?moderator snvoc:lastName ?lastName .
-              }
-          `;
+                SELECT
+                DISTINCT
+                    ?firstName
+                    ?lastName
+                WHERE
+                {
+                    ?message snvoc:hasCreator ?person.
+                    ?forum snvoc:containerOf ?message;
+                        snvoc:hasModerator ?moderator.
+                    ?moderator snvoc:firstName ?firstName .
+                    ?moderator snvoc:lastName ?lastName .
+                }
+            `;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -5140,7 +5138,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeUndefined();
@@ -5148,28 +5146,28 @@ describe('query', () => {
 
         test('interactive-discovery-8', () => {
           const query = `
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-          DISTINCT
-              ?creator
-              ?messageContent
-          WHERE
-          {
-              ?person snvoc:likes [ snvoc:hasPost|snvoc:hasComment ?message ].
-              ?message snvoc:hasCreator ?creator.
-              ?otherMessage snvoc:hasCreator ?creator;
-                  snvoc:content ?messageContent.
-          } LIMIT 10
-          `;
+            SELECT
+            DISTINCT
+                ?creator
+                ?messageContent
+            WHERE
+            {
+                ?person snvoc:likes [ snvoc:hasPost|snvoc:hasComment ?message ].
+                ?message snvoc:hasCreator ?creator.
+                ?otherMessage snvoc:hasCreator ?creator;
+                    snvoc:content ?messageContent.
+            } LIMIT 10
+            `;
 
           const messageStarPattern: [string, IStarPatternWithDependencies] = [
             'message',
@@ -5237,7 +5235,7 @@ describe('query', () => {
             if (subject === 'person') {
               continue;
             }
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           const personSujet = resp.starPatterns.get('person');
@@ -5264,10 +5262,10 @@ describe('query', () => {
 
             for (const pattern of starPattern.starPattern.values() ?? []) {
               expect(pattern.dependencies).toBeDefined();
-              expect(pattern.dependencies).toMatchObject(messageStarPattern[1]);
+              expect(pattern.dependencies).toEqual<IStarPatternWithDependencies>(messageStarPattern[1]);
               expect(pattern.triple.subject).toBeDefined();
               expect(pattern.triple.predicate).toBe(`${SNVOC_PREFIX}hasPost`);
-              expect(pattern.triple.object).toMatchObject(DF.variable('message'));
+              expect(pattern.triple.object).toEqual<Variable>(DF.variable('message'));
             }
           }
 
@@ -5278,10 +5276,10 @@ describe('query', () => {
 
             for (const pattern of starPattern.starPattern.values() ?? []) {
               expect(pattern.dependencies).toBeDefined();
-              expect(pattern.dependencies).toMatchObject(messageStarPattern[1]);
+              expect(pattern.dependencies).toEqual<IStarPatternWithDependencies>(messageStarPattern[1]);
               expect(pattern.triple.subject).toBeDefined();
               expect(pattern.triple.predicate).toBe(`${SNVOC_PREFIX}hasComment`);
-              expect(pattern.triple.object).toMatchObject(DF.variable('message'));
+              expect(pattern.triple.object).toEqual<Variable>(DF.variable('message'));
             }
           }
         });
@@ -5705,62 +5703,62 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject));
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject));
           }
         });
         */
 
         test('interactive-complex-2', () => {
           const query = `
-          # Recent messages by your friends
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            # Recent messages by your friends
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              (?frId AS ?personId)
-              (?first AS ?personFirstName)
-              (?last AS ?personLastName)
-              ?messageId
-              (?content AS ?messageContent)
-              (?creationDate AS ?messageCreationDate)
-          WHERE
-          {
-              VALUES (?type) {(snvoc:Comment) (snvoc:Post)}
-              {
-                  SELECT DISTINCT
-                      ?fr
-                  WHERE {
-                      ?rootPerson a snvoc:Person .
-                      ?fr a snvoc:Person .
-                      ?rootPerson ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?fr
-                  }
-              }
-              ?message snvoc:hasCreator ?fr .
-              ?message a ?type
-              {
-                  {
-                      ?message snvoc:content ?content
-                  } UNION {
-                      ?message snvoc:imageFile ?content
-                  }
-              } .
-              ?message snvoc:creationDate ?creationDate .
-              ?message snvoc:id ?messageId .
-              FILTER (?creationDate <= ?maxDate) .
-              ?fr snvoc:firstName ?first .
-              ?fr snvoc:lastName ?last .
-              ?fr snvoc:id ?frId .
-          }
-          ORDER BY DESC(?creationDate) ?message
-          LIMIT 20
-          `;
+            SELECT
+                (?frId AS ?personId)
+                (?first AS ?personFirstName)
+                (?last AS ?personLastName)
+                ?messageId
+                (?content AS ?messageContent)
+                (?creationDate AS ?messageCreationDate)
+            WHERE
+            {
+                VALUES (?type) {(snvoc:Comment) (snvoc:Post)}
+                {
+                    SELECT DISTINCT
+                        ?fr
+                    WHERE {
+                        ?rootPerson a snvoc:Person .
+                        ?fr a snvoc:Person .
+                        ?rootPerson ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?fr
+                    }
+                }
+                ?message snvoc:hasCreator ?fr .
+                ?message a ?type
+                {
+                    {
+                        ?message snvoc:content ?content
+                    } UNION {
+                        ?message snvoc:imageFile ?content
+                    }
+                } .
+                ?message snvoc:creationDate ?creationDate .
+                ?message snvoc:id ?messageId .
+                FILTER (?creationDate <= ?maxDate) .
+                ?fr snvoc:firstName ?first .
+                ?fr snvoc:lastName ?last .
+                ?fr snvoc:id ?frId .
+            }
+            ORDER BY DESC(?creationDate) ?message
+            LIMIT 20
+            `;
           const rootPersonStarPattern: [string, IStarPatternWithDependencies] = [
             'rootPerson',
             {
@@ -6030,7 +6028,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -6042,10 +6040,10 @@ describe('query', () => {
           const firstBranchFirstUnion = firstUnion[0];
           const secondBranchFirstUnion = firstUnion[1];
 
-          expect(firstBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
+          expect(firstBranchFirstUnion.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
           expect(firstBranchFirstUnion.union).toBeUndefined();
 
-          expect(secondBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
+          expect(secondBranchFirstUnion.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
           expect(secondBranchFirstUnion.union).toBeUndefined();
 
           const secondUnion = resp.union![1];
@@ -6054,52 +6052,52 @@ describe('query', () => {
           const firstBranchSecondUnion = secondUnion[0];
           const secondBranchSecondUnion = secondUnion[1];
 
-          expect(firstBranchSecondUnion.starPatterns).toMatchObject(new Map([unionMessageContent]));
+          expect(firstBranchSecondUnion.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([unionMessageContent]));
           expect(firstBranchSecondUnion.union).toBeUndefined();
 
-          expect(secondBranchSecondUnion.starPatterns).toMatchObject(new Map([unionMessageImageFile]));
+          expect(secondBranchSecondUnion.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([unionMessageImageFile]));
           expect(secondBranchSecondUnion.union).toBeUndefined();
         });
 
         test('interactive-complex-4', () => {
           const query = `
-          # Recent messages by your friends
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-          PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-          PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
-          PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
+            # Recent messages by your friends
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX sn: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/data/>
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            PREFIX sntag: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/tag/>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX dbpedia: <http://localhost:3000/dbpedia.org/resource/>
+            PREFIX dbpedia-owl: <http://localhost:3000/dbpedia.org/ontology/>
 
-          SELECT
-              ?tagName
-              (COUNT(*) AS ?postCount)
-          WHERE {
-              BIND( ?startDate + STRDT(CONCAT("P", ?durationDays, "D"), xsd:duration) AS ?endDate ) .
-              ?rootPerson a snvoc:Person .
-              ?rootPerson ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?fr .
-              ?post a snvoc:Post .
-              ?post snvoc:hasCreator ?fr .
-              ?post snvoc:hasTag ?tag .
-              ?tag foaf:name ?tagName .
-              ?post snvoc:creationDate ?creationDate .
-              FILTER (?creationDate >= ?startDate && ?creationDate <= ?endDate ) .
-              FILTER NOT EXISTS {
-                  ?rootPerson ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?fr2 .
-                  ?post2 snvoc:hasCreator ?fr2 .
-                  ?post2 a snvoc:Post .
-                  ?post2 snvoc:hasTag ?tag .
-                  ?post2 snvoc:creationDate ?creationDate2 .
-                  FILTER (?creationDate2 < ?startDate)
-              }
-          }
-          GROUP BY ?tagName
-          ORDER BY DESC(?postCount) ?tagName
-          LIMIT 10
-          `;
+            SELECT
+                ?tagName
+                (COUNT(*) AS ?postCount)
+            WHERE {
+                BIND( ?startDate + STRDT(CONCAT("P", ?durationDays, "D"), xsd:duration) AS ?endDate ) .
+                ?rootPerson a snvoc:Person .
+                ?rootPerson ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?fr .
+                ?post a snvoc:Post .
+                ?post snvoc:hasCreator ?fr .
+                ?post snvoc:hasTag ?tag .
+                ?tag foaf:name ?tagName .
+                ?post snvoc:creationDate ?creationDate .
+                FILTER (?creationDate >= ?startDate && ?creationDate <= ?endDate ) .
+                FILTER NOT EXISTS {
+                    ?rootPerson ((snvoc:knows/snvoc:hasPerson)|^(snvoc:knows/snvoc:hasPerson)) ?fr2 .
+                    ?post2 snvoc:hasCreator ?fr2 .
+                    ?post2 a snvoc:Post .
+                    ?post2 snvoc:hasTag ?tag .
+                    ?post2 snvoc:creationDate ?creationDate2 .
+                    FILTER (?creationDate2 < ?startDate)
+                }
+            }
+            GROUP BY ?tagName
+            ORDER BY DESC(?postCount) ?tagName
+            LIMIT 10
+            `;
           const rootPersonStarPattern: [string, IStarPatternWithDependencies] = [
             'rootPerson',
             {
@@ -6291,7 +6289,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
 
           expect(resp.union).toBeDefined();
@@ -6303,36 +6301,36 @@ describe('query', () => {
           const firstBranchFirstUnion = firstUnion[0];
           const secondBranchFirstUnion = firstUnion[1];
 
-          expect(firstBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
+          expect(firstBranchFirstUnion.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([rootPersonFirstBranch, rootPersonFirstBranchSeq]));
           expect(firstBranchFirstUnion.union).toBeUndefined();
 
-          expect(secondBranchFirstUnion.starPatterns).toMatchObject(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
+          expect(secondBranchFirstUnion.starPatterns).toEqual<Map<string, IStarPatternWithDependencies>>(new Map([rootPersonSecondBranch, rootPersonSecondBranchSeq]));
           expect(secondBranchFirstUnion.union).toBeUndefined();
         });
 
         test('interactive-complex-8', () => {
           const query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-          SELECT ?personId ?personFirstName ?personLastName ?commentCreationDate ?commentId ?commentContent WHERE {
-            VALUES ?type {
-              snvoc:Comment
-              snvoc:Post
+            PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
+            SELECT ?personId ?personFirstName ?personLastName ?commentCreationDate ?commentId ?commentContent WHERE {
+              VALUES ?type {
+                snvoc:Comment
+                snvoc:Post
+              }
+              <http://localhost:3000/pods/00000002199023256816/profile/card#me> rdf:type snvoc:Person.
+              ?message snvoc:hasCreator <http://localhost:3000/pods/00000002199023256816/profile/card#me>;
+                rdf:type ?type.
+              ?comment rdf:type snvoc:Comment;
+                snvoc:replyOf ?message;
+                snvoc:creationDate ?commentCreationDate;
+                snvoc:id ?commentId;
+                snvoc:content ?commentContent;
+                snvoc:hasCreator ?person.
+              ?person snvoc:id ?personId;
+                snvoc:firstName ?personFirstName;
+                snvoc:lastName ?personLastName.
             }
-            <http://localhost:3000/pods/00000002199023256816/profile/card#me> rdf:type snvoc:Person.
-            ?message snvoc:hasCreator <http://localhost:3000/pods/00000002199023256816/profile/card#me>;
-              rdf:type ?type.
-            ?comment rdf:type snvoc:Comment;
-              snvoc:replyOf ?message;
-              snvoc:creationDate ?commentCreationDate;
-              snvoc:id ?commentId;
-              snvoc:content ?commentContent;
-              snvoc:hasCreator ?person.
-            ?person snvoc:id ?personId;
-              snvoc:firstName ?personFirstName;
-              snvoc:lastName ?personLastName.
-          }
-          ORDER BY DESC (?commentCreationDate) (?commentId)
-          LIMIT 20`;
+            ORDER BY DESC (?commentCreationDate) (?commentId)
+            LIMIT 20`;
 
           const meStarPattern: [string, IStarPatternWithDependencies] = [
             'http://localhost:3000/pods/00000002199023256816/profile/card#me',
@@ -6519,7 +6517,7 @@ describe('query', () => {
           expect(resp.starPatterns.size).toBe(expectedStarPattern.size);
           expect(resp.filterExpression).toBe('');
           for (const [subject, starPatterns] of resp.starPatterns) {
-            expect(starPatterns).toMatchObject(expectedStarPattern.get(subject)!);
+            expect(starPatterns).toEqual<IStarPatternWithDependencies>(expectedStarPattern.get(subject)!);
           }
         });
 
@@ -6537,7 +6535,7 @@ describe('query', () => {
 
       const resp = generateStarPatternUnion(union, starPatternName);
 
-      expect(resp).toMatchObject(expectedStarPattern);
+      expect(resp).toStrictEqual(expectedStarPattern);
 
     });
 
@@ -6566,7 +6564,7 @@ describe('query', () => {
 
       const resp = generateStarPatternUnion(union, starPatternName);
 
-      expect(resp).toMatchObject(expectedStarPattern);
+      expect(resp).toStrictEqual(expectedStarPattern);
     });
 
     it("should generate a star pattern given the star pattern name is not present in the union", () => {
@@ -6605,7 +6603,7 @@ describe('query', () => {
 
       const resp = generateStarPatternUnion(union, starPatternName);
 
-      expect(resp).toMatchObject(expectedStarPattern);
+      expect(resp).toStrictEqual(expectedStarPattern);
     });
   })
 });
