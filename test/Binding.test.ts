@@ -3,15 +3,17 @@ import { Bindings, OneOfBinding, UnionBinding } from '../lib/Binding';
 import { ContraintType, IShape, OneOf, OneOfPathIndexed, Shape } from '../lib/Shape';
 import { IStarPatternWithDependencies, ITriple, Triple } from '../lib/Triple';
 import { BaseQuad } from '@rdfjs/types';
-import { translate } from 'sparqlalgebrajs';
+import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
+import { toAlgebra } from '@traqula/algebra-sparql-1-1';
 import { generateQuery, generateStarPatternUnion } from '../lib/query';
 import type * as RDF from '@rdfjs/types';
 import * as N3 from 'n3';
 import { readFileSync } from 'fs';
-import streamifyArray from 'streamify-array';
+import { streamifyArray } from 'streamify-array';
 import { shapeFromQuads } from '../lib/shex';
 
 const n3Parser = new N3.Parser();
+const sparqlParser = new SPARQLParser();
 
 const DF = new DataFactory<BaseQuad>();
 
@@ -2571,7 +2573,7 @@ describe('Bindings', () => {
                 ?y <http://www.example.ca> ?x .
             }
             `;
-            const query = generateQuery(translate(stringQuery));
+            const query = generateQuery(toAlgebra(sparqlParser.parse(stringQuery)));
             const xStarPattern = query.starPatterns.get("x")!;
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["http://www.example.ca"], closed: true });
             const triple: ITriple = xStarPattern.starPattern.get("http://www.example.ca")!.triple;
@@ -2599,7 +2601,7 @@ describe('Bindings', () => {
                 ?v <http://www.example.uk> "abc" .
             }
             `;
-            const query = generateQuery(translate(stringQuery));
+            const query = generateQuery(toAlgebra(sparqlParser.parse(stringQuery)));
             const xStarPattern = query.starPatterns.get("x")!;
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["http://www.example.ca"], closed: true });
             const triple: ITriple = xStarPattern.starPattern.get("http://www.example.ca")!.triple;
@@ -2631,7 +2633,7 @@ describe('Bindings', () => {
                 ?z <http://www.example.be> ?x
             }
             `;
-            const query = generateQuery(translate(stringQuery));
+            const query = generateQuery(toAlgebra(sparqlParser.parse(stringQuery)));
             const xStarPattern = query.starPatterns.get("x")!;
             const shape: Shape = new Shape({
                 name: 'foo', positivePredicates:
@@ -2666,7 +2668,7 @@ describe('Bindings', () => {
                 ?z <http://www.example.ca> ?y .
             }
             `;
-            const query = generateQuery(translate(stringQuery));
+            const query = generateQuery(toAlgebra(sparqlParser.parse(stringQuery)));
             const xStarPattern = query.starPatterns.get("x")!;
             const shape: Shape = new Shape({ name: 'foo', positivePredicates: ["http://www.example.ca"], closed: true });
             const triple: ITriple = xStarPattern.starPattern.get("http://www.example.ca")!.triple;
@@ -2712,7 +2714,7 @@ describe('Bindings', () => {
                 ?w2 <https://www.example.ca/p1> "bar"
               }
             `;
-            const querySparql = translate(queryString);
+            const querySparql = toAlgebra(sparqlParser.parse(queryString));
             const query = generateQuery(querySparql);
 
             const xStarPattern = query.starPatterns.get("x")!;
@@ -3964,7 +3966,7 @@ describe('Bindings', () => {
             }
             ORDER BY DESC (?commentCreationDate) (?commentId)
             LIMIT 20`;
-            const query = generateQuery(translate(stringQuery));
+            const query = generateQuery(toAlgebra(sparqlParser.parse(stringQuery)));
             const commentStarPattern = query.starPatterns.get("comment")!;
             const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();
             const shape: IShape = shapeIndexed.get("http://example.com#Comment")!;
@@ -4035,7 +4037,7 @@ describe('Bindings', () => {
                     ?creator snvoc:id ?originalPostAuthorId .
                 }
                 LIMIT 10`;
-            const query = generateQuery(translate(stringQuery));
+            const query = generateQuery(toAlgebra(sparqlParser.parse(stringQuery)));
             const commentStarPattern = query.starPatterns.get("message")!;
             const unionComment = generateStarPatternUnion(query.union!, 'message');
             const shapeIndexed: Map<string, IShape> = await generateSolidBenchShapes();

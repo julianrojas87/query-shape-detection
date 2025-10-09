@@ -27,7 +27,8 @@ import type {
   IQuery,
   IShape,
 } from 'query-shape-detection';
-import { translate } from 'sparqlalgebrajs';
+import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
+import { toAlgebra } from '@traqula/algebra-sparql-1-1';
 import * as ShexParser from '@shexjs/parser';
 import { JsonLdParser } from 'jsonld-streaming-parser';
 import * as SHEX_CONTEXT from './shex_context.json'; // you need to provide this JSON from https://www.w3.org/ns/shex.jsonld
@@ -57,9 +58,11 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       LIMIT 20
 `;
 
-const query = generateQuery(translate(rawQuery));
+const sparqlParser = new SPARQLParser();
 
-// The shape may come already as an array of quad or a quad stream. I am presenting a contained example.
+const query = generateQuery(toAlgebra(sparqlParser.parse(rawQuery)));
+
+// The shape may come already as an array of quads or a quad stream. I am presenting a contained example.
 const shapeShexc = `
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ldbcvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
@@ -91,7 +94,7 @@ const stringShapeJsonLD = JSON.stringify(shapeJSONLD);
 const quads: RDF.Quad[] = [];
 
 const shapeQuadPromise = new Promise((resolve, reject) => {
-      // The jsonLD is not valid without the context field and the library doesn't include it
+      // The JSON-LD is not valid without the context field and the library doesn't include it
       // because a ShExJ MAY contain a @context field
       // https://shex.io/shex-semantics/#shexj
       const jsonldParser = new JsonLdParser({
@@ -118,11 +121,11 @@ const commentShape = await shapeFromQuads(await shapeQuadPromise, shapeIRI);
 
 
 const resultsReport: IResult = solveShapeQueryContainment({
-        query: query,
-        shapes,
-      });
+    query: query,
+    shapes,
+});
 
-// resultsReport provide an object with information about the containement.
+// resultsReport provides an object with information about the containement.
 // The containement is calculated by star patterns.
 
 

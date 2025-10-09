@@ -6,7 +6,7 @@ import type { IStarPatternWithDependencies, ITriple } from './Triple';
 
 /**
  * Determine if a query is contained inside a shape.
- * It provide detail information about the containment and weither or not 
+ * It provides detailed information about the containment and whether or not
  * the documents linked with the shape should be followed.
  * @param param {IContainementArg} - the shape and the query to evaluate
  * @returns {IResult} result relative to the containement of the query inside of the shape
