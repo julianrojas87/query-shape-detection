@@ -1,4 +1,4 @@
-import { ContraintType, IContraint, IPredicate, IShape, OneOfPathIndexed } from "./Shape";
+import { ConstraintType, IContraint, IPredicate, IShape, OneOfPathIndexed } from "./Shape";
 import { IStarPatternWithDependencies, type ITriple, Triple } from "./Triple";
 
 /**
@@ -308,7 +308,7 @@ export class Bindings implements IBindings {
         linkedShape: Map<string, IShape>,
         currentShape: IShape,
         dependencies?: IStarPatternWithDependencies): ConstraintResult {
-        if (constraint.type === ContraintType.SHAPE && dependencies !== undefined && constraint.value.size == 1) {
+        if (constraint.type === ConstraintType.SHAPE && dependencies !== undefined && constraint.value.size == 1) {
             const shapeName = constraint.value.values().next().value;
             const currentLinkedShape = currentShape.name === shapeName ? currentShape 
                 : shapeName !== undefined ? linkedShape.get(shapeName) : undefined;
@@ -341,30 +341,30 @@ export class Bindings implements IBindings {
     private static handleShapeType(
         constraint: IContraint,
         triple: ITriple): ConstraintResult {
-        if (constraint.type === ContraintType.TYPE &&
+        if (constraint.type === ConstraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "Literal"
             && constraint.value.has(triple.object.datatype.value)
         ) {
             return ConstraintResult.RESPECT;
-        } else if (constraint.type === ContraintType.TYPE &&
+        } else if (constraint.type === ConstraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "NamedNode"
             && constraint.value.has(triple.object.value)) {
             return ConstraintResult.RESPECT;
 
-        } else if (constraint.type === ContraintType.TYPE &&
+        } else if (constraint.type === ConstraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "Literal"
             && !constraint.value.has(triple.object.datatype.value)) {
             return ConstraintResult.NOT_RESPECT;
         }
-        else if (constraint.type === ContraintType.TYPE &&
+        else if (constraint.type === ConstraintType.TYPE &&
             !Array.isArray(triple.object) &&
             triple.object.termType === "NamedNode"
             && !constraint.value.has(triple.object.value)) {
             return ConstraintResult.NOT_RESPECT;
-        } else if (constraint.type === ContraintType.TYPE &&
+        } else if (constraint.type === ConstraintType.TYPE &&
             Array.isArray(triple.object)) {
             for (const object of triple.object) {
                 if (constraint.value.has(object.value) || (object.termType === "Literal" && constraint.value.has(object.datatype.value))) {

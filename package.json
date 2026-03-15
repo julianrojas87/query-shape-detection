@@ -41,36 +41,28 @@
     "validate": "npm ls",
     "prepare": "npm run build",
     "version": "manual-git-changelog onversion",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@traqula/algebra-sparql-1-1": "^0.0.19",
-    "@traqula/algebra-transformations-1-1": "^0.0.19",
-    "@traqula/parser-sparql-1-1": "^0.0.19",
+    "@traqula/algebra-sparql-1-1": "^1.0.3",
+    "@traqula/algebra-transformations-1-1": "^1.0.3",
+    "@traqula/parser-sparql-1-1": "^1.0.3",
     "rdf-data-factory": "^2.0.2"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.37.0",
+    "@eslint/js": "^10.0.1",
     "@rdfjs/types": "^2.0.1",
     "@types/jest": "^30.0.0",
-    "@types/n3": "^1.26.0",
-    "@types/node": "^24.7.0",
+    "@types/n3": "^1.26.1",
+    "@types/node": "^25.5.0",
     "@types/streamify-array": "^1.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.46.0",
-    "@typescript-eslint/parser": "^8.46.0",
-    "eslint": "^9.37.0",
-    "eslint-config-standard-with-typescript": "^43.0.1",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-n": "^17.23.1",
-    "eslint-plugin-promise": "^7.2.1",
-    "globals": "^16.4.0",
-    "jest": "^30.2.0",
-    "n3": "^1.26.0",
+    "eslint": "^10.0.3",
+    "globals": "^17.4.0",
+    "jest": "^30.3.0",
+    "n3": "^2.0.3",
     "streamify-array": "^2.0.0",
-    "ts-jest": "^29.4.4",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.0"
-  },
-  "packageManager": "yarn@4.3.1"
+    "typescript-eslint": "^8.57.0"
+  }
 }

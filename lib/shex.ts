@@ -15,8 +15,14 @@ import {
   SHEX_EACH_OF,
   SHEX_ONE_OF,
 } from './constant';
-import type { IContraint, InconsistentPositiveAndNegativePredicateError, OneOf, IShape, IPredicate } from './Shape';
-import { Shape, ContraintType } from './Shape';
+import type { 
+  IContraint,
+  ShapeError,
+  OneOf, 
+  IShape, 
+  IPredicate 
+} from './Shape';
+import { Shape, ConstraintType, PoorlyFormatedShapeError } from './Shape';
 
 /**
  * Parse a Shex shape from a set of quads
@@ -120,7 +126,7 @@ function concatShapeInfo(
   if (expression === undefined) {
     expressions = mapTripleShex.mapLogicLinkIdExpressions.get(shapeIri);
     if (expressions === undefined) {
-      return new ShapePoorlyFormatedError('there are no expressions in the shape');
+      return new PoorlyFormatedShapeError('there are no expressions in the shape');
     }
   } else {
     expressions = mapTripleShex.mapLogicLinkIdExpressions.get(expression);
@@ -132,7 +138,7 @@ function concatShapeInfo(
     argsFunctionPredicate.current = expression;
     const predicateAdded = appendPredicates((argsFunctionPredicate as Required<IAppendPredicateArgs>));
     if (!predicateAdded) {
-      return new ShapePoorlyFormatedError('there are no predicates in the shape');
+      return new PoorlyFormatedShapeError('there are no predicates in the shape');
     }
   } else if (expression !== undefined && mapTripleShex.setIriEachOf.has(expression)) {
     current = mapTripleShex.mapPrevCurrentList.get(expressions);
@@ -189,7 +195,7 @@ function interpretConstraint(
   if (constraint.termType === 'NamedNode') {
     return {
       value: new Set([constraint.value]),
-      type: ContraintType.SHAPE,
+      type: ConstraintType.SHAPE,
     };
   }
 
@@ -198,7 +204,7 @@ function interpretConstraint(
     if (dataType !== undefined) {
       return {
         value: new Set([dataType]),
-        type: ContraintType.TYPE,
+        type: ConstraintType.TYPE,
       };
     }
   }
@@ -242,7 +248,7 @@ function handleOneOf(
   index: string,
   mapTripleShex: IMapTripleShex,
   prevArgsFunctionPredicate: IAppendPredicateArgs,
-  eachOf: boolean): undefined | ShapePoorlyFormatedError {
+  eachOf: boolean): undefined | PoorlyFormatedShapeError {
   const positivePredicates: IPredicate[] = [];
   const negativePredicates: string[] = [];
   const argsFunctionPredicate: IAppendPredicateArgs = {
@@ -259,7 +265,7 @@ function handleOneOf(
   // we don't really support validation of format
   /* istanbul ignore next */
   if (expressions === undefined) {
-    return new ShapePoorlyFormatedError('There are no expressions in a one of');
+    return new PoorlyFormatedShapeError('There are no expressions in a one of');
   }
 
   let current = mapTripleShex.mapPrevCurrentList.get(expressions);
@@ -278,7 +284,7 @@ function handleOneOf(
     // we don't really support validation of format
     /* istanbul ignore next */
     if (next === undefined) {
-      return new ShapePoorlyFormatedError('An RDF list is poorly defined');
+      return new PoorlyFormatedShapeError('An RDF list is poorly defined');
     }
 
     current = mapTripleShex.mapPrevCurrentList.get(next);
@@ -307,7 +313,7 @@ function handleEachOf(
   current: string | undefined,
   next: string | undefined,
   mapTripleShex: IMapTripleShex,
-  argsFunctionPredicate: IAppendPredicateArgs): undefined | ShapePoorlyFormatedError {
+  argsFunctionPredicate: IAppendPredicateArgs): undefined | PoorlyFormatedShapeError {
   // Traverse the RDF list
   while (current !== undefined) {
     if (!mapTripleShex.setIriOneOf.has(current)) {
@@ -318,7 +324,7 @@ function handleEachOf(
     }
 
     if (next === undefined) {
-      return new ShapePoorlyFormatedError('An RDF list is poorly defined');
+      return new PoorlyFormatedShapeError('An RDF list is poorly defined');
     }
 
     current = mapTripleShex.mapPrevCurrentList.get(next);
@@ -401,18 +407,6 @@ function parseShapeQuads(
     mapTripleShex.setIriOneOf.add(quad.subject.value);
   }
 }
-/**
- * An error to indicate that the shape is poorly formated
- */
-export class ShapePoorlyFormatedError extends Error {
-  public constructor(message: string) {
-    super(message);
-
-    Object.setPrototypeOf(this, ShapePoorlyFormatedError.prototype);
-  }
-}
-
-type ShapeError = ShapePoorlyFormatedError | InconsistentPositiveAndNegativePredicateError;
 
 interface IMapTripleShex {
   mapIdPredicate: Map<string, string>;

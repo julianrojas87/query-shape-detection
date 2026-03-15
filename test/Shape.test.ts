@@ -1,7 +1,7 @@
 import { 
   Shape, 
   InconsistentPositiveAndNegativePredicateError, 
-  ContraintType, 
+  ConstraintType, 
   OneOf, 
   OneOfIndexed, 
   IShapeJson 
@@ -119,7 +119,7 @@ describe('Shape', () => {
         { name: 'b' },
         {
           name: 'c',
-          constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
+          constraint: { value: new Set(["1", "2"]), type: ConstraintType.TYPE },
           cardinality: { min: 1, max: 5 },
           negative: false,
           optional: false
@@ -128,7 +128,7 @@ describe('Shape', () => {
 
       const negativePredicates = [{
         name: 'd',
-        constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
+        constraint: { value: new Set(["1", "2"]), type: ConstraintType.TYPE },
         cardinality: { min: 1, max: 5 },
         negative: true,
         optional: false
@@ -141,7 +141,7 @@ describe('Shape', () => {
           { name: 'b', optional: false, constraint: undefined },
           {
             name: 'c',
-            constraint: { value: ["1", "2"], type: ContraintType.TYPE },
+            constraint: { value: ["1", "2"], type: ConstraintType.TYPE },
             cardinality: { min: 1, max: 5 },
             negative: false,
             optional: false
@@ -149,7 +149,7 @@ describe('Shape', () => {
         ],
         negativePredicates: [{
           name: 'd',
-          constraint: { value: ["1", "2"], type: ContraintType.TYPE },
+          constraint: { value: ["1", "2"], type: ConstraintType.TYPE },
           cardinality: { min: 1, max: 5 },
           negative: true,
           optional: false
@@ -168,7 +168,7 @@ describe('Shape', () => {
         { name: 'b' },
         {
           name: 'c',
-          constraint: { value: new Set(["1", "2"]), type: ContraintType.TYPE },
+          constraint: { value: new Set(["1", "2"]), type: ConstraintType.TYPE },
           cardinality: { min: 0, max: 5 },
           negative: false,
           optional: true
@@ -177,7 +177,7 @@ describe('Shape', () => {
       const oneOf: OneOf[] = [
         [
           [
-            { name: "foo", constraint: { value: new Set(["a"]), type: ContraintType.SHAPE } }
+            { name: "foo", constraint: { value: new Set(["a"]), type: ConstraintType.SHAPE } }
           ]
         ]
       ]
@@ -190,7 +190,7 @@ describe('Shape', () => {
           { name: 'b', constraint: undefined, optional: false },
           {
             name: 'c',
-            constraint: { value: ["1", "2"], type: ContraintType.TYPE },
+            constraint: { value: ["1", "2"], type: ConstraintType.TYPE },
             cardinality: { min: 0, max: 5 },
             negative: false,
             optional: true
@@ -200,7 +200,7 @@ describe('Shape', () => {
         oneOf: [
           [
             [
-              { name: "foo", constraint: { value: ["a"], type: ContraintType.SHAPE } }
+              { name: "foo", constraint: { value: ["a"], type: ConstraintType.SHAPE } }
             ]
           ]
         ],
@@ -219,7 +219,7 @@ describe('Shape', () => {
         cardinality: { min: 0, max: 33 },
         constraint: {
           value: 'a',
-          type: ContraintType.SHAPE,
+          type: ConstraintType.SHAPE,
         },
       },
       'c',
@@ -251,7 +251,7 @@ describe('Shape', () => {
         cardinality: { min: 0, max: 33 },
         constraint: {
           value: 'a',
-          type: ContraintType.SHAPE,
+          type: ConstraintType.SHAPE,
         },
         optional: true,
       });
@@ -266,7 +266,7 @@ describe('Shape', () => {
         cardinality: { min: 0, max: 33 },
         constraint: {
           value: 'a',
-          type: ContraintType.SHAPE,
+          type: ConstraintType.SHAPE,
         },
       },
       'c',
@@ -284,7 +284,7 @@ describe('Shape', () => {
           cardinality: { min: 0, max: 33 },
           constraint: {
             value: 'a',
-            type: ContraintType.SHAPE,
+            type: ConstraintType.SHAPE,
           },
           optional: true,
         },
@@ -313,7 +313,7 @@ describe('Shape', () => {
         cardinality: { min: 0, max: 33 },
         constraint: {
           value: new Set(['foo1']),
-          type: ContraintType.SHAPE,
+          type: ConstraintType.SHAPE,
         },
       },
       {
@@ -321,7 +321,7 @@ describe('Shape', () => {
         cardinality: { min: 0, max: 33 },
         constraint: {
           value: new Set(['bar']),
-          type: ContraintType.SHAPE,
+          type: ConstraintType.SHAPE,
         },
       },
     ];
@@ -339,7 +339,7 @@ describe('Shape', () => {
         name: 'foo', positivePredicates: ['a', 'b', {
           name: 'c', constraint: {
             value: new Set(['bar']),
-            type: ContraintType.TYPE,
+            type: ConstraintType.TYPE,
           },
         }]
       });
@@ -368,7 +368,7 @@ describe('Shape', () => {
               cardinality: { min: 0, max: 33 },
               constraint: {
                 value: new Set('a'),
-                type: ContraintType.SHAPE,
+                type: ConstraintType.SHAPE,
               }
             },
             {
@@ -376,7 +376,7 @@ describe('Shape', () => {
               cardinality: { min: 0, max: 33 },
               constraint: {
                 value: new Set('a'),
-                type: ContraintType.SHAPE,
+                type: ConstraintType.SHAPE,
               }
             },
 
@@ -401,7 +401,7 @@ describe('Shape', () => {
               cardinality: { min: 0, max: 33 },
               constraint: {
                 value: new Set('a'),
-                type: ContraintType.SHAPE,
+                type: ConstraintType.SHAPE,
               }
             }],
             ['c', {
@@ -409,7 +409,7 @@ describe('Shape', () => {
               cardinality: { min: 0, max: 33 },
               constraint: {
                 value: new Set('a'),
-                type: ContraintType.SHAPE,
+                type: ConstraintType.SHAPE,
               }
             }],
           ]),

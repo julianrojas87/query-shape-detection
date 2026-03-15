@@ -58,7 +58,7 @@ export type IPredicateJson = Omit<IPredicate, "constraint"> & {
  */
 export interface IContraint {
   value: Set<string>;
-  type: ContraintType;
+  type: ConstraintType;
 }
 
 function toJsonConstraint(constraint: IContraint): IContraintJson {
@@ -89,7 +89,7 @@ export type IShapeJson = Omit<IShapeObj, "positivePredicates" | "negativePredica
 /**
  * A constraint type
  */
-export const enum ContraintType {
+export const enum ConstraintType {
   // Is bound to another shape
   SHAPE,
   // Is bound by an RDF type
@@ -193,7 +193,7 @@ export class Shape implements IShape {
       if (typeof predicate === 'string') {
         this.predicates.set(predicate, { name: predicate });
       } else {
-        if (predicate.constraint !== undefined && predicate?.constraint.type === ContraintType.SHAPE) {
+        if (predicate.constraint !== undefined && predicate?.constraint.type === ConstraintType.SHAPE) {
           for (const value of predicate.constraint.value) {
             if (value !== name) {
               linkedShapeIri.add(value);
@@ -211,7 +211,7 @@ export class Shape implements IShape {
     for (const paths of this.oneOf) {
       for (const path of paths) {
         for (const predicate of path) {
-          if (predicate.constraint !== undefined && predicate?.constraint.type === ContraintType.SHAPE) {
+          if (predicate.constraint !== undefined && predicate?.constraint.type === ConstraintType.SHAPE) {
             for (const value of predicate.constraint.value) {
               if (value !== name) {
                 linkedShapeIri.add(value);
@@ -325,3 +325,15 @@ export class InconsistentPositiveAndNegativePredicateError extends Error {
   }
 }
 
+/**
+ * An error to indicate that the shape is poorly formated
+ */
+export class PoorlyFormatedShapeError extends Error {
+  public constructor(message: string) {
+    super(message);
+
+    Object.setPrototypeOf(this, PoorlyFormatedShapeError.prototype);
+  }
+}
+
+export type ShapeError = PoorlyFormatedShapeError | InconsistentPositiveAndNegativePredicateError;

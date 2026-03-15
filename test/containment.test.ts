@@ -1,6 +1,6 @@
 import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
 import { toAlgebra } from '@traqula/algebra-sparql-1-1';
-import { ContraintType, IShape, Shape } from '../lib/Shape';
+import { ConstraintType, IShape, Shape } from '../lib/Shape';
 import { IStarPatternWithDependencies, Triple } from '../lib/Triple';
 import { ContainmentResult, IContainmentResult, IResult, StarPatternName, solveShapeQueryContainment } from '../lib/containment';
 import { DataFactory } from 'rdf-data-factory';
@@ -26,21 +26,21 @@ describe('solveShapeQueryContainment', () => {
                     name: "https://www.example.ca/p0",
                     constraint: {
                         value: new Set(['foo1']),
-                        type: ContraintType.SHAPE
+                        type: ConstraintType.SHAPE
                     }
                 },
                 {
                     name: "https://www.example.ca/p1",
                     constraint: {
                         value: new Set(['foo2']),
-                        type: ContraintType.SHAPE
+                        type: ConstraintType.SHAPE
                     }
                 },
                 {
                     name: "https://www.example.ca/p2",
                     constraint: {
                         value: new Set(['foo3']),
-                        type: ContraintType.SHAPE
+                        type: ConstraintType.SHAPE
                     }
                 },
             ], closed: true
@@ -52,7 +52,7 @@ describe('solveShapeQueryContainment', () => {
                 {
                     name: "https://www.example.ca/p1",
                     constraint: {
-                        type: ContraintType.TYPE,
+                        type: ConstraintType.TYPE,
                         value: new Set(["https://www.example.ca/t0"])
                     }
                 }
@@ -72,7 +72,7 @@ describe('solveShapeQueryContainment', () => {
                     name: "https://www.example.ca/p1",
                     constraint: {
                         value: new Set(['foo4']),
-                        type: ContraintType.SHAPE
+                        type: ConstraintType.SHAPE
                     }
                 },
                 "https://www.example.ca/p3"
@@ -85,7 +85,7 @@ describe('solveShapeQueryContainment', () => {
                     name: "https://www.example.ca/p1",
                     constraint: {
                         value: new Set(['foo5']),
-                        type: ContraintType.SHAPE
+                        type: ConstraintType.SHAPE
                     }
                 },
                 "https://www.example.ca/p2",
@@ -111,7 +111,7 @@ describe('solveShapeQueryContainment', () => {
                     name: TYPE_DEFINITION.value,
                     constraint: {
                         value: new Set(['<https://www.example.ca/Type>']),
-                        type: ContraintType.SHAPE
+                        type: ConstraintType.SHAPE
                     }
                 }
 
@@ -124,7 +124,7 @@ describe('solveShapeQueryContainment', () => {
                     name: TYPE_DEFINITION.value,
                     constraint: {
                         value: new Set(['<https://www.example.ca/Type>']),
-                        type: ContraintType.SHAPE
+                        type: ConstraintType.SHAPE
                     }
                 }
 

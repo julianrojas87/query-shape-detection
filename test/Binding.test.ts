@@ -1,6 +1,6 @@
 import { DataFactory } from 'rdf-data-factory';
 import { Bindings, OneOfBinding, UnionBinding } from '../lib/Binding';
-import { ContraintType, IShape, OneOf, OneOfPathIndexed, Shape } from '../lib/Shape';
+import { ConstraintType, IShape, OneOf, OneOfPathIndexed, Shape } from '../lib/Shape';
 import { IStarPatternWithDependencies, ITriple, Triple } from '../lib/Triple';
 import { BaseQuad } from '@rdfjs/types';
 import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
@@ -444,7 +444,7 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -525,7 +525,7 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -600,7 +600,7 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     "p1",
@@ -714,7 +714,7 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -770,7 +770,7 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -846,21 +846,21 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo2']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                 ], closed: true
@@ -880,7 +880,7 @@ describe('Bindings', () => {
                         name: "p2",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -892,7 +892,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo4']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -904,14 +904,14 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo5']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -1149,21 +1149,21 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo2']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                 ], closed: true
@@ -1189,7 +1189,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo4']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -1201,7 +1201,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo5']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     "p2"
@@ -1415,21 +1415,21 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo2']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                 ], closed: true
@@ -1455,7 +1455,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo4']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -1467,7 +1467,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo5']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     "p2"
@@ -1681,7 +1681,7 @@ describe('Bindings', () => {
                     {
                         name: "p0",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t0"])
                         }
                     }
@@ -1728,7 +1728,7 @@ describe('Bindings', () => {
                     {
                         name: "p0",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t0"])
                         }
                     }
@@ -1775,7 +1775,7 @@ describe('Bindings', () => {
                     {
                         name: "p0",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t_0"])
                         }
                     }
@@ -1822,21 +1822,21 @@ describe('Bindings', () => {
                     {
                         name: "p0",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t0"])
                         }
                     },
                     {
                         name: "p1",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t1"])
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t2"])
                         }
                     }
@@ -1911,21 +1911,21 @@ describe('Bindings', () => {
                     {
                         name: "p0",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t0"])
                         }
                     },
                     {
                         name: "p1",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t1"])
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t_2"])
                         }
                     }
@@ -2003,21 +2003,21 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo2']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                 ], closed: true
@@ -2029,7 +2029,7 @@ describe('Bindings', () => {
                     {
                         name: "p1",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t0"])
                         }
                     }
@@ -2049,7 +2049,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo4']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -2061,7 +2061,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo5']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     "p2"
@@ -2300,21 +2300,21 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo2']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     {
                         name: "p2",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                 ], closed: true
@@ -2326,7 +2326,7 @@ describe('Bindings', () => {
                     {
                         name: "p1",
                         constraint: {
-                            type: ContraintType.TYPE,
+                            type: ConstraintType.TYPE,
                             value: new Set(["t_0"])
                         }
                     }
@@ -2346,7 +2346,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo4']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], closed: true
@@ -2358,7 +2358,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo5']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },
                     "p2"
@@ -2993,7 +2993,7 @@ describe('Bindings', () => {
                             name: "p0",
                             constraint: {
                                 value: new Set(['foo1']),
-                                type: ContraintType.SHAPE
+                                type: ConstraintType.SHAPE
                             }
                         }
                     ],
@@ -3002,7 +3002,7 @@ describe('Bindings', () => {
                             name: "p0",
                             constraint: {
                                 value: new Set(['foo2']),
-                                type: ContraintType.SHAPE
+                                type: ConstraintType.SHAPE
                             }
                         }
                     ]
@@ -3012,7 +3012,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },],
                     [{ name: "p99" }]
@@ -3104,7 +3104,7 @@ describe('Bindings', () => {
                             name: "p0",
                             constraint: {
                                 value: new Set(['foo1']),
-                                type: ContraintType.SHAPE
+                                type: ConstraintType.SHAPE
                             }
                         }
                     ],
@@ -3113,7 +3113,7 @@ describe('Bindings', () => {
                             name: "p0",
                             constraint: {
                                 value: new Set(['foo2']),
-                                type: ContraintType.SHAPE
+                                type: ConstraintType.SHAPE
                             }
                         }
                     ]
@@ -3123,7 +3123,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },],
                     [{ name: "p99" }]
@@ -3248,7 +3248,7 @@ describe('Bindings', () => {
                             name: "p0",
                             constraint: {
                                 value: new Set(['foo1']),
-                                type: ContraintType.SHAPE
+                                type: ConstraintType.SHAPE
                             }
                         }
                     ],
@@ -3257,7 +3257,7 @@ describe('Bindings', () => {
                             name: "p0",
                             constraint: {
                                 value: new Set(['foo2']),
-                                type: ContraintType.SHAPE
+                                type: ConstraintType.SHAPE
                             }
                         }
                     ]
@@ -3267,7 +3267,7 @@ describe('Bindings', () => {
                         name: "p1",
                         constraint: {
                             value: new Set(['foo3']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     },],
                     [{ name: "p99" }]
@@ -3279,7 +3279,7 @@ describe('Bindings', () => {
                         name: "p0",
                         constraint: {
                             value: new Set(['foo1']),
-                            type: ContraintType.SHAPE
+                            type: ConstraintType.SHAPE
                         }
                     }
                 ], oneOf, closed: true
@@ -4075,7 +4075,7 @@ describe('OneOfBinding', () => {
                 cardinality: { min: 0, max: 33 },
                 constraint: {
                     value: new Set('a'),
-                    type: ContraintType.SHAPE,
+                    type: ConstraintType.SHAPE,
                 }
             }],
             ['c', {
@@ -4083,7 +4083,7 @@ describe('OneOfBinding', () => {
                 cardinality: { min: 0, max: 33 },
                 constraint: {
                     value: new Set('a'),
-                    type: ContraintType.SHAPE,
+                    type: ConstraintType.SHAPE,
                 }
             }],
             ['foo2', {
@@ -4091,7 +4091,7 @@ describe('OneOfBinding', () => {
                 cardinality: { min: 0, max: 33 },
                 constraint: {
                     value: new Set('a'),
-                    type: ContraintType.SHAPE,
+                    type: ConstraintType.SHAPE,
                 }
             }],
         ]),
@@ -4126,7 +4126,7 @@ describe('OneOfBinding', () => {
                 cardinality: { min: 0, max: 33 },
                 constraint: {
                     value: new Set('a'),
-                    type: ContraintType.SHAPE,
+                    type: ConstraintType.SHAPE,
                 }
             },
             { name: "foo2" }
@@ -4234,7 +4234,7 @@ describe('UnionBinding', () => {
                 {
                     name: "p0",
                     constraint: {
-                        type: ContraintType.SHAPE,
+                        type: ConstraintType.SHAPE,
                         value: new Set(["foo2"])
                     }
                 }

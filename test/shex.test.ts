@@ -4,7 +4,7 @@ import * as N3 from 'n3';
 import { DataFactory } from 'rdf-data-factory';
 import { streamifyArray } from 'streamify-array';
 import { SHEX_SHAPE, TYPE_DEFINITION, SHEX_PREDICATE } from '../lib/constant';
-import { ContraintType, IContraint, OneOf, type IShape } from '../lib/Shape';
+import { ConstraintType, IContraint, OneOf, type IShape } from '../lib/Shape';
 import { shapeFromQuads } from '../lib/shex';
 
 const DF = new DataFactory<RDF.BaseQuad>();
@@ -98,16 +98,16 @@ describe.each([
       ]);
 
       const mapConstraint = new Map<string, IContraint | undefined>([
-        [TYPE_DEFINITION.value, { type: ContraintType.TYPE, value: new Set([`${LBDCVOC_PREFIX}Comment`]) }],
-        [`${LBDCVOC_PREFIX}id`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}long`]) }],
-        [`${LBDCVOC_PREFIX}creationDate`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}dateTime`]) }],
-        [`${LBDCVOC_PREFIX}locationIP`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
-        [`${LBDCVOC_PREFIX}browserUsed`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
-        [`${LBDCVOC_PREFIX}content`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
-        [`${LBDCVOC_PREFIX}lenght`, { type: ContraintType.TYPE, value: new Set([`${XSD_PREFIX}int`]) }],
+        [TYPE_DEFINITION.value, { type: ConstraintType.TYPE, value: new Set([`${LBDCVOC_PREFIX}Comment`]) }],
+        [`${LBDCVOC_PREFIX}id`, { type: ConstraintType.TYPE, value: new Set([`${XSD_PREFIX}long`]) }],
+        [`${LBDCVOC_PREFIX}creationDate`, { type: ConstraintType.TYPE, value: new Set([`${XSD_PREFIX}dateTime`]) }],
+        [`${LBDCVOC_PREFIX}locationIP`, { type: ConstraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
+        [`${LBDCVOC_PREFIX}browserUsed`, { type: ConstraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
+        [`${LBDCVOC_PREFIX}content`, { type: ConstraintType.TYPE, value: new Set([`${XSD_PREFIX}string`]) }],
+        [`${LBDCVOC_PREFIX}lenght`, { type: ConstraintType.TYPE, value: new Set([`${XSD_PREFIX}int`]) }],
         [`${LBDCVOC_PREFIX}hasTag`, undefined],
         [`${LBDCVOC_PREFIX}isLocatedIn`, undefined],
-        [`${LBDCVOC_PREFIX}hasCreator`, { type: ContraintType.SHAPE, value: new Set(["http://example.com#Profile"]) }],
+        [`${LBDCVOC_PREFIX}hasCreator`, { type: ConstraintType.SHAPE, value: new Set(["http://example.com#Profile"]) }],
       ]);
       const expectedOneOf: OneOf[] = [
         [
@@ -115,14 +115,14 @@ describe.each([
             {
               name: `${LBDCVOC_PREFIX}replyOf`,
               cardinality: { min: 0, max: -1 },
-              constraint: { type: ContraintType.SHAPE, value: new Set(["http://example.com#Post"]) }
+              constraint: { type: ConstraintType.SHAPE, value: new Set(["http://example.com#Post"]) }
             },
           ],
           [
             {
               name: `${LBDCVOC_PREFIX}replyOf`,
               cardinality: { min: 0, max: -1 },
-              constraint: { type: ContraintType.SHAPE, value: new Set(["http://example.com#Comment"]) }
+              constraint: { type: ConstraintType.SHAPE, value: new Set(["http://example.com#Comment"]) }
             }
           ],
         ]
@@ -326,7 +326,7 @@ describe.each([
     const mapConstraint = new Map([
       ['http://xmlns.com/foaf/0.1/prop1',
         {
-          type: ContraintType.SHAPE,
+          type: ConstraintType.SHAPE,
           value: new Set(['http:exemple.ca/bar']),
         },
       ],
@@ -339,7 +339,7 @@ describe.each([
       ['http://xmlns.com/foaf/0.1/prop8', undefined],
       ['http://xmlns.com/foaf/0.1/prop10',
         {
-          type: ContraintType.TYPE,
+          type: ConstraintType.TYPE,
           value: new Set(['http://example.org/unassigned']),
         },
       ],
