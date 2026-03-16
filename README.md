@@ -86,8 +86,8 @@ The library returns a report where each star pattern is assigned one of the foll
 
 | Result | Description |
 | :--- | :--- |
-| **`CONTAIN`** | All triple patterns in the star pattern are covered by the shape's constraints. |
-| **`ALIGNED`** | At least one triple pattern matches, but some parts of the star pattern are not covered. |
+| **`CONTAIN`** | All triple patterns in the graph star pattern are covered by the shape's constraints. |
+| **`ALIGNED`** | At least one triple pattern matches, but some parts of the graph star pattern are not covered. |
 | **`DEPEND`** | The pattern is reachable via a property that links to another shape (nested containment). |
 | **`REJECTED`**| No part of the star pattern matches any property defined in the shape. |
 
