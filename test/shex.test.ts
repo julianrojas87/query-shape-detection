@@ -5,7 +5,7 @@ import { DataFactory } from 'rdf-data-factory';
 import { streamifyArray } from 'streamify-array';
 import { SHEX_SHAPE, TYPE_DEFINITION, SHEX_PREDICATE } from '../lib/constant';
 import { ConstraintType, IContraint, OneOf, type IShape } from '../lib/Shape';
-import { shapeFromQuads } from '../lib/shex';
+import { shexShapeFromQuads } from '../lib/shex';
 
 const DF = new DataFactory<RDF.BaseQuad>();
 const n3Parser = new N3.Parser();
@@ -15,7 +15,7 @@ const LBDCVOC_PREFIX = "http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/voc
 const XSD_PREFIX = "http://www.w3.org/2001/XMLSchema#";
 
 describe.each([
-  [{ name: 'shapeFromQuads', populateFunction: populateArray }],
+  [{ name: 'shexShapeFromQuads', populateFunction: populateArray }],
   [{ name: 'shapeFromStream', populateFunction: populateStream }],
 ])('$name', ({ populateFunction, name }) => {
   const emptyQuad: any = populateFunction([]);
@@ -70,7 +70,7 @@ describe.each([
 
   describe('SolidBench', () => {
     it(`${name}: should handle Comment`, async () => {
-      const shape = await shapeFromQuads(shapeSolidBenchComment, "http://example.com#Comment");
+      const shape = await shexShapeFromQuads(shapeSolidBenchComment, "http://example.com#Comment");
       const expectedPredicates: string[] = [
         TYPE_DEFINITION.value,
         `${LBDCVOC_PREFIX}id`,
@@ -149,15 +149,15 @@ describe.each([
     });
   });
   it(`${name}: should returns an error given an empty quad set`, async () => {
-    expect(await shapeFromQuads(emptyQuad, shapeIri)).toBeInstanceOf(Error);
+    expect(await shexShapeFromQuads(emptyQuad, shapeIri)).toBeInstanceOf(Error);
   });
 
   it(`${name}: should returns an error given unrelated quads`, async () => {
-    expect(await shapeFromQuads(unRelatedQuads, shapeIri)).toBeInstanceOf(Error);
+    expect(await shexShapeFromQuads(unRelatedQuads, shapeIri)).toBeInstanceOf(Error);
   });
 
   it(`${name}: should returns a shape with one property`, async () => {
-    const shape = await shapeFromQuads(shapeWithOneProperty, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithOneProperty, shapeIri);
 
     expect(shape).not.toBeInstanceOf(Error);
     expect((shape as IShape).positivePredicates).toStrictEqual(['http://example.org/state']);
@@ -167,7 +167,7 @@ describe.each([
   });
 
   it(`${name}: should returns a closed Shape with multiple properties`, async () => {
-    const shape = await shapeFromQuads(closedShapeWithMultipleProperties, shapeIri);
+    const shape = await shexShapeFromQuads(closedShapeWithMultipleProperties, shapeIri);
     const expectedPredicates: string[] = [
       'http://ex.example/#state',
       'http://foaf.example/#name',
@@ -183,7 +183,7 @@ describe.each([
   });
 
   it(`${name}: should returns a Shape with multiple properties given some quads representing two shapes`, async () => {
-    const shape = await shapeFromQuads(twoShapes, shapeIri);
+    const shape = await shexShapeFromQuads(twoShapes, shapeIri);
     const expectedPredicates: string[] = [
       'http://foaf.example/#name',
       'http://foaf.example/#mbox',
@@ -196,16 +196,16 @@ describe.each([
   });
 
   it(`${name}: should returns an error given quads representing a shape with no predicate`, async () => {
-    expect(await shapeFromQuads(shapeNoPredicate, shapeIri)).toBeInstanceOf(Error);
+    expect(await shexShapeFromQuads(shapeNoPredicate, shapeIri)).toBeInstanceOf(Error);
   });
 
   it(`${name}: should returns an error given quads representing a shape with an incomplete RDF list`, async () => {
-    expect(await shapeFromQuads(shapeIncompleteRdfList, shapeIri)).toBeInstanceOf(Error);
+    expect(await shexShapeFromQuads(shapeIncompleteRdfList, shapeIri)).toBeInstanceOf(Error);
   });
 
   it(`${name}: should returns a closed Shape with multiple properties  
     given some quads representing a shape with a shape expression`, async () => {
-    const shape = await shapeFromQuads(shapeWithShapeExpression, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithShapeExpression, shapeIri);
     const prefix = 'http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary';
     const expectedPredicates: string[] = [
       'http://www.w3.org/ns/pim/space#storage',
@@ -232,7 +232,7 @@ describe.each([
   });
 
   it(`${name}: should returns a Shape with a negative property`, async () => {
-    const shape = await shapeFromQuads(shapeWithANegativeProperty, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithANegativeProperty, shapeIri);
     const expectedPredicates: string[] = [
     ];
     const negativePredicates: string[] = [
@@ -246,7 +246,7 @@ describe.each([
   });
 
   it(`${name}: should returns a Shape with positive and negative properties`, async () => {
-    const shape = await shapeFromQuads(shapeWithInverseAndPositiveProperties, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithInverseAndPositiveProperties, shapeIri);
     const expectedPredicates: string[] = [
       'http://xmlns.com/foaf/0.1/prop1',
       'http://xmlns.com/foaf/0.1/prop2',
@@ -263,7 +263,7 @@ describe.each([
   });
 
   it(`${name}: should handle a shape with multiple cardinalities`, async () => {
-    const shape = await shapeFromQuads(shapeWithMultipleCardinality, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithMultipleCardinality, shapeIri);
     const expectedPredicates: string[] = [
       'http://xmlns.com/foaf/0.1/prop1',
       'http://xmlns.com/foaf/0.1/prop3',
@@ -296,7 +296,7 @@ describe.each([
   });
 
   it(`${name}: should handle a shape with constraints`, async () => {
-    const shape = await shapeFromQuads(shapeWithConstraints, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithConstraints, shapeIri);
     const expectedPredicates: string[] = [
       'http://xmlns.com/foaf/0.1/prop1',
       'http://xmlns.com/foaf/0.1/prop2',
@@ -363,12 +363,12 @@ describe.each([
 
   it(`${name}: should throw an error given a shape with inconsistent positive and negative properties`, async () => {
     expect(
-      await shapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri),
+      await shexShapeFromQuads(shapeWithInconsistentPositiveAndNegativeProperties, shapeIri),
     ).toBeInstanceOf(Error);
   });
 
   it(`${name}: should handle a shape with an or statement`, async () => {
-    const shape = await shapeFromQuads(shapeWithOrStatement, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithOrStatement, shapeIri);
 
     expect(shape).not.toBeInstanceOf(Error);
 
@@ -409,7 +409,7 @@ describe.each([
   });
 
   it(`${name}: should handle a shape with an or statement with one expression`, async () => {
-    const shape = await shapeFromQuads(shapeWithOrStatementOne, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithOrStatementOne, shapeIri);
 
     expect(shape).not.toBeInstanceOf(Error);
 
@@ -444,7 +444,7 @@ describe.each([
   });
 
   it(`${name}: should handle a shape with an or statement with multiple branches`, async () => {
-    const shape = await shapeFromQuads(shapeWithOrStatementMultipleBranches, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithOrStatementMultipleBranches, shapeIri);
 
     expect(shape).not.toBeInstanceOf(Error);
 
@@ -508,7 +508,7 @@ describe.each([
   });
 
   it(`${name}: should handle a shape with an or statement with multiple statement`, async () => {
-    const shape = await shapeFromQuads(shapeWithOrStatementMultipleStatement, shapeIri);
+    const shape = await shexShapeFromQuads(shapeWithOrStatementMultipleStatement, shapeIri);
 
     expect(shape).not.toBeInstanceOf(Error);
 
@@ -601,14 +601,14 @@ describe.each([
           if (event === 'error') { return callback(new Error('foo')); }
         },
       };
-      const err = await shapeFromQuads(stream, shapeIri);
+      const err = await shexShapeFromQuads(stream, shapeIri);
       expect(err).toBeInstanceOf(Error);
       expect((err as Error).message).toBe('foo');
     });
   }
 });
 
-function populateStream(source: string | RDF.Quad[]):any {
+function populateStream(source: string | RDF.Quad[]): any {
   let quads;
   if (Array.isArray(source)) {
     quads = source;
@@ -618,7 +618,7 @@ function populateStream(source: string | RDF.Quad[]):any {
   return streamifyArray(quads);
 }
 
-function populateArray(source: string | RDF.Quad[]):RDF.Quad[] {
+function populateArray(source: string | RDF.Quad[]): RDF.Quad[] {
   if (Array.isArray(source)) {
     return source;
   }

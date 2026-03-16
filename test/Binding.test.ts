@@ -10,7 +10,7 @@ import type * as RDF from '@rdfjs/types';
 import * as N3 from 'n3';
 import { readFileSync } from 'fs';
 import { streamifyArray } from 'streamify-array';
-import { shapeFromQuads } from '../lib/shex';
+import { shexShapeFromQuads } from '../lib/shex';
 
 const n3Parser = new N3.Parser();
 const sparqlParser = new SPARQLParser();
@@ -4300,9 +4300,9 @@ async function generateSolidBenchShapes(): Promise<Map<string, IShape>> {
     const postShapeFile = "./test/shape/solidbench_post.ttl";
     const profileShapeFile = "./test/shape/solidbench_profile.ttl";
 
-    const commentShape = await shapeFromQuads(populateStream(commentShapeFile), "http://example.com#Comment");
-    const postShape = await shapeFromQuads(populateStream(postShapeFile), "http://example.com#Post");
-    const profileShape = await shapeFromQuads(populateStream(profileShapeFile), "http://example.com#Profile");
+    const commentShape = await shexShapeFromQuads(populateStream(commentShapeFile), "http://example.com#Comment");
+    const postShape = await shexShapeFromQuads(populateStream(postShapeFile), "http://example.com#Post");
+    const profileShape = await shexShapeFromQuads(populateStream(profileShapeFile), "http://example.com#Profile");
     if ((commentShape instanceof Error) || (postShape instanceof Error) || (profileShape instanceof Error)) {
         throw new Error("was not able to generate the shapes")
     }

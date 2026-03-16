@@ -15,12 +15,12 @@ import {
   SHEX_EACH_OF,
   SHEX_ONE_OF,
 } from './constant';
-import type { 
+import type {
   IContraint,
   ShapeError,
-  OneOf, 
-  IShape, 
-  IPredicate 
+  OneOf,
+  IShape,
+  IPredicate
 } from './Shape';
 import { Shape, ConstraintType, PoorlyFormatedShapeError } from './Shape';
 
@@ -31,7 +31,7 @@ import { Shape, ConstraintType, PoorlyFormatedShapeError } from './Shape';
  * @returns {Promise<IShape | ShapeError>} The shape
  * @todo support for `OR` statement
  */
-export function shapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapeError> {
+export function shexShapeFromQuads(quads: RDF.Stream | RDF.Quad[], shapeIri: string): Promise<IShape | ShapeError> {
   if (Array.isArray(quads)) {
     return new Promise(resolve => {
       resolve(shapeFromQuadArray(quads, shapeIri));
