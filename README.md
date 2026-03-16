@@ -1,180 +1,183 @@
 # Query Shape Detection
 [![npm version](https://badge.fury.io/js/query-shape-detection.svg)](https://www.npmjs.com/package/query-shape-detection)
 
+A NodeJS library to calculate the containment (subsumption) between [SPARQL queries](https://www.w3.org/TR/sparql11-query/) and [RDF data shapes](https://www.w3.org/groups/wg/data-shapes/) (ShEx and SHACL) at the star pattern level.
 
-A nodejs library to calculate the subsumption between [SPARQL queries](https://www.w3.org/TR/sparql11-query/) and [RDF data shapes](https://www.w3.org/groups/wg/data-shapes/) at the star pattern level.
+## Features
+
+- **Support for different shape formats**: Supports both **ShEx** (Shape Expressions) and **SHACL** (Shapes Constraint Language).
+- **Star Pattern Decomposition**: Breaks down complex SPARQL queries into star patterns (groups of triple patterns sharing the same subject).
+- **Alignment Detection**: Identifies how closely a query matches the constraints defined in a shape.
+- **Dependency Tracking**: Handles links between shapes, detecting when a star pattern depends on another to be fully bounded.
+
+## How it Works
+
+1. **Query Parsing**: The library converts a SPARQL query into its algebraic representation and groups triple patterns into **Star Patterns**.
+2. **Shape Parsing**: It parses ShEx or SHACL definitions (from their RDF quads) into a unified internal `IShape` representation.
+3. **Containment Analysis**: It matches each star pattern against the shape's property constraints, cardinalities, and logic (AND, OR, NOT), returning a report on the level of containment.
 
 ## Installation
+
 ```sh
+npm install query-shape-detection
+# or
 yarn add query-shape-detection
 ```
 
-## Dependencies
-Node v20 or higher
+## Example Code
 
-## Example code
+### Simple SHACL Example
 
 ```ts
-import {
-  ContainmentResult,
-  generateQuery,
-  shapeFromQuads,
-  solveShapeQueryContainment,
-} from 'query-shape-detection';
-
-import type {
-  IResult,
-  IQuery,
-  IShape,
+import { 
+  generateQuery, 
+  shaclShapeFromQuads, 
+  solveShapeQueryContainment 
 } from 'query-shape-detection';
 import { Parser as SPARQLParser } from '@traqula/parser-sparql-1-1';
 import { toAlgebra } from '@traqula/algebra-sparql-1-1';
-import * as ShexParser from '@shexjs/parser';
-import { JsonLdParser } from 'jsonld-streaming-parser';
-import * as SHEX_CONTEXT from './shex_context.json'; // you need to provide this JSON from https://www.w3.org/ns/shex.jsonld
+import * as N3 from 'n3';
 
+// 1. Prepare the Query
 const rawQuery = `
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      PREFIX snvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-      SELECT ?personId ?personFirstName ?personLastName ?commentCreationDate ?commentId ?commentContent WHERE {
-        VALUES ?type {
-          snvoc:Comment
-          snvoc:Post
-        }
-        <http://localhost:3000/pods/00000002199023256816/profile/card#me> rdf:type snvoc:Person.
-        ?message snvoc:hasCreator <http://localhost:3000/pods/00000002199023256816/profile/card#me>;
-          rdf:type ?type.
-        ?comment rdf:type snvoc:Comment;
-          snvoc:replyOf ?message;
-          snvoc:creationDate ?commentCreationDate;
-          snvoc:id ?commentId;
-          snvoc:content ?commentContent;
-          snvoc:hasCreator ?person.
-        ?person snvoc:id ?personId;
-          snvoc:firstName ?personFirstName;
-          snvoc:lastName ?personLastName.
-      }
-      ORDER BY DESC (?commentCreationDate) (?commentId)
-      LIMIT 20
+  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+  SELECT ?name ?mbox WHERE {
+    ?person foaf:name ?name;
+            foaf:mbox ?mbox.
+  }
 `;
-
 const sparqlParser = new SPARQLParser();
-
 const query = generateQuery(toAlgebra(sparqlParser.parse(rawQuery)));
 
-// The shape may come already as an array of quads or a quad stream. I am presenting a contained example.
-const shapeShexc = `
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ldbcvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
-PREFIX schema: <http://www.w3.org/2000/01/rdf-schema#>
-
-<http://localhost:3000/pods/00000000000000000065/comments_shape#Comment> CLOSED {
-    a ldbcvoc:Comment?;
-    ldbcvoc:id xsd:long ;
-    ldbcvoc:creationDate xsd:dateTime ;
-    ldbcvoc:locationIP xsd:string  ;
-    ldbcvoc:browserUsed xsd:string ;
-    ldbcvoc:content xsd:string?;
-    ldbcvoc:lenght xsd:int ;
-    ldbcvoc:hasTag IRI *;
-    (
-        ldbcvoc:replyOf @<http://localhost:3000/pods/00000000000000000065/comments_shape#Post> *;
-        |
-        ldbcvoc:replyOf @<http://localhost:3000/pods/00000000000000000065/comments_shape#Comment> *;
-    );
-    ldbcvoc:isLocatedIn IRI ;
-    ldbcvoc:hasCreator @<http://localhost:3000/pods/00000000000000000065/comments_shape#Profile> ;
-}
+// 2. Prepare the SHACL Shape (from Turtle)
+const shape = `
+  @prefix sh: <http://www.w3.org/ns/shacl#> .
+  @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+  
+  <http://example.org/PersonShape> a sh:NodeShape ;
+    sh:property [ sh:path foaf:name ] ;
+    sh:property [ sh:path foaf:mbox ] .
 `;
-const shapeIRI = "http://localhost:3000/pods/00000000000000000065/comments_shape#Comment";
-const shexParser = ShexParser.construct(shapeIRI);
+const shapeQuads = new N3.Parser().parse(shape);
+const personShape = await shaclShapeFromQuads(shapeQuads, "http://example.org/PersonShape");
 
-const shapeJSONLD = shexParser.parse(shapeShexc);
-const stringShapeJsonLD = JSON.stringify(shapeJSONLD);
-const quads: RDF.Quad[] = [];
-
-const shapeQuadPromise = new Promise((resolve, reject) => {
-      // The JSON-LD is not valid without the context field and the library doesn't include it
-      // because a ShExJ MAY contain a @context field
-      // https://shex.io/shex-semantics/#shexj
-      const jsonldParser = new JsonLdParser({
-        streamingProfile: false,
-        context: SHEX_CONTEXT // you have to provide a JSON of the context,
-        skipContextValidation: true,
-      });
-      jsonldParser
-        .on('data', async(quad: RDF.Quad) => {
-          quads.push(quad);
-        })
-        .on('error',(error: any) => {
-          reject(error);
-        })
-        .on('end', async() => {
-          resolve(quads);
-        });
-
-      jsonldParser.write(stringShapeJsonLD);
-      jsonldParser.end();
-    });
-// shapeQuadPromise can be a quad stream or a array of quad 
-const commentShape = await shapeFromQuads(await shapeQuadPromise, shapeIRI);
-
-
-const resultsReport: IResult = solveShapeQueryContainment({
+// 3. Solve Containment
+const report = solveShapeQueryContainment({
     query: query,
-    shapes,
+    shapes: [personShape],
 });
 
-// resultsReport provides an object with information about the containement.
-// The containement is calculated by star patterns.
-
-
-/**
-export interface IResult {
-  // URL from the object of triples (s, p, o) that are not bound by a shape
-  conditionalLink: IConditionalLink[];
-  // The documents associated with a shape that can be followed
-  visitShapeBoundedResource: Map<ShapeName, boolean>;
-  // The type of containment of each star patterns with there associated shapes
-  // This is the general information about the containment
-  starPatternsContainment: Map<StarPatternName, IContainmentResult>;
-}
-*/
-
-/**
-export type IContainmentResult = Readonly<{
-  // The type of containement
-  result: ContainmentResult;
-  
-   // The shape iri associated with the containement
-   // Will be undefined if the the star pattern has no alignment with any shape
-   // The size of the array will be greater than one if it is contained by dependence
-  target?: string[];
-  
-   // If the result is an alignment then we record the shape
-   // that have a binding with RDF class
-  bindingByRdfClass?: string[];
-}>;
-
-export enum ContainmentResult {
-  // Is contained
-  CONTAIN,
-  // Has at least one binding
-  ALIGNED,
-  // Is a dependency of a contained star pattern
-  DEPEND,
-  // Has no binding
-  REJECTED,
-}
- 
-*/
+console.log(report.starPatternsContainment.get("person"));
 ```
+
+### Simple ShEx Example
+
+```ts
+import { shexShapeFromQuads } from 'query-shape-detection';
+
+// Parsing a ShEx shape follows the same pattern
+const shexQuads = /* RDF quads from ShEx definition */;
+const personShape = await shexShapeFromQuads(shexQuads, "http://example.org/PersonShape");
+```
+
+## Containment Results
+
+The library returns a report where each star pattern is assigned one of the following `ContainmentResult` values:
+
+| Result | Description |
+| :--- | :--- |
+| **`CONTAIN`** | All triple patterns in the star pattern are covered by the shape's constraints. |
+| **`ALIGNED`** | At least one triple pattern matches, but some parts of the star pattern are not covered. |
+| **`DEPEND`** | The pattern is reachable via a property that links to another shape (nested containment). |
+| **`REJECTED`**| No part of the star pattern matches any property defined in the shape. |
+
+### Examples of Containment Results
+
+#### 1. `CONTAIN`
+The star pattern for `?person` is fully covered by the shape.
+*   **Query**:
+    ```sparql
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    SELECT * WHERE {
+      ?person foaf:name ?name ;
+              foaf:mbox ?mbox .
+    }
+    ```
+*   **Shape**:
+    ```turtle
+    @prefix sh: <http://www.w3.org/ns/shacl#> .
+    @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+    <http://example.org/PersonShape> a sh:NodeShape ;
+      sh:property [ sh:path foaf:name ] ;
+      sh:property [ sh:path foaf:mbox ] .
+    ```
+
+#### 2. `ALIGNED`
+The query matches one property (`foaf:name`), but contains `ex:age` which is not defined in the closed shape.
+*   **Query**:
+    ```sparql
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    PREFIX ex: <http://example.org/>
+    SELECT * WHERE {
+      ?person foaf:name ?name ;
+              ex:age ?age .
+    }
+    ```
+*   **Shape**:
+    ```turtle
+    <http://example.org/PersonShape> a sh:NodeShape ;
+      sh:closed true ;
+      sh:property [ sh:path foaf:name ] .
+    ```
+
+#### 3. `DEPEND`
+The `?person` pattern matches the shape's link to another shape. Its full containment depends on whether `?friend` also matches its shape.
+*   **Query**:
+    ```sparql
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    SELECT * WHERE {
+      ?person foaf:knows ?friend . 
+      ?friend foaf:name ?friendName .
+    }
+    ```
+*   **Shape**:
+    ```turtle
+    <http://example.org/PersonShape> a sh:NodeShape ;
+      sh:property [ 
+        sh:path foaf:knows ; 
+        sh:node <http://example.org/FriendShape> 
+      ] .
+
+    <http://example.org/FriendShape> a sh:NodeShape ;
+      sh:property [ sh:path foaf:name ] .
+    ```
+
+#### 4. `REJECTED`
+The query uses `schema:birthDate`, but the shape only defines `foaf:name`.
+*   **Query**:
+    ```sparql
+    PREFIX schema: <http://schema.org/>
+    SELECT * WHERE {
+      ?person schema:birthDate ?date .
+    }
+    ```
+*   **Shape**:
+    ```turtle
+    <http://example.org/PersonShape> a sh:NodeShape ;
+      sh:property [ sh:path foaf:name ] .
+    ```
+
+## SPARQL Limitations
+
+The detection logic is focused on **Triple Patterns** and **Star Patterns**. Currently, the following SPARQL features are not (yet) supported:
+
+- **Filter Expressions**: Logic inside `FILTER` clauses is not checked against shape constraints.
+- **Negative Patterns**: `MINUS` and `FILTER NOT EXISTS` are not used to determine containment.
+- **Complex Property Paths**: While simple paths are supported, complex or recursive property paths are not considered yet.
+- **Aggregates & Subqueries**: `GROUP BY`, `HAVING`, and subqueries are not processed.
+- **Federated Queries**: `SERVICE` clauses are currently ignored.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for more information.
-
-## Current limitation
-- Support only ShEx
-- Known bug for some complex property path
-- No support for MINUS statement
-- No support for filter expression
